@@ -4,6 +4,11 @@ import ProtectedRoute from './components/routing/ProtectedRoute';
 
 // Pages - Public
 import Home from './pages/Home';
+import AboutPage from './pages/AboutPage';
+import SermonsPage from './pages/SermonsPage';
+import EventsPage from './pages/EventsPage';
+
+// Pages - Auth
 import LoginPage from './pages/portal/LoginPage';
 import RegisterPage from './pages/portal/RegisterPage';
 
@@ -17,7 +22,9 @@ function App() {
         {/* ── Public Routes (with Navbar + Footer) ── */}
         <Route path="/" element={<PublicLayout />}>
           <Route index element={<Home />} />
-          {/* Future: /about, /sermons, /events */}
+          <Route path="about" element={<AboutPage />} />
+          <Route path="sermons" element={<SermonsPage />} />
+          <Route path="events" element={<EventsPage />} />
         </Route>
 
         {/* ── Auth Routes (no layout wrapper) ── */}
@@ -27,7 +34,6 @@ function App() {
         {/* ── Protected Member Portal Routes ── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/portal/dashboard" element={<PortalDashboard />} />
-          {/* Future: /portal/sermons, /portal/events, /portal/profile */}
         </Route>
 
         {/* ── Fallback ── */}
