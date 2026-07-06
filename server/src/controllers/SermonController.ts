@@ -26,7 +26,7 @@ export class SermonController {
 
   public static async getById(req: Request, res: Response): Promise<void> {
     try {
-      const sermon = await SermonService.getSermonById(req.params.id);
+      const sermon = await SermonService.getSermonById(req.params.id as string);
       res.status(200).json({ success: true, data: sermon });
     } catch (error: any) {
       res.status(404).json({ success: false, message: error.message });

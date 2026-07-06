@@ -23,7 +23,7 @@ export class EventController {
 
   public static async register(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const event = await EventService.registerForEvent(req.params.id, req.user.id);
+      const event = await EventService.registerForEvent(req.params.id as string, req.user.id);
       res.status(200).json({ success: true, data: event, message: 'Successfully registered for event' });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
