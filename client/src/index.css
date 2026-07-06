@@ -1,27 +1,45 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Poppins:wght@500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@400;500;600;700;800&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-primary: #1E40AF;
+  --color-primary: #1D4ED8;
   --color-primary-light: #3B82F6;
   --color-primary-dark: #1E3A8A;
   
-  --color-secondary: #D4AF37;
-  --color-secondary-light: #F4D35E;
-  --color-secondary-dark: #B8860B;
+  --color-secondary: #EAB308;
+  --color-secondary-light: #FDE047;
+  --color-secondary-dark: #CA8A04;
 
   --color-background: #F8FAFC;
   --color-background-paper: #FFFFFF;
 
-  --font-heading: "Poppins", sans-serif;
+  --font-heading: "Outfit", sans-serif;
   --font-body: "Inter", sans-serif;
+
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
+  --animate-slide-up: slide-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  --animate-float: float 6s ease-in-out infinite;
+
+  @keyframes fade-in {
+    0% { opacity: 0; }
+    100% { opacity: 1; }
+  }
+  @keyframes slide-up {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes float {
+    0% { transform: translateY(0px); }
+    50% { transform: translateY(-15px); }
+    100% { transform: translateY(0px); }
+  }
 }
 
 @layer base {
   body {
     font-family: var(--font-body);
     background-color: var(--color-background);
-    color: #1e293b;
+    color: #0f172a;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5, h6 {
