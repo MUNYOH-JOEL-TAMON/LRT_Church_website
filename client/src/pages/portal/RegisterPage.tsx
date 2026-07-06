@@ -4,6 +4,7 @@ import { Mail, Lock, User, Church } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -51,9 +52,7 @@ const RegisterPage = () => {
         <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <div className="w-16 h-16 rounded-2xl bg-secondary/20 flex items-center justify-center mb-4 border border-secondary/30">
-              <Church className="w-8 h-8 text-secondary" />
-            </div>
+            <img src={lrtLogo} alt="LRT" className="w-20 h-20 rounded-full object-cover border-2 border-secondary/40 mb-4 shadow-lg" />
             <h1 className="text-3xl font-heading font-extrabold text-white">Join LRT</h1>
             <p className="text-slate-400 text-sm mt-1">Create your member account</p>
           </div>
