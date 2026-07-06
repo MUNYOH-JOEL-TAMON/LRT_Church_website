@@ -17,8 +17,8 @@ const Home = () => {
           <div className="inline-block mb-4 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 backdrop-blur-sm animate-fade-in">
             <span className="text-secondary font-semibold text-sm tracking-widest uppercase">Welcome Home</span>
           </div>
-          <h1 className="text-5xl md:text-7xl font-heading font-extrabold mb-6 animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
-            Experience the <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-light to-secondary">Latter Rain</span>
+          <h1 className="text-5xl md:text-7xl font-heading font-extrabold mb-6 text-white animate-slide-up" style={{ animationDelay: '0.1s', opacity: 0 }}>
+            Experience the <span className="text-transparent bg-clip-text bg-gradient-to-r from-secondary-light to-secondary">Latter Rain</span> Tabernacle
           </h1>
           <p className="text-lg md:text-2xl text-slate-300 mb-10 max-w-2xl mx-auto animate-slide-up" style={{ animationDelay: '0.2s', opacity: 0 }}>
             A Spirit-filled community dedicated to excellence, worship, and spreading the Gospel to all nations.
