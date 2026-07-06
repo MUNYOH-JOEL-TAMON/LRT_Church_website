@@ -1,6 +1,6 @@
 import { Link } from 'react-router-dom';
 import {
-  Church,
+import {
   LayoutDashboard,
   BookOpen,
   CalendarDays,
@@ -10,6 +10,7 @@ import {
   Bell,
 } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
+import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
 const navItems = [
   { icon: LayoutDashboard, label: 'Dashboard', to: '/portal/dashboard' },
@@ -26,12 +27,10 @@ const PortalDashboard = () => {
       {/* Sidebar */}
       <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-40">
         {/* Brand */}
-        <div className="flex items-center gap-3 px-6 py-6 border-b border-white/10">
-          <div className="p-2 bg-secondary/10 rounded-xl">
-            <Church className="w-6 h-6 text-secondary" />
-          </div>
-          <span className="text-xl font-heading font-extrabold">
-            LRT<span className="text-secondary">.</span>
+        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
+          <img src={lrtLogo} alt="LRT" className="w-10 h-10 rounded-full object-cover border border-secondary/40" />
+          <span className="text-lg font-heading font-extrabold text-white">
+            Latter Rain <span className="text-secondary">LRT</span>
           </span>
         </div>
 
