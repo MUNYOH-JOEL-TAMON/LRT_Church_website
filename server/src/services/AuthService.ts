@@ -74,4 +74,15 @@ export class AuthService {
 
     return { user: userToReturn, token };
   }
+
+  /**
+   * Get a user by their ID (for the /me endpoint)
+   */
+  public static async getUserById(id: string) {
+    const user = await User.findById(id).select('-passwordHash');
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
 }
