@@ -18,7 +18,7 @@ const ManageSermons = () => {
   // Form State
   const [formData, setFormData] = useState({
     title: '',
-    speaker: '',
+    preacher: '',
     series: '',
     videoUrl: '',
     audioUrl: '',
@@ -29,7 +29,7 @@ const ManageSermons = () => {
     try {
       setIsLoading(true);
       const res = await sermonService.getAll();
-      setSermons(res.data);
+      setSermons(res.data || []);
     } catch (err) {
       console.error('Failed to fetch sermons:', err);
     } finally {
@@ -48,7 +48,7 @@ const ManageSermons = () => {
     try {
       await sermonService.create(formData);
       setIsModalOpen(false);
-      setFormData({ title: '', speaker: '', series: '', videoUrl: '', audioUrl: '', notes: '' });
+      setFormData({ title: '', preacher: '', series: '', videoUrl: '', audioUrl: '', notes: '' });
       fetchSermons(); // Refresh the list
     } catch (err: any) {
       setError(err.response?.data?.message || 'Failed to create sermon');
@@ -58,7 +58,7 @@ const ManageSermons = () => {
   };
 
   const filtered = sermons.filter(
-    (s) => s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.speaker.toLowerCase().includes(searchQuery.toLowerCase())
+    (s) => s.title.toLowerCase().includes(searchQuery.toLowerCase()) || s.preacher.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
   const columns = [
@@ -71,7 +71,7 @@ const ManageSermons = () => {
         </div>
       ),
     },
-    { key: 'speaker', header: 'Preacher' },
+    { key: 'preacher', header: 'Preacher' },
     {
       key: 'videoUrl',
       header: 'Media',
@@ -139,7 +139,7 @@ const ManageSermons = () => {
           {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold">{error}</div>}
           <Input id="sermon-title" label="Title" placeholder="e.g. Walking in the Spirit" required value={formData.title} onChange={e => setFormData({...formData, title: e.target.value})} />
           <div className="grid grid-cols-2 gap-4">
-            <Input id="sermon-preacher" label="Preacher" placeholder="Pastor Joel Tamon" required value={formData.speaker} onChange={e => setFormData({...formData, speaker: e.target.value})} />
+            <Input id="sermon-preacher" label="Preacher" placeholder="Pastor Joel Tamon" required value={formData.preacher} onChange={e => setFormData({...formData, preacher: e.target.value})} />
             <Input id="sermon-series" label="Series" placeholder="e.g. Living by Faith" value={formData.series} onChange={e => setFormData({...formData, series: e.target.value})} />
           </div>
           <Input id="sermon-video" label="YouTube Video URL" placeholder="https://youtube.com/watch?v=..." value={formData.videoUrl} onChange={e => setFormData({...formData, videoUrl: e.target.value})} />
