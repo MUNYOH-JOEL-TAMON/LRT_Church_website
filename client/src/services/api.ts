@@ -24,13 +24,25 @@ api.interceptors.request.use(
 
 // Response interceptor: globally handles 401 Unauthorized responses.
 // This automatically logs the user out if their session has expired.
+// NOTE: Only redirect on 401 for protected routes, not for public API calls
+// like fetching sermons/events — those should fail gracefully on the page.
 api.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401) {
-      localStorage.removeItem('lrt_token');
-      // We use window.location to avoid circular imports with the router
-      window.location.href = '/portal/login';
+      const url = error.config?.url || '';
+      // Only force-logout if the 401 came from an auth-required endpoint
+      // Public endpoints (sermons, events) returning 401 should NOT redirect
+      const isPublicEndpoint =
+        url.includes('/sermons') ||
+        url.includes('/events') ||
+        url.includes('/prayer-requests/public');
+
+      if (!isPublicEndpoint) {
+        localStorage.removeItem('lrt_token');
+        // We use window.location to avoid circular imports with the router
+        window.location.href = '/portal/login';
+      }
     }
     return Promise.reject(error);
   }
