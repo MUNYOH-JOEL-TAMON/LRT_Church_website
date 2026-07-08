@@ -34,7 +34,7 @@ export class PrayerRequestService {
    * Update prayer request status
    */
   public static async updateStatus(id: string, status: string) {
-    const validStatuses = ['Pending', 'Prayed', 'Resolved'];
+    const validStatuses = ['Pending', 'Praying', 'Answered'];
     if (!validStatuses.includes(status)) {
       throw new Error('Invalid status');
     }

@@ -8,7 +8,7 @@ const PrayerRequestSchema: Schema = new Schema(
     isPrivate: { type: Boolean, default: false },
     status: { 
       type: String, 
-      enum: ['Pending', 'Prayed', 'Resolved'], 
+      enum: ['Pending', 'Praying', 'Answered'], 
       default: 'Pending' 
     },
   },

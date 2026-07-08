@@ -5,7 +5,7 @@ export interface IPrayerRequest extends Document {
   user?: Types.ObjectId; // Optional for anonymous requests
   request: string;
   isPrivate: boolean;
-  status: 'Pending' | 'Prayed' | 'Resolved';
+  status: 'Pending' | 'Praying' | 'Answered';
   createdAt: Date;
   updatedAt: Date;
 }
