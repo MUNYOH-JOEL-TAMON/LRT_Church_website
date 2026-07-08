@@ -4,6 +4,7 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import sermonRoutes from './routes/sermonRoutes';
 import eventRoutes from './routes/eventRoutes';
+import prayerRequestRoutes from './routes/prayerRequestRoutes';
 
 // Initialize env variables
 dotenv.config();
@@ -30,6 +31,7 @@ app.get('/', (req: Request, res: Response) => {
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/sermons', sermonRoutes);
 app.use('/api/v1/events', eventRoutes);
+app.use('/api/v1/prayer-requests', prayerRequestRoutes);
 
 // Generic Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
