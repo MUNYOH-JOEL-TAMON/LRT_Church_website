@@ -8,9 +8,9 @@ const VALUES = [
 ];
 
 const LEADERSHIP = [
-  { name: 'Pastor Joel Tamon', title: 'Senior Pastor & Founder', initials: 'JT' },
-  { name: 'Deacon Michael Ndi', title: 'Church Administrator', initials: 'MN' },
-  { name: 'Sister Grace Munyoh', title: 'Worship Director', initials: 'GM' },
+  { name: 'Apostle N.A Stanley', title: 'Overseer & Founder', initials: 'JT' },
+  { name: 'Pastor A Beckley', title: 'Pastor', initials: 'MN' },
+  { name: 'Evangelist Fidelis', title: 'Deacon', initials: 'GM' },
 ];
 
 const AboutPage = () => {
