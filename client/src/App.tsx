@@ -1,6 +1,8 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import PublicLayout from './layouts/PublicLayout';
+import AdminLayout from './layouts/AdminLayout';
 import ProtectedRoute from './components/routing/ProtectedRoute';
+import AdminRoute from './components/routing/AdminRoute';
 
 // Pages - Public
 import Home from './pages/Home';
@@ -14,6 +16,16 @@ import RegisterPage from './pages/portal/RegisterPage';
 
 // Pages - Portal (Protected)
 import PortalDashboard from './pages/portal/PortalDashboard';
+
+// Pages - Admin (Role Protected)
+import DashboardOverview from './pages/admin/DashboardOverview';
+import ManageUsers from './pages/admin/ManageUsers';
+import ManageSermons from './pages/admin/ManageSermons';
+import ManageEvents from './pages/admin/ManageEvents';
+import ManagePrayerRequests from './pages/admin/ManagePrayerRequests';
+import ManageAnnouncements from './pages/admin/ManageAnnouncements';
+import ManageBlog from './pages/admin/ManageBlog';
+import ManageGallery from './pages/admin/ManageGallery';
 
 function App() {
   return (
@@ -34,6 +46,20 @@ function App() {
         {/* ── Protected Member Portal Routes ── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/portal/dashboard" element={<PortalDashboard />} />
+        </Route>
+
+        {/* ── Admin Dashboard Routes (Role Protected) ── */}
+        <Route element={<AdminRoute />}>
+          <Route element={<AdminLayout />}>
+            <Route path="/admin/dashboard" element={<DashboardOverview />} />
+            <Route path="/admin/users" element={<ManageUsers />} />
+            <Route path="/admin/sermons" element={<ManageSermons />} />
+            <Route path="/admin/events" element={<ManageEvents />} />
+            <Route path="/admin/prayer-requests" element={<ManagePrayerRequests />} />
+            <Route path="/admin/announcements" element={<ManageAnnouncements />} />
+            <Route path="/admin/blog" element={<ManageBlog />} />
+            <Route path="/admin/gallery" element={<ManageGallery />} />
+          </Route>
         </Route>
 
         {/* ── Fallback ── */}
