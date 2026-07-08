@@ -12,7 +12,7 @@ const prayerService = {
     return data;
   },
 
-  create: async (requestData: { subject: string; details: string; isAnonymous: boolean; isPrivate: boolean }): Promise<ApiResponse<PrayerRequest>> => {
+  create: async (requestData: { request: string; isPrivate: boolean }): Promise<ApiResponse<PrayerRequest>> => {
     const { data } = await api.post<ApiResponse<PrayerRequest>>('/prayer-requests', requestData);
     return data;
   },
