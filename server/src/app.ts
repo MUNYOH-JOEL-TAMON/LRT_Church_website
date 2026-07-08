@@ -5,6 +5,7 @@ import authRoutes from './routes/authRoutes';
 import sermonRoutes from './routes/sermonRoutes';
 import eventRoutes from './routes/eventRoutes';
 import prayerRequestRoutes from './routes/prayerRequestRoutes';
+import userRoutes from './routes/userRoutes';
 
 // Initialize env variables
 dotenv.config();
@@ -29,6 +30,7 @@ app.get('/', (req: Request, res: Response) => {
 
 // Mount Routes
 app.use('/api/v1/auth', authRoutes);
+app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/sermons', sermonRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/prayer-requests', prayerRequestRoutes);

@@ -16,13 +16,11 @@ export interface User {
 export interface Sermon {
   _id: string;
   title: string;
-  preacher: string;
-  description?: string;
+  speaker: string;         // matches backend field name
+  datePreached?: string;
   videoUrl?: string;
   audioUrl?: string;
-  thumbnailUrl?: string;
-  scripture?: string;
-  series?: string;
+  notes?: string;
   tags?: string[];
   uploadedBy: Partial<User>;
   createdAt: string;
@@ -31,23 +29,20 @@ export interface Sermon {
 export interface Event {
   _id: string;
   title: string;
-  description?: string;
-  startDate: string;
-  endDate?: string;
-  location?: string;
-  coverImage?: string;
+  description: string;
+  date: string;            // matches backend field name
+  location: string;
+  department?: string;
   maxCapacity?: number;
-  attendees: string[];
-  createdBy: Partial<User>;
+  registeredAttendees: string[];
   createdAt: string;
 }
 
 export interface PrayerRequest {
   _id: string;
-  subject: string;
-  details: string;
-  requestedBy: Partial<User>;
-  isAnonymous: boolean;
+  request: string;         // matches backend field name
+  user?: Partial<User>;
+  isPrivate: boolean;
   status: 'Pending' | 'Praying' | 'Answered';
   createdAt: string;
 }
