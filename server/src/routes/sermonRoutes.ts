@@ -8,7 +8,9 @@ const router = Router();
 router.get('/', SermonController.getAll);
 router.get('/:id', SermonController.getById);
 
-// Protected routes: Only Admin, Pastor, and Editor can create new sermons
+// Protected routes: Only Admin, Pastor, and Editor can create/update/delete sermons
 router.post('/', protect, authorize('Admin', 'Pastor', 'Editor'), SermonController.create);
+router.put('/:id', protect, authorize('Admin', 'Pastor', 'Editor'), SermonController.update);
+router.delete('/:id', protect, authorize('Admin', 'Pastor', 'Editor'), SermonController.remove);
 
 export default router;
