@@ -51,7 +51,8 @@ export class PrayerRequestController {
    */
   public static async updateStatus(req: Request, res: Response): Promise<void> {
     try {
-      const request = await PrayerRequestService.updateStatus(req.params.id, req.body.status);
+      const id = req.params.id as string;
+      const request = await PrayerRequestService.updateStatus(id, req.body.status);
       res.status(200).json({ success: true, data: request });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });

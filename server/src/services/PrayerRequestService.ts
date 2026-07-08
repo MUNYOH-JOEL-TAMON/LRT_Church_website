@@ -5,14 +5,12 @@ export class PrayerRequestService {
    * Create a new prayer request
    */
   public static async create(data: any, userId?: string) {
-    const { subject, details, isAnonymous, isPrivate } = data;
+    const { request: requestText, isPrivate } = data;
 
     const request = await PrayerRequest.create({
-      subject,
-      details,
-      isAnonymous: Boolean(isAnonymous),
+      request: requestText,
       isPrivate: Boolean(isPrivate),
-      requestedBy: userId || null,
+      user: userId || undefined,
     });
 
     return request;
@@ -22,21 +20,21 @@ export class PrayerRequestService {
    * Get all prayer requests (Admin/Pastor view)
    */
   public static async getAll() {
-    return await PrayerRequest.find().populate('requestedBy', 'firstName lastName email').sort({ createdAt: -1 });
+    return await PrayerRequest.find().populate('user', 'firstName lastName email').sort({ createdAt: -1 });
   }
 
   /**
    * Get public prayer requests
    */
   public static async getPublic() {
-    return await PrayerRequest.find({ isPrivate: false }).populate('requestedBy', 'firstName lastName').sort({ createdAt: -1 });
+    return await PrayerRequest.find({ isPrivate: false }).populate('user', 'firstName lastName').sort({ createdAt: -1 });
   }
 
   /**
    * Update prayer request status
    */
   public static async updateStatus(id: string, status: string) {
-    const validStatuses = ['Pending', 'Praying', 'Answered'];
+    const validStatuses = ['Pending', 'Prayed', 'Resolved'];
     if (!validStatuses.includes(status)) {
       throw new Error('Invalid status');
     }
