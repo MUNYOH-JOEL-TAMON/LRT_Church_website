@@ -16,6 +16,18 @@ export class EventService {
     return event;
   }
 
+  public static async updateEvent(id: string, data: any) {
+    const event = await Event.findByIdAndUpdate(id, data, { new: true, runValidators: true });
+    if (!event) throw new Error('Event not found');
+    return event;
+  }
+
+  public static async deleteEvent(id: string) {
+    const event = await Event.findByIdAndDelete(id);
+    if (!event) throw new Error('Event not found');
+    return true;
+  }
+
   public static async registerForEvent(eventId: string, userId: string) {
     const event = await Event.findById(eventId);
     if (!event) throw new Error('Event not found');

@@ -29,4 +29,22 @@ export class EventController {
       res.status(400).json({ success: false, message: error.message });
     }
   }
+
+  public static async update(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const event = await EventService.updateEvent(req.params.id as string, req.body);
+      res.status(200).json({ success: true, data: event });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
+
+  public static async remove(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      await EventService.deleteEvent(req.params.id as string);
+      res.status(200).json({ success: true, message: 'Event deleted successfully' });
+    } catch (error: any) {
+      res.status(404).json({ success: false, message: error.message });
+    }
+  }
 }
