@@ -32,6 +32,7 @@ export class AuthService {
 
     // 5. Format return object to exclude password hash
     const userToReturn = {
+      _id: newUser._id,
       id: newUser._id,
       firstName: newUser.firstName,
       lastName: newUser.lastName,
@@ -65,6 +66,7 @@ export class AuthService {
 
     // 4. Format return object
     const userToReturn = {
+      _id: user._id,
       id: user._id,
       firstName: user.firstName,
       lastName: user.lastName,
