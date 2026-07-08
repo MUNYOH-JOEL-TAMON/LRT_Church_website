@@ -14,7 +14,11 @@ const AdminRoute = () => {
     return <Navigate to="/portal/login" replace />;
   }
 
-  if (!user || !ADMIN_ROLES.includes(user.role)) {
+  // Normalize role comparison to be case-insensitive for robustness
+  const userRole = user?.role?.toLowerCase();
+  const hasAdminAccess = userRole === 'admin' || userRole === 'pastor' || userRole === 'editor';
+
+  if (!user || !hasAdminAccess) {
     return (
       <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4">
         <div className="text-center">

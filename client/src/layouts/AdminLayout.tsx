@@ -37,9 +37,9 @@ const AdminLayout = () => {
   const { user, logout } = useAuthStore();
   const location = useLocation();
 
-  // Filter nav items based on user role
+  // Filter nav items based on user role (case-insensitive)
   const visibleNavItems = allNavItems.filter(
-    (item) => user && item.roles.includes(user.role)
+    (item) => user && item.roles.some(r => r.toLowerCase() === user.role?.toLowerCase())
   );
 
   // Get current page title from nav items

@@ -19,9 +19,14 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     await login(form.email, form.password);
-    // If no error after login, navigate to member portal
-    if (!useAuthStore.getState().error) {
-      navigate('/portal/dashboard');
+    const { error: loginError, user: loggedInUser } = useAuthStore.getState();
+    if (!loginError && loggedInUser) {
+      const adminRoles = ['admin', 'pastor', 'editor'];
+      if (adminRoles.includes(loggedInUser.role?.toLowerCase())) {
+        navigate('/admin/dashboard');
+      } else {
+        navigate('/portal/dashboard');
+      }
     }
   };
 
