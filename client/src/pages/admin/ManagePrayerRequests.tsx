@@ -1,16 +1,8 @@
-import { useState } from 'react';
-import { Search, Eye } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { Search, Eye, Loader2 } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
-
-const PLACEHOLDER_REQUESTS = [
-  { _id: '1', subject: 'Healing for my mother', requestedBy: 'Grace Munyoh', isAnonymous: false, isPrivate: true, status: 'Pending', createdAt: '2025-07-06' },
-  { _id: '2', subject: 'Guidance for my career', requestedBy: 'Anonymous', isAnonymous: true, isPrivate: false, status: 'Praying', createdAt: '2025-07-05' },
-  { _id: '3', subject: 'Financial breakthrough', requestedBy: 'Daniel Nji', isAnonymous: false, isPrivate: false, status: 'Pending', createdAt: '2025-07-04' },
-  { _id: '4', subject: 'Safe delivery for my wife', requestedBy: 'Michael Ndi', isAnonymous: false, isPrivate: true, status: 'Answered', createdAt: '2025-06-28' },
-  { _id: '5', subject: 'Peace in my home', requestedBy: 'Anonymous', isAnonymous: true, isPrivate: false, status: 'Praying', createdAt: '2025-06-25' },
-];
-
-type PrayerItem = typeof PLACEHOLDER_REQUESTS[0];
+import prayerService from '../../services/prayerService';
+import type { PrayerRequest } from '../../types';
 
 const STATUS_STYLES: Record<string, string> = {
   Pending: 'bg-amber-100 text-amber-700',
@@ -19,21 +11,51 @@ const STATUS_STYLES: Record<string, string> = {
 };
 
 const ManagePrayerRequests = () => {
+  const [requests, setRequests] = useState<PrayerRequest[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
 
-  const filtered = PLACEHOLDER_REQUESTS.filter(
-    (r) => r.subject.toLowerCase().includes(searchQuery.toLowerCase())
+  const fetchRequests = async () => {
+    try {
+      setIsLoading(true);
+      const res = await prayerService.getAll();
+      setRequests(res.data || []);
+    } catch (err) {
+      console.error('Failed to fetch prayer requests:', err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  useEffect(() => { fetchRequests(); }, []);
+
+  const handleStatusChange = async (id: string, status: string) => {
+    try {
+      await prayerService.updateStatus(id, status);
+      // Update locally for instant UI feedback
+      setRequests((prev) =>
+        prev.map((r) => (r._id === id ? { ...r, status: status as PrayerRequest['status'] } : r))
+      );
+    } catch (err) {
+      console.error('Failed to update status:', err);
+    }
+  };
+
+  const filtered = requests.filter((r) =>
+    r.request.toLowerCase().includes(searchQuery.toLowerCase())
   );
+
+  const pendingCount = requests.filter((r) => r.status === 'Pending').length;
 
   const columns = [
     {
-      key: 'subject',
+      key: 'request',
       header: 'Prayer Request',
-      render: (item: PrayerItem) => (
-        <div className="flex items-center gap-2">
-          <p className="font-semibold text-slate-800">{item.subject}</p>
+      render: (item: PrayerRequest) => (
+        <div className="flex items-start gap-2 max-w-sm">
+          <p className="text-slate-800 leading-relaxed">{item.request}</p>
           {item.isPrivate && (
-            <span className="text-xs bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
+            <span className="flex-shrink-0 text-xs bg-rose-100 text-rose-600 font-bold px-2 py-0.5 rounded-full flex items-center gap-1">
               <Eye className="w-3 h-3" /> Private
             </span>
           )}
@@ -41,20 +63,24 @@ const ManagePrayerRequests = () => {
       ),
     },
     {
-      key: 'requestedBy',
+      key: 'user',
       header: 'Submitted By',
-      render: (item: PrayerItem) => (
-        <span className={item.isAnonymous ? 'text-slate-400 italic' : 'text-slate-700'}>
-          {item.requestedBy}
-        </span>
-      ),
+      render: (item: PrayerRequest) =>
+        item.user ? (
+          <span className="text-slate-700">
+            {(item.user as any).firstName} {(item.user as any).lastName}
+          </span>
+        ) : (
+          <span className="text-slate-400 italic">Anonymous</span>
+        ),
     },
     {
       key: 'status',
       header: 'Status',
-      render: (item: PrayerItem) => (
+      render: (item: PrayerRequest) => (
         <select
-          defaultValue={item.status}
+          value={item.status}
+          onChange={(e) => handleStatusChange(item._id, e.target.value)}
           className={`text-xs font-bold px-3 py-1.5 rounded-full border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 ${STATUS_STYLES[item.status]}`}
         >
           <option value="Pending">Pending</option>
@@ -66,7 +92,9 @@ const ManagePrayerRequests = () => {
     {
       key: 'createdAt',
       header: 'Date',
-      render: (item: PrayerItem) => <span className="text-slate-500">{new Date(item.createdAt).toLocaleDateString()}</span>,
+      render: (item: PrayerRequest) => (
+        <span className="text-slate-500">{new Date(item.createdAt).toLocaleDateString()}</span>
+      ),
     },
   ];
 
@@ -74,7 +102,9 @@ const ManagePrayerRequests = () => {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-heading font-extrabold text-slate-800">Prayer Requests</h2>
-        <p className="text-sm text-slate-500">{PLACEHOLDER_REQUESTS.length} total requests · {PLACEHOLDER_REQUESTS.filter(r => r.status === 'Pending').length} pending</p>
+        <p className="text-sm text-slate-500">
+          {requests.length} total · {pendingCount} pending
+        </p>
       </div>
 
       <div className="relative max-w-md">
@@ -88,7 +118,13 @@ const ManagePrayerRequests = () => {
         />
       </div>
 
-      <DataTable columns={columns} data={filtered} emptyMessage="No prayer requests found." />
+      {isLoading ? (
+        <div className="flex justify-center p-12">
+          <Loader2 className="w-8 h-8 text-primary animate-spin" />
+        </div>
+      ) : (
+        <DataTable columns={columns} data={filtered} emptyMessage="No prayer requests found." />
+      )}
     </div>
   );
 };
