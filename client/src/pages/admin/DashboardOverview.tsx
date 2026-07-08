@@ -74,7 +74,7 @@ const DashboardOverview = () => {
         <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
           <h3 className="text-lg font-heading font-bold text-slate-800 mb-5">Quick Actions</h3>
           <div className="grid grid-cols-2 gap-3">
-            {QUICK_ACTIONS.map(({ label, to, icon: Icon, color }) => (
+            {QUICK_ACTIONS.map(({ label, to, color }) => (
               <Link
                 key={label}
                 to={to}
