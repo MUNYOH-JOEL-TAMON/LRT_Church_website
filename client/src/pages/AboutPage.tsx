@@ -8,9 +8,9 @@ const VALUES = [
 ];
 
 const LEADERSHIP = [
-  { name: 'Apostle N.A Stanley', title: 'Overseer & Founder', initials: 'JT' },
-  { name: 'Pastor A Beckley', title: 'Pastor', initials: 'MN' },
-  { name: 'Evangelist Fidelis', title: 'Deacon', initials: 'GM' },
+  { name: 'Apostle N.A Stanley', title: 'Overseer & Founder', initials: 'AT' },
+  { name: 'Pastor A Beckley', title: 'Pastor', initials: 'AB' },
+  { name: 'Evangelist F Fidelis', title: 'Deacon', initials: 'FF' },
 ];
 
 const AboutPage = () => {
