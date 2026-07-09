@@ -12,6 +12,15 @@ export class EventController {
     }
   }
 
+  public static async getById(req: Request, res: Response): Promise<void> {
+    try {
+      const event = await EventService.getEventById(req.params.id as string);
+      res.status(200).json({ success: true, data: event });
+    } catch (error: any) {
+      res.status(404).json({ success: false, message: error.message });
+    }
+  }
+
   public static async create(req: AuthRequest, res: Response): Promise<void> {
     try {
       const event = await EventService.createEvent(req.body);
