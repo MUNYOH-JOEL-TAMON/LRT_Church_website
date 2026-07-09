@@ -29,7 +29,7 @@ export class UserController {
         return;
       }
       const user = await User.findByIdAndUpdate(
-        req.params.id,
+        req.params.id as string,
         { role },
         { new: true, runValidators: true }
       ).select('-passwordHash');
@@ -50,11 +50,11 @@ export class UserController {
   public static async remove(req: AuthRequest, res: Response): Promise<void> {
     try {
       // Prevent admin from deleting themselves
-      if (req.params.id === req.user.id) {
+      if (req.params.id as string === req.user.id) {
         res.status(400).json({ success: false, message: 'You cannot delete your own account' });
         return;
       }
-      const user = await User.findByIdAndDelete(req.params.id);
+      const user = await User.findByIdAndDelete(req.params.id as string);
       if (!user) {
         res.status(404).json({ success: false, message: 'User not found' });
         return;
