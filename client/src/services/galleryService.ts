@@ -16,6 +16,17 @@ const galleryService = {
     const { data } = await api.delete<ApiResponse<null>>(`/gallery/${id}`);
     return data;
   },
+
+  uploadFile: async (file: File): Promise<string> => {
+    const formData = new FormData();
+    formData.append('image', file);
+    const { data } = await api.post<{ success: boolean; imageUrl: string }>(
+      '/upload',
+      formData,
+      { headers: { 'Content-Type': 'multipart/form-data' } }
+    );
+    return data.imageUrl;
+  },
 };
 
 export default galleryService;

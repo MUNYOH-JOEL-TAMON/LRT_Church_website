@@ -1,6 +1,7 @@
 import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import path from 'path';
 import authRoutes from './routes/authRoutes';
 import userRoutes from './routes/userRoutes';
 import sermonRoutes from './routes/sermonRoutes';
@@ -9,6 +10,7 @@ import prayerRequestRoutes from './routes/prayerRequestRoutes';
 import announcementRoutes from './routes/announcementRoutes';
 import blogRoutes from './routes/blogRoutes';
 import galleryRoutes from './routes/galleryRoutes';
+import uploadRoutes from './routes/uploadRoutes';
 
 // Initialize env variables
 dotenv.config();
@@ -31,6 +33,9 @@ app.get('/', (req: Request, res: Response) => {
   });
 });
 
+// Serve uploaded files as static assets
+app.use('/uploads', express.static(path.join(process.cwd(), 'uploads')));
+
 // Mount Routes
 app.use('/api/v1/auth', authRoutes);
 app.use('/api/v1/users', userRoutes);
@@ -40,6 +45,7 @@ app.use('/api/v1/prayer-requests', prayerRequestRoutes);
 app.use('/api/v1/announcements', announcementRoutes);
 app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/gallery', galleryRoutes);
+app.use('/api/v1/upload', uploadRoutes);
 
 // Generic Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
