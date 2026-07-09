@@ -2,10 +2,13 @@ import express, { Application, Request, Response, NextFunction } from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
+import userRoutes from './routes/userRoutes';
 import sermonRoutes from './routes/sermonRoutes';
 import eventRoutes from './routes/eventRoutes';
 import prayerRequestRoutes from './routes/prayerRequestRoutes';
-import userRoutes from './routes/userRoutes';
+import announcementRoutes from './routes/announcementRoutes';
+import blogRoutes from './routes/blogRoutes';
+import galleryRoutes from './routes/galleryRoutes';
 
 // Initialize env variables
 dotenv.config();
