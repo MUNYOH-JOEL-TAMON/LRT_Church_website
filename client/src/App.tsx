@@ -10,6 +10,8 @@ import AboutPage from './pages/AboutPage';
 import SermonsPage from './pages/SermonsPage';
 import EventsPage from './pages/EventsPage';
 import BlogPage from './pages/BlogPage';
+import AnnouncementsPage from './pages/AnnouncementsPage';
+import GalleryPage from './pages/GalleryPage';
 
 // Pages - Auth
 import LoginPage from './pages/portal/LoginPage';
@@ -39,6 +41,8 @@ function App() {
           <Route path="sermons" element={<SermonsPage />} />
           <Route path="events" element={<EventsPage />} />
           <Route path="blog" element={<BlogPage />} />
+          <Route path="announcements" element={<AnnouncementsPage />} />
+          <Route path="gallery" element={<GalleryPage />} />
         </Route>
 
         {/* ── Auth Routes (no layout wrapper) ── */}
