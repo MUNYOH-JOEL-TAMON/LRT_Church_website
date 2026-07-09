@@ -23,7 +23,7 @@ export class BlogController {
 
   public static async getById(req: Request, res: Response): Promise<void> {
     try {
-      const post = await BlogService.getById(req.params.id);
+      const post = await BlogService.getById(req.params.id as string);
       res.status(200).json({ success: true, data: post });
     } catch (error: any) {
       res.status(404).json({ success: false, message: error.message });
@@ -41,7 +41,7 @@ export class BlogController {
 
   public static async update(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const post = await BlogService.update(req.params.id, req.body);
+      const post = await BlogService.update(req.params.id as string, req.body);
       res.status(200).json({ success: true, data: post });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
@@ -50,7 +50,7 @@ export class BlogController {
 
   public static async remove(req: AuthRequest, res: Response): Promise<void> {
     try {
-      await BlogService.remove(req.params.id);
+      await BlogService.remove(req.params.id as string);
       res.status(200).json({ success: true, message: 'Blog post deleted successfully' });
     } catch (error: any) {
       res.status(404).json({ success: false, message: error.message });

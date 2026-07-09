@@ -23,7 +23,7 @@ export class GalleryController {
 
   public static async remove(req: AuthRequest, res: Response): Promise<void> {
     try {
-      await GalleryService.remove(req.params.id);
+      await GalleryService.remove(req.params.id as string);
       res.status(200).json({ success: true, message: 'Image deleted successfully' });
     } catch (error: any) {
       res.status(404).json({ success: false, message: error.message });
