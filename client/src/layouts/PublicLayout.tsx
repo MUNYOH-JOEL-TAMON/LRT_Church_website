@@ -238,11 +238,11 @@ const PublicLayout = () => {
                 </li>
                 <li>
                   <p className="text-white font-medium">Bible Study</p>
-                  <p>Wednesday, 6:00 PM</p>
+                  <p>Friday, 4:00 PM</p>
                 </li>
                 <li>
                   <p className="text-white font-medium">Prayer Meeting</p>
-                  <p>Friday, 6:00 PM</p>
+                  <p>Saturday, 4:00 PM</p>
                 </li>
               </ul>
             </div>
