@@ -22,6 +22,7 @@ const PublicLayout = () => {
             <Link to="/about" className="hover:text-white transition-all duration-300">About</Link>
             <Link to="/sermons" className="hover:text-white transition-all duration-300">Sermons</Link>
             <Link to="/events" className="hover:text-white transition-all duration-300">Events</Link>
+            <Link to="/blog" className="hover:text-white transition-all duration-300">Blog</Link>
           </nav>
           <Link to="/portal/login" className="bg-white/10 backdrop-blur-md border border-white/20 text-white font-semibold px-6 py-2.5 rounded-xl hover:bg-secondary hover:text-slate-900 hover:border-transparent transition-all duration-300 shadow-lg hover:shadow-[0_0_15px_rgba(234,179,8,0.5)]">
             Member Portal

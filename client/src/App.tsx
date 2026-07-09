@@ -9,6 +9,7 @@ import Home from './pages/Home';
 import AboutPage from './pages/AboutPage';
 import SermonsPage from './pages/SermonsPage';
 import EventsPage from './pages/EventsPage';
+import BlogPage from './pages/BlogPage';
 
 // Pages - Auth
 import LoginPage from './pages/portal/LoginPage';
@@ -37,6 +38,7 @@ function App() {
           <Route path="about" element={<AboutPage />} />
           <Route path="sermons" element={<SermonsPage />} />
           <Route path="events" element={<EventsPage />} />
+          <Route path="blog" element={<BlogPage />} />
         </Route>
 
         {/* ── Auth Routes (no layout wrapper) ── */}
