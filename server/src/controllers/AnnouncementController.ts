@@ -32,7 +32,7 @@ export class AnnouncementController {
 
   public static async update(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const announcement = await AnnouncementService.update(req.params.id, req.body);
+      const announcement = await AnnouncementService.update(req.params.id as string, req.body);
       res.status(200).json({ success: true, data: announcement });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
@@ -41,7 +41,7 @@ export class AnnouncementController {
 
   public static async remove(req: AuthRequest, res: Response): Promise<void> {
     try {
-      await AnnouncementService.remove(req.params.id);
+      await AnnouncementService.remove(req.params.id as string);
       res.status(200).json({ success: true, message: 'Announcement deleted successfully' });
     } catch (error: any) {
       res.status(404).json({ success: false, message: error.message });
