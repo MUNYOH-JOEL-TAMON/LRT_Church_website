@@ -37,6 +37,9 @@ app.use('/api/v1/users', userRoutes);
 app.use('/api/v1/sermons', sermonRoutes);
 app.use('/api/v1/events', eventRoutes);
 app.use('/api/v1/prayer-requests', prayerRequestRoutes);
+app.use('/api/v1/announcements', announcementRoutes);
+app.use('/api/v1/blog', blogRoutes);
+app.use('/api/v1/gallery', galleryRoutes);
 
 // Generic Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
