@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useLocation } from 'react-router-dom';
 import { Mail, Lock, User } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import Button from '../../components/ui/Button';
@@ -8,6 +8,7 @@ import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { register, isLoading, error, clearError } = useAuthStore();
   const [form, setForm] = useState({
     firstName: '',
@@ -36,7 +37,8 @@ const RegisterPage = () => {
     }
     await register(form.firstName, form.lastName, form.email, form.password);
     if (!useAuthStore.getState().error) {
-      navigate('/portal/dashboard');
+      const from = (location.state as any)?.from;
+      navigate(from || '/portal/dashboard');
     }
   };
 
