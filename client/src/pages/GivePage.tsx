@@ -332,7 +332,7 @@ const GivePage = () => {
                 icon: Heart,
                 color: 'text-rose-500',
                 bg: 'bg-rose-50',
-                title: 'Trust God's Return',
+                title: "Trust God's Return",
                 body: 'Rest in faith that your seed is working. God is faithful and He rewards those who honour Him.',
               },
             ].map(({ icon: Icon, color, bg, title, body }) => (
