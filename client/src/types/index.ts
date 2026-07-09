@@ -30,8 +30,9 @@ export interface Event {
   _id: string;
   title: string;
   description: string;
-  date: string;            // matches backend field name
+  date: string;
   location: string;
+  flierUrl?: string;
   department?: string;
   maxCapacity?: number;
   registeredAttendees: string[];
