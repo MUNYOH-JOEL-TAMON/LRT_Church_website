@@ -8,6 +8,7 @@ import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
 const LoginPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { login, isLoading, error, clearError } = useAuthStore();
   const [form, setForm] = useState({ email: '', password: '' });
 
@@ -22,7 +23,11 @@ const LoginPage = () => {
     const { error: loginError, user: loggedInUser } = useAuthStore.getState();
     if (!loginError && loggedInUser) {
       const adminRoles = ['admin', 'pastor', 'editor'];
-      if (adminRoles.includes(loggedInUser.role?.toLowerCase())) {
+      // Redirect back to the page they came from, or role-based default
+      const from = (location.state as any)?.from;
+      if (from) {
+        navigate(from);
+      } else if (adminRoles.includes(loggedInUser.role?.toLowerCase())) {
         navigate('/admin/dashboard');
       } else {
         navigate('/portal/dashboard');
