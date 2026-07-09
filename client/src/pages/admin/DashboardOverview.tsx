@@ -197,7 +197,7 @@ const DashboardOverview = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-8 relative overflow-hidden shadow-xl shadow-primary/20">
+      <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-6 md:p-8 relative overflow-hidden shadow-xl shadow-primary/20">
         <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
         <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-white/5 rounded-full translate-y-1/2"></div>
         <div className="relative z-10 flex items-center justify-between">
