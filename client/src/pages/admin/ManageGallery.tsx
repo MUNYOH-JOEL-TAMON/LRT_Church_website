@@ -167,7 +167,7 @@ const ManageGallery = () => {
           {/* Mode toggle */}
           <div>
             <label className="text-sm font-semibold text-slate-700 mb-2 block">Upload Method</label>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
               <button type="button"
                 onClick={() => { setUploadMode('file'); setImageUrl(''); }}
                 className={`flex items-center justify-center gap-2 py-2.5 rounded-xl border-2 text-sm font-semibold transition-all ${

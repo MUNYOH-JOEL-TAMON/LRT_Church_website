@@ -170,7 +170,7 @@ const ManageBlog = () => {
           {error && <div className="p-3 bg-red-50 text-red-600 rounded-xl text-sm font-semibold">{error}</div>}
           <Input id="blog-title" label="Title" placeholder="Enter blog post title" required
             value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input id="blog-author" label="Author" placeholder="e.g. Pastor Joel Tamon" required
               value={formData.author} onChange={(e) => setFormData({ ...formData, author: e.target.value })} />
             <div>

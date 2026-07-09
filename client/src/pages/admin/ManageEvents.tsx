@@ -239,7 +239,7 @@ const ManageEvents = () => {
           <Input id="event-title" label="Event Title" placeholder="e.g. Sunday Worship Service"
             required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <Input id="event-date" label="Date" type="date" required
               value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
             <Input id="event-capacity" label="Max Capacity (Optional)" type="number" placeholder="e.g. 200"
