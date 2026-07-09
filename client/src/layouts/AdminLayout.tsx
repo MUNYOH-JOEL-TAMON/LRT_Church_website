@@ -154,7 +154,7 @@ const AdminLayout = () => {
               <h1 className="text-lg lg:text-xl font-heading font-bold text-slate-800 leading-tight">
                 {currentPage?.label || 'Admin'}
               </h1>
-              <p className="text-[10px] lg:text-xs text-slate-400">Latter Rain Tabernacle Management</p>
+              <p className="text-[10px] lg:text-xs text-slate-400 hidden sm:block">Latter Rain Tabernacle Management</p>
             </div>
           </div>
           <div className="flex items-center gap-3">
