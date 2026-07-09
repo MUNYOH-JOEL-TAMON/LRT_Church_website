@@ -53,3 +53,31 @@ export interface ApiResponse<T> {
   token?: string;
   message?: string;
 }
+
+export interface Announcement {
+  _id: string;
+  title: string;
+  content: string;
+  status: 'Draft' | 'Published';
+  createdBy?: Partial<User>;
+  createdAt: string;
+}
+
+export interface BlogPost {
+  _id: string;
+  title: string;
+  content: string;
+  author: string;
+  status: 'Draft' | 'Published';
+  views: number;
+  createdBy?: Partial<User>;
+  createdAt: string;
+}
+
+export interface GalleryImage {
+  _id: string;
+  title: string;
+  imageUrl: string;
+  uploadedBy?: Partial<User>;
+  createdAt: string;
+}
