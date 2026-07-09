@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { CalendarDays, MapPin, Clock, Users, Loader2 } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon } from 'lucide-react';
 import Button from '../components/ui/Button';
 import eventService from '../services/eventService';
 import type { Event } from '../types';
@@ -20,17 +20,13 @@ const EventsPage = () => {
         const res = await eventService.getAll();
         const eventsData = res.data || [];
         setEvents(eventsData);
-
-        // Pre-mark events the user is already registered for
         if (user) {
-          const alreadyRegistered = new Set(
-            eventsData
-              .filter((e) => e.registeredAttendees?.includes(user._id))
-              .map((e) => e._id)
+          const already = new Set(
+            eventsData.filter((e) => e.registeredAttendees?.includes(user._id)).map((e) => e._id)
           );
-          setRegisteredIds(alreadyRegistered);
+          setRegisteredIds(already);
         }
-      } catch (err) {
+      } catch {
         setError('Failed to load events. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -40,20 +36,14 @@ const EventsPage = () => {
   }, [user]);
 
   const handleRegister = async (eventId: string) => {
-    if (!isAuthenticated) {
-      window.location.href = '/portal/login';
-      return;
-    }
+    if (!isAuthenticated) { window.location.href = '/portal/login'; return; }
     try {
       setRegisteringId(eventId);
       await eventService.register(eventId);
       setRegisteredIds((prev) => new Set(prev).add(eventId));
-      // Update local attendee count
       setEvents((prev) =>
         prev.map((e) =>
-          e._id === eventId
-            ? { ...e, registeredAttendees: [...e.registeredAttendees, user!._id] }
-            : e
+          e._id === eventId ? { ...e, registeredAttendees: [...e.registeredAttendees, user!._id] } : e
         )
       );
     } catch (err: any) {
@@ -85,7 +75,6 @@ const EventsPage = () => {
         </div>
       </div>
 
-      {/* Content */}
       <div className="container mx-auto px-4">
         {/* Loading */}
         {isLoading && (
@@ -111,9 +100,9 @@ const EventsPage = () => {
           </div>
         )}
 
-        {/* Events List */}
+        {/* Events */}
         {!isLoading && !error && events.length > 0 && (
-          <div className="flex flex-col gap-6 max-w-4xl mx-auto">
+          <div className="flex flex-col gap-8 max-w-4xl mx-auto">
             {events.map((event) => {
               const atCapacity = isAtCapacity(event);
               const isRegistered = registeredIds.has(event._id);
@@ -122,74 +111,125 @@ const EventsPage = () => {
               return (
                 <div
                   key={event._id}
-                  className="group bg-white rounded-3xl shadow-md shadow-slate-200/50 hover:shadow-xl transition-all duration-300 border border-slate-100 p-6 md:p-8 flex flex-col md:flex-row gap-6"
+                  className="group bg-white rounded-3xl shadow-md shadow-slate-200/50 hover:shadow-xl transition-all duration-300 border border-slate-100 overflow-hidden"
                 >
-                  {/* Date block */}
-                  <div className="flex-shrink-0 w-24 h-24 rounded-2xl bg-primary-dark flex flex-col items-center justify-center text-white shadow-lg shadow-primary/20">
-                    <CalendarDays className="w-7 h-7 text-secondary mb-1" />
-                    {event.date ? (
-                      <>
-                        <span className="text-lg font-extrabold leading-none">
-                          {new Date(event.date).getDate()}
-                        </span>
-                        <span className="text-xs text-blue-200 font-medium">
-                          {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
-                        </span>
-                      </>
-                    ) : (
-                      <span className="text-xs text-blue-200 text-center px-1">TBD</span>
+                  {/* ── Flier image (full width when present) ── */}
+                  {event.flierUrl ? (
+                    <div className="relative w-full h-64 sm:h-80 overflow-hidden">
+                      <img
+                        src={event.flierUrl}
+                        alt={`${event.title} flier`}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                      {/* date badge overlay */}
+                      {event.date && (
+                        <div className="absolute top-4 left-4 bg-slate-900/80 backdrop-blur-sm text-white rounded-2xl px-4 py-2 flex items-center gap-2 shadow-lg">
+                          <CalendarDays className="w-4 h-4 text-secondary" />
+                          <span className="text-sm font-semibold">
+                            {new Date(event.date).toLocaleDateString('en-US', {
+                              month: 'short', day: 'numeric', year: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                      )}
+                    </div>
+                  ) : (
+                    /* No flier — coloured banner with date block */
+                    <div className="bg-gradient-to-r from-primary-dark to-primary p-6 flex items-center gap-4">
+                      <div className="w-16 h-16 rounded-2xl bg-white/10 border border-white/20 flex flex-col items-center justify-center text-white flex-shrink-0">
+                        {event.date ? (
+                          <>
+                            <span className="text-xl font-extrabold leading-none">
+                              {new Date(event.date).getDate()}
+                            </span>
+                            <span className="text-xs text-blue-200 font-medium">
+                              {new Date(event.date).toLocaleDateString('en-US', { month: 'short' })}
+                            </span>
+                          </>
+                        ) : (
+                          <ImageIcon className="w-6 h-6 text-white/40" />
+                        )}
+                      </div>
+                      <h3 className="text-2xl font-heading font-bold text-white">
+                        {event.title}
+                      </h3>
+                    </div>
+                  )}
+
+                  {/* ── Event details ── */}
+                  <div className="p-6 md:p-8">
+                    {/* Title (only shown when flier is present — already shown in banner otherwise) */}
+                    {event.flierUrl && (
+                      <h3 className="text-2xl font-heading font-bold text-slate-800 mb-3 group-hover:text-primary transition-colors">
+                        {event.title}
+                      </h3>
                     )}
-                  </div>
 
-                  {/* Content */}
-                  <div className="flex-1">
-                    <h3 className="text-2xl font-heading font-bold text-slate-800 mb-2 group-hover:text-primary transition-colors">
-                      {event.title}
-                    </h3>
-                    <p className="text-slate-500 mb-4 leading-relaxed">{event.description}</p>
+                    <p className="text-slate-500 leading-relaxed mb-5">{event.description}</p>
 
-                    <div className="flex flex-wrap gap-5 text-sm text-slate-500">
+                    {/* Meta row */}
+                    <div className="flex flex-wrap gap-4 text-sm text-slate-500 mb-6">
                       {event.date && (
                         <span className="flex items-center gap-1.5">
-                          <Clock className="w-4 h-4 text-primary" />
+                          <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                           {new Date(event.date).toLocaleDateString('en-US', {
-                            weekday: 'long',
-                            month: 'long',
-                            day: 'numeric',
-                            year: 'numeric',
+                            weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
                           })}
                         </span>
                       )}
                       <span className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4 text-primary" />
+                        <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
                         {event.location}
                       </span>
                       <span className="flex items-center gap-1.5">
-                        <Users className="w-4 h-4 text-primary" />
+                        <Users className="w-4 h-4 text-primary flex-shrink-0" />
                         {event.maxCapacity
                           ? `${event.registeredAttendees?.length ?? 0} / ${event.maxCapacity} registered`
                           : 'Open to all'}
                       </span>
                     </div>
-                  </div>
 
-                  {/* CTA */}
-                  <div className="flex-shrink-0 flex items-center">
-                    {isRegistered ? (
-                      <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-4 py-2 rounded-xl border border-emerald-200">
-                        ✓ Registered
-                      </span>
-                    ) : (
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => handleRegister(event._id)}
-                        isLoading={isRegistering}
-                        disabled={atCapacity}
-                      >
-                        {atCapacity ? 'Full' : 'Register'}
-                      </Button>
-                    )}
+                    {/* CTA */}
+                    <div className="flex items-center justify-between">
+                      {/* Capacity bar (when there's a limit) */}
+                      {event.maxCapacity ? (
+                        <div className="flex-1 mr-6">
+                          <div className="flex justify-between text-xs text-slate-400 mb-1">
+                            <span>{event.registeredAttendees?.length ?? 0} registered</span>
+                            <span>{event.maxCapacity} spots</span>
+                          </div>
+                          <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${atCapacity ? 'bg-red-400' : 'bg-primary'}`}
+                              style={{
+                                width: `${Math.min(
+                                  100,
+                                  ((event.registeredAttendees?.length ?? 0) / event.maxCapacity) * 100
+                                )}%`,
+                              }}
+                            />
+                          </div>
+                        </div>
+                      ) : (
+                        <div />
+                      )}
+
+                      {isRegistered ? (
+                        <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-5 py-2.5 rounded-xl border border-emerald-200">
+                          ✓ Registered
+                        </span>
+                      ) : (
+                        <Button
+                          variant={atCapacity ? 'ghost' : 'secondary'}
+                          size="sm"
+                          onClick={() => handleRegister(event._id)}
+                          isLoading={isRegistering}
+                          disabled={atCapacity}
+                        >
+                          {atCapacity ? 'Fully Booked' : 'Register Now'}
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
