@@ -21,6 +21,7 @@ import eventService from '../../services/eventService';
 import prayerService from '../../services/prayerService';
 import announcementService from '../../services/announcementService';
 import type { Sermon, Event, PrayerRequest, Announcement } from '../../types';
+import Modal from '../../components/admin/Modal';
 
 const QUICK_ACTIONS = [
   { label: 'Add Sermon', to: '/admin/sermons', icon: BookOpen, color: 'bg-primary' },
@@ -60,6 +61,7 @@ const DashboardOverview = () => {
   });
   const [activity, setActivity] = useState<ActivityItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [selectedActivity, setSelectedActivity] = useState<ActivityItem | null>(null);
 
   useEffect(() => {
     const loadDashboard = async () => {
@@ -153,9 +155,9 @@ const DashboardOverview = () => {
           });
         });
 
-        // Sort by most recent and take top 6
+        // Sort by most recent and take top 4 to save space
         activityItems.sort((a, b) => b.sortKey - a.sortKey);
-        setActivity(activityItems.slice(0, 6));
+        setActivity(activityItems.slice(0, 4));
 
       } catch (err) {
         console.error('Dashboard load error:', err);
@@ -258,23 +260,65 @@ const DashboardOverview = () => {
               <p className="text-slate-400 text-sm">No recent activity yet.</p>
             </div>
           ) : (
-            <div className="space-y-4">
-              {activity.map(({ icon: Icon, text, time, color }, idx) => (
-                <div key={idx} className="flex items-center gap-4">
-                  <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center flex-shrink-0`}>
-                    <Icon className="w-5 h-5" />
+            <div className="space-y-3">
+              {activity.map((item, idx) => {
+                const Icon = item.icon;
+                return (
+                  <div
+                    key={idx}
+                    onClick={() => setSelectedActivity(item)}
+                    className="flex items-center gap-4 p-2.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer group"
+                    title="Click to view details"
+                  >
+                    <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
+                      <Icon className="w-5 h-5" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-primary transition-colors">
+                        {item.text}
+                      </p>
+                      <p className="text-xs text-slate-400">{item.time}</p>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                   </div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-slate-700 truncate">{text}</p>
-                    <p className="text-xs text-slate-400">{time}</p>
-                  </div>
-                  <ArrowRight className="w-4 h-4 text-slate-300 flex-shrink-0" />
-                </div>
-              ))}
+                );
+              })}
             </div>
           )}
         </div>
       </div>
+
+      {/* Activity Detail Modal */}
+      <Modal
+        isOpen={!!selectedActivity}
+        onClose={() => setSelectedActivity(null)}
+        title="Activity Details"
+        size="sm"
+      >
+        {selectedActivity && (
+          <div className="space-y-5 text-center py-2">
+            <div className={`w-14 h-14 rounded-2xl mx-auto flex items-center justify-center ${selectedActivity.color}`}>
+              <selectedActivity.icon className="w-7 h-7" />
+            </div>
+            <div className="space-y-2 px-2">
+              <p className="text-base font-semibold text-slate-800 leading-relaxed">
+                {selectedActivity.text}
+              </p>
+              <p className="text-xs text-slate-400">
+                Occurred {selectedActivity.time}
+              </p>
+            </div>
+            <div className="pt-2 flex justify-center">
+              <button
+                onClick={() => setSelectedActivity(null)}
+                className="w-full sm:w-auto px-6 py-2.5 bg-slate-900 text-white rounded-xl text-xs font-semibold hover:bg-slate-800 transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+      </Modal>
     </div>
   );
 };
