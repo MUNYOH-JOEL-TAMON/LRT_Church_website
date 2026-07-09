@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,6 +8,8 @@ import {
   LogOut,
   User,
   Bell,
+  Menu,
+  X,
 } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
@@ -20,17 +23,39 @@ const navItems = [
 
 const PortalDashboard = () => {
   const { user, logout } = useAuthStore();
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
   return (
     <div className="min-h-screen bg-slate-50 flex">
+      {/* Backdrop overlay for mobile menu */}
+      {isMobileMenuOpen && (
+        <div
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
+          onClick={() => setIsMobileMenuOpen(false)}
+        ></div>
+      )}
+
       {/* Sidebar */}
-      <aside className="w-64 bg-slate-900 text-white flex flex-col fixed h-full z-40">
+      <aside
+        className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-40 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+          isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
+        }`}
+      >
         {/* Brand */}
-        <div className="flex items-center gap-3 px-6 py-5 border-b border-white/10">
-          <img src={lrtLogo} alt="LRT" className="w-10 h-10 rounded-full object-cover border border-secondary/40" />
-          <span className="text-lg font-heading font-extrabold text-white">
-            Latter Rain <span className="text-secondary">LRT</span>
-          </span>
+        <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-white/10">
+          <div className="flex items-center gap-3">
+            <img src={lrtLogo} alt="LRT" className="w-10 h-10 rounded-full object-cover border border-secondary/40" />
+            <span className="text-lg font-heading font-extrabold text-white">
+              Latter Rain <span className="text-secondary">LRT</span>
+            </span>
+          </div>
+          {/* Mobile Sidebar Close Button */}
+          <button
+            onClick={() => setIsMobileMenuOpen(false)}
+            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white lg:hidden transition-colors"
+          >
+            <X className="w-5 h-5" />
+          </button>
         </div>
 
         {/* Navigation */}
@@ -39,6 +64,7 @@ const PortalDashboard = () => {
             <Link
               key={to}
               to={to}
+              onClick={() => setIsMobileMenuOpen(false)}
               className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group"
             >
               <Icon className="w-5 h-5 group-hover:text-secondary transition-colors" />
@@ -71,10 +97,20 @@ const PortalDashboard = () => {
       </aside>
 
       {/* Main Content */}
-      <div className="flex-1 ml-64 flex flex-col">
+      <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-8 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-heading font-bold text-slate-800">Dashboard</h1>
+        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 lg:px-8 py-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            {/* Hamburger Toggle Button */}
+            <button
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="p-2 -ml-2 rounded-xl hover:bg-slate-100 text-slate-500 lg:hidden transition-colors"
+              aria-label="Toggle menu"
+            >
+              <Menu className="w-6 h-6" />
+            </button>
+            <h1 className="text-lg lg:text-xl font-heading font-bold text-slate-800">Dashboard</h1>
+          </div>
           <div className="flex items-center gap-3">
             <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
               <Bell className="w-5 h-5" />
@@ -87,17 +123,17 @@ const PortalDashboard = () => {
         </header>
 
         {/* Page Body */}
-        <main className="flex-1 p-8">
+        <main className="flex-1 p-4 lg:p-8">
           {/* Welcome Banner */}
-          <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-8 mb-8 relative overflow-hidden shadow-xl shadow-primary/20">
+          <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-6 lg:p-8 mb-8 relative overflow-hidden shadow-xl shadow-primary/20">
             <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
             <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-white/5 rounded-full translate-y-1/2"></div>
             <div className="relative z-10">
-              <p className="text-secondary font-semibold text-sm tracking-widest uppercase mb-2">Member Portal</p>
-              <h2 className="text-3xl md:text-4xl font-heading font-extrabold mb-3">
+              <p className="text-secondary font-semibold text-xs lg:text-sm tracking-widest uppercase mb-2">Member Portal</p>
+              <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold mb-3">
                 Welcome back, {user?.firstName}! 👋
               </h2>
-              <p className="text-blue-100 max-w-lg">
+              <p className="text-blue-100 text-sm lg:text-base max-w-lg">
                 You are connected to your LRT account. Explore sermons, register for events, and submit prayer requests below.
               </p>
             </div>
