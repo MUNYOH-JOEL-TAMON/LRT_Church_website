@@ -4,14 +4,17 @@ import { Menu, X, ChevronRight } from 'lucide-react';
 import lrtLogo from '../assets/LRT_LOGO.jpeg';
 
 const NAV_LINKS = [
-  { to: '/',             label: 'Home' },
-  { to: '/about',        label: 'About' },
-  { to: '/sermons',      label: 'Sermons' },
-  { to: '/events',       label: 'Events' },
-  { to: '/blog',         label: 'Blog' },
-  { to: '/announcements',label: 'Announcements' },
-  { to: '/gallery',      label: 'Gallery' },
+  { to: '/',              label: 'Home' },
+  { to: '/about',         label: 'About' },
+  { to: '/sermons',       label: 'Sermons' },
+  { to: '/events',        label: 'Events' },
+  { to: '/blog',          label: 'Blog' },
+  { to: '/announcements', label: 'Announcements' },
+  { to: '/gallery',       label: 'Gallery' },
 ];
+
+/** Give gets a special gold CTA treatment — kept separate from NAV_LINKS */
+const GIVE_LINK = { to: '/give', label: '🤲 Give' };
 
 const PublicLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -96,6 +99,17 @@ const PublicLayout = () => {
                   {label}
                 </Link>
               ))}
+              {/* Give – gold CTA */}
+              <Link
+                to={GIVE_LINK.to}
+                className={`ml-1 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 shadow ${
+                  isActive(GIVE_LINK.to)
+                    ? 'bg-secondary text-slate-900 shadow-secondary/40'
+                    : 'bg-secondary/20 text-secondary border border-secondary/30 hover:bg-secondary hover:text-slate-900 hover:shadow-[0_0_12px_rgba(234,179,8,0.4)]'
+                }`}
+              >
+                {GIVE_LINK.label}
+              </Link>
             </nav>
 
             {/* Right side */}
@@ -144,6 +158,18 @@ const PublicLayout = () => {
                   <ChevronRight className={`w-4 h-4 ${isActive(to) ? 'text-slate-900' : 'text-slate-500'}`} />
                 </Link>
               ))}
+              {/* Give — gold highlight */}
+              <Link
+                to={GIVE_LINK.to}
+                className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 border ${
+                  isActive(GIVE_LINK.to)
+                    ? 'bg-secondary text-slate-900 border-secondary'
+                    : 'text-secondary border-secondary/30 bg-secondary/10 hover:bg-secondary hover:text-slate-900'
+                }`}
+              >
+                {GIVE_LINK.label}
+                <ChevronRight className={`w-4 h-4 ${isActive(GIVE_LINK.to) ? 'text-slate-900' : 'text-secondary'}`} />
+              </Link>
             </nav>
 
             {/* Divider */}
@@ -219,6 +245,7 @@ const PublicLayout = () => {
                   { to: '/blog',             label: 'Blog' },
                   { to: '/announcements',    label: 'Announcements' },
                   { to: '/prayer-requests',  label: 'Prayer Requests' },
+                  { to: '/give',             label: '🤲 Give Online' },
                   { to: '/portal/login',     label: 'Member Portal' },
                 ].map(({ to, label }) => (
                   <li key={to}>
