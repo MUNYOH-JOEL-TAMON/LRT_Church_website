@@ -12,6 +12,7 @@ import EventsPage from './pages/EventsPage';
 import BlogPage from './pages/BlogPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import GalleryPage from './pages/GalleryPage';
+import PrayerRequestPage from './pages/PrayerRequestPage';
 
 // Pages - Auth
 import LoginPage from './pages/portal/LoginPage';
@@ -43,6 +44,7 @@ function App() {
           <Route path="blog" element={<BlogPage />} />
           <Route path="announcements" element={<AnnouncementsPage />} />
           <Route path="gallery" element={<GalleryPage />} />
+          <Route path="prayer-requests" element={<PrayerRequestPage />} />
         </Route>
 
         {/* ── Auth Routes (no layout wrapper) ── */}
