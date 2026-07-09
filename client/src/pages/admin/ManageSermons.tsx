@@ -152,7 +152,7 @@ const ManageSermons = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl font-heading font-extrabold text-slate-800">Manage Sermons</h2>
           <p className="text-sm text-slate-500">{sermons.length} total sermons</p>
