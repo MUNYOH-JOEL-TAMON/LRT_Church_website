@@ -54,14 +54,14 @@ const AdminLayout = () => {
       {/* Backdrop overlay for mobile menu */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-30 lg:hidden"
+          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
         ></div>
       )}
 
       {/* ── Sidebar ── */}
       <aside
-        className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-40 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
@@ -140,7 +140,7 @@ const AdminLayout = () => {
       {/* ── Main Content ── */}
       <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
         {/* Top Bar */}
-        <header className="sticky top-0 z-30 bg-white border-b border-slate-200 px-4 lg:px-8 py-4 flex items-center justify-between shadow-sm">
+        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4 flex items-center justify-between shadow-sm">
           <div className="flex items-center gap-3">
             {/* Hamburger Toggle Button */}
             <button
