@@ -7,6 +7,7 @@ const EventSchema: Schema = new Schema(
     description: { type: String, required: true },
     date: { type: Date, required: true },
     location: { type: String, required: true },
+    flierUrl: { type: String, trim: true },
     department: { type: Schema.Types.ObjectId, ref: 'Department' },
     maxCapacity: { type: Number },
     registeredAttendees: [{ type: Schema.Types.ObjectId, ref: 'User' }],

@@ -6,6 +6,7 @@ export interface IEvent extends Document {
   description: string;
   date: Date;
   location: string;
+  flierUrl?: string;
   department?: Types.ObjectId;
   maxCapacity?: number;
   registeredAttendees: Types.ObjectId[];
