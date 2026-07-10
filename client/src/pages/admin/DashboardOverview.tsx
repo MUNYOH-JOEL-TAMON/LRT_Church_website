@@ -8,9 +8,7 @@ import {
   Megaphone,
   PenLine,
   Image,
-  Plus,
   TrendingUp,
-  ArrowRight,
   Loader2,
 } from 'lucide-react';
 import StatCard from '../../components/admin/StatCard';
@@ -224,29 +222,29 @@ const DashboardOverview = () => {
       </div>
 
       {/* Quick Actions + Recent Activity */}
-      <div className="grid lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <h3 className="text-lg font-heading font-bold text-slate-800 mb-5">Quick Actions</h3>
-          <div className="grid grid-cols-2 gap-3">
-            {QUICK_ACTIONS.map(({ label, to, color }) => (
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <h3 className="text-lg font-heading font-bold text-slate-800 mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-2 gap-3">
+            {QUICK_ACTIONS.map(({ label, to, icon: Icon, color }) => (
               <Link
                 key={label}
                 to={to}
-                className="flex flex-col items-center gap-2 p-4 rounded-2xl hover:bg-slate-50 transition-colors group border border-slate-100"
+                className="flex flex-col items-center gap-2 p-3 rounded-2xl hover:bg-slate-50 active:bg-slate-100 transition-colors group border border-slate-100"
               >
-                <div className={`w-11 h-11 rounded-xl ${color} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
-                  <Plus className="w-5 h-5 text-white" />
+                <div className={`w-10 h-10 rounded-xl ${color} flex items-center justify-center shadow-md group-hover:scale-105 transition-transform`}>
+                  <Icon className="w-4 h-4 text-white" />
                 </div>
-                <span className="text-xs font-semibold text-slate-600">{label}</span>
+                <span className="text-xs font-semibold text-slate-600 text-center leading-tight">{label}</span>
               </Link>
             ))}
           </div>
         </div>
 
         {/* Recent Activity */}
-        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-6">
-          <div className="flex items-center justify-between mb-5">
+        <div className="lg:col-span-2 bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
+          <div className="flex items-center justify-between mb-4">
             <h3 className="text-lg font-heading font-bold text-slate-800">Recent Activity</h3>
             <span className="text-xs text-slate-400">Live data</span>
           </div>
@@ -260,26 +258,23 @@ const DashboardOverview = () => {
               <p className="text-slate-400 text-sm">No recent activity yet.</p>
             </div>
           ) : (
-            <div className="space-y-3">
+            <div className="space-y-2">
               {activity.map((item, idx) => {
                 const Icon = item.icon;
                 return (
                   <div
                     key={idx}
-                    onClick={() => setSelectedActivity(item)}
-                    className="flex items-center gap-4 p-2.5 -mx-2 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors cursor-pointer group"
-                    title="Click to view details"
+                    className="flex items-center gap-3 p-2.5 rounded-xl hover:bg-slate-50 active:bg-slate-100 transition-colors"
                   >
-                    <div className={`w-10 h-10 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0 group-hover:scale-105 transition-transform`}>
-                      <Icon className="w-5 h-5" />
+                    <div className={`w-9 h-9 rounded-xl ${item.color} flex items-center justify-center flex-shrink-0`}>
+                      <Icon className="w-4 h-4" />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-slate-700 truncate group-hover:text-primary transition-colors">
+                      <p className="text-sm font-medium text-slate-700 truncate">
                         {item.text}
                       </p>
                       <p className="text-xs text-slate-400">{item.time}</p>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-slate-300 group-hover:text-primary group-hover:translate-x-0.5 transition-all flex-shrink-0" />
                   </div>
                 );
               })}
