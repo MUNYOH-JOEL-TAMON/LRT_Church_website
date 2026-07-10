@@ -7,7 +7,9 @@ import Input from '../../components/ui/Input';
 import announcementService from '../../services/announcementService';
 import type { Announcement } from '../../types';
 
-const EMPTY_FORM = { title: '', content: '', status: 'Draft' };
+const EMPTY_FORM: { title: string; content: string; status: 'Draft' | 'Published' } = {
+  title: '', content: '', status: 'Draft',
+};
 
 const STATUS_STYLES: Record<string, string> = {
   Published: 'bg-emerald-100 text-emerald-700',
@@ -156,7 +158,7 @@ const ManageAnnouncements = () => {
           </div>
           <div>
             <label className="text-sm font-semibold text-slate-700 mb-1.5 block">Status</label>
-            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value })}
+            <select value={formData.status} onChange={(e) => setFormData({ ...formData, status: e.target.value as 'Draft' | 'Published' })}
               className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all">
               <option value="Draft">Draft</option>
               <option value="Published">Published</option>

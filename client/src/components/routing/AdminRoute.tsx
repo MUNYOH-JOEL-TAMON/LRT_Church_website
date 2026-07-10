@@ -1,8 +1,6 @@
 import { Navigate, Outlet } from 'react-router-dom';
 import useAuthStore from '../../store/useAuthStore';
 
-const ADMIN_ROLES = ['Admin', 'Pastor', 'Editor'];
-
 /**
  * AdminRoute: A route guard that only allows Admin, Pastor, or Editor roles.
  * Members and unauthenticated users are redirected.
