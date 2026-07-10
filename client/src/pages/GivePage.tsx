@@ -50,14 +50,6 @@ const MOMO_OPTIONS = [
     ringCls: 'ring-amber-300',
     btnCls: 'bg-amber-400 hover:bg-amber-300 text-slate-900',
     logo: 'M',
-    steps: [
-      { action: 'Dial', detail: '*126#' },
-      { action: 'Select', detail: '"Transfer Money"' },
-      { action: 'Enter number', detail: '677 000 000' },
-      { action: 'Enter amount', detail: 'Your giving amount' },
-      { action: 'Confirm PIN', detail: 'Your MoMo PIN' },
-      { action: 'Screenshot', detail: 'Your confirmation SMS' },
-    ],
   },
   {
     provider: 'Orange' as const,
@@ -72,14 +64,6 @@ const MOMO_OPTIONS = [
     ringCls: 'ring-orange-300',
     btnCls: 'bg-orange-500 hover:bg-orange-400 text-white',
     logo: 'O',
-    steps: [
-      { action: 'Dial', detail: '#150*50#' },
-      { action: 'Select', detail: '"Send Money"' },
-      { action: 'Enter number', detail: '699 000 000' },
-      { action: 'Enter amount', detail: 'Your giving amount' },
-      { action: 'Confirm PIN', detail: 'Your Orange PIN' },
-      { action: 'Screenshot', detail: 'Your confirmation SMS' },
-    ],
   },
 ];
 
@@ -288,93 +272,64 @@ export default function GivePage() {
             >
               <div className="flex items-center gap-3">
                 <span className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-extrabold text-white ${momo.badgeCls}`}>
-                  {momo.logo}
-                </span>
-                <div>
-                  <p className={`font-heading font-extrabold text-lg ${momo.textCls}`}>{momo.tagline}</p>
-                  <p className="text-slate-500 text-xs">Instant · Secure · Trusted</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
-                <Lock className="w-3.5 h-3.5" />
-                Secure
-              </div>
-            </div>
-
-            <div className="bg-white p-6 md:p-10">
-              <div className="grid md:grid-cols-2 gap-10">
-
-                {/* LEFT — Account details */}
-                <div className="space-y-6">
-                  {/* Phone number display */}
-                  <div className={`${momo.bgCls} rounded-2xl p-6 border ${momo.borderCls}`}>
-                    <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Account Number</p>
-                    <div className="flex items-center justify-between gap-4">
-                      <span className="text-3xl md:text-4xl font-heading font-extrabold text-slate-800 tracking-widest">
-                        {momo.number}
-                      </span>
-                      <button
-                        onClick={handleCopy}
-                        className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex-shrink-0 ${
-                          copied
-                            ? 'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-300'
-                            : `${momo.btnCls} shadow-md hover:shadow-lg`
-                        }`}
-                      >
-                        {copied ? (
-                          <><CheckCircle2 className="w-4 h-4" /> Copied!</>
-                        ) : (
-                          <><Copy className="w-4 h-4" /> Copy</>
-                        )}
-                      </button>
-                    </div>
-                  </div>
-
-                  {/* Meta info cards */}
-                  <div className="grid grid-cols-1 gap-3">
-                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0">
-                        <Phone className="w-4 h-4 text-slate-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Account Name</p>
-                        <p className="font-bold text-slate-800 truncate">{momo.name}</p>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
-                      <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0">
-                        <MessageSquare className="w-4 h-4 text-slate-600" />
-                      </div>
-                      <div className="min-w-0">
-                        <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Reference / Note</p>
-                        <p className="font-bold text-slate-800">{givingLabel} – LRT</p>
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* Security note */}
-                  <div className="flex items-start gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50">
-                    <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
-                    <p className="text-sm text-emerald-800 leading-relaxed">
-                      <strong>Secure & private.</strong> Your transaction is handled end-to-end by{' '}
-                      {momo.tagline}. You'll receive an SMS confirmation immediately.
-                    </p>
+                  {momo.log            <div className="bg-white p-6 md:p-10">
+              <div className="max-w-xl space-y-6">
+                {/* Phone number display */}
+                <div className={`${momo.bgCls} rounded-2xl p-6 border ${momo.borderCls}`}>
+                  <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Account Number</p>
+                  <div className="flex items-center justify-between gap-4">
+                    <span className="text-3xl md:text-4xl font-heading font-extrabold text-slate-800 tracking-widest">
+                      {momo.number}
+                    </span>
+                    <button
+                      onClick={handleCopy}
+                      className={`flex items-center gap-2 px-4 py-2.5 rounded-xl font-bold text-sm transition-all duration-300 flex-shrink-0 ${
+                        copied
+                          ? 'bg-emerald-100 text-emerald-700 ring-2 ring-emerald-300'
+                          : `${momo.btnCls} shadow-md hover:shadow-lg`
+                      }`}
+                    >
+                      {copied ? (
+                        <><CheckCircle2 className="w-4 h-4" /> Copied!</>
+                      ) : (
+                        <><Copy className="w-4 h-4" /> Copy</>
+                      )}
+                    </button>
                   </div>
                 </div>
 
-                {/* RIGHT — Steps */}
-                <div>
-                  <p className="text-xs font-bold uppercase tracking-widest text-slate-400 mb-5">
-                    How to Send via {momo.tagline}
+                {/* Meta info */}
+                <div className="grid grid-cols-1 gap-3">
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0">
+                      <Phone className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Account Name</p>
+                      <p className="font-bold text-slate-800 truncate">{momo.name}</p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-4 p-4 bg-slate-50 rounded-xl border border-slate-100">
+                    <div className="w-9 h-9 rounded-lg bg-slate-200 flex items-center justify-center flex-shrink-0">
+                      <MessageSquare className="w-4 h-4 text-slate-600" />
+                    </div>
+                    <div className="min-w-0">
+                      <p className="text-xs text-slate-400 uppercase tracking-wider font-semibold">Reference / Note</p>
+                      <p className="font-bold text-slate-800">{givingLabel} – LRT</p>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Security note */}
+                <div className="flex items-start gap-3 p-4 rounded-xl border border-emerald-200 bg-emerald-50">
+                  <ShieldCheck className="w-5 h-5 text-emerald-600 flex-shrink-0 mt-0.5" />
+                  <p className="text-sm text-emerald-800 leading-relaxed">
+                    <strong>Secure &amp; private.</strong> Your transaction is handled end-to-end by{' '}
+                    {momo.tagline}. You'll receive an SMS confirmation immediately.
                   </p>
-                  <div className="space-y-3">
-                    {momo.steps.map((step, idx) => (
-                      <div key={idx} className={`flex items-start gap-4 p-4 rounded-xl transition-colors ${
-                        idx === 0 ? `${momo.bgCls} border ${momo.borderCls}` : 'bg-slate-50 border border-slate-100'
-                      }`}>
-                        <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-xs font-extrabold flex-shrink-0 ${
-                          idx === 0 ? `${momo.badgeCls} text-white` : 'bg-slate-200 text-slate-600'
-                        }`}>
+                </div>
+              </div>
+            </div>                      }`}>
                           {idx + 1}
                         </div>
                         <div>
