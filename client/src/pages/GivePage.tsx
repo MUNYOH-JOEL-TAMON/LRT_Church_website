@@ -342,18 +342,6 @@ export default function GivePage() {
                   </p>
                 </div>
               </div>
-            </div>                      }`}>
-                          {idx + 1}
-                        </div>
-                        <div>
-                          <p className="text-xs font-bold text-slate-500 uppercase tracking-wider">{step.action}</p>
-                          <p className="font-semibold text-slate-800">{step.detail}</p>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              </div>
             </div>
           </div>
         </section>
