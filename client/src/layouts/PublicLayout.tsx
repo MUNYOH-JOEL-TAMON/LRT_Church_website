@@ -19,6 +19,7 @@ const GIVE_LINK = { to: '/give', label: '🤲 Give' };
 const PublicLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled]  = useState(false);
+  const [comingSoonModalOpen, setComingSoonModalOpen] = useState(false);
   const location = useLocation();
   const menuRef  = useRef<HTMLDivElement>(null);
 
@@ -100,8 +101,8 @@ const PublicLayout = () => {
                 </Link>
               ))}
               {/* Give – gold CTA */}
-              <Link
-                to={GIVE_LINK.to}
+              <button
+                onClick={() => setComingSoonModalOpen(true)}
                 className={`ml-1 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 shadow ${
                   isActive(GIVE_LINK.to)
                     ? 'bg-secondary text-slate-900 shadow-secondary/40'
@@ -109,7 +110,7 @@ const PublicLayout = () => {
                 }`}
               >
                 {GIVE_LINK.label}
-              </Link>
+              </button>
             </nav>
 
             {/* Right side */}
@@ -159,9 +160,12 @@ const PublicLayout = () => {
                 </Link>
               ))}
               {/* Give — gold highlight */}
-              <Link
-                to={GIVE_LINK.to}
-                className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 border ${
+              <button
+                onClick={() => {
+                  setComingSoonModalOpen(true);
+                  setMenuOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 border ${
                   isActive(GIVE_LINK.to)
                     ? 'bg-secondary text-slate-900 border-secondary'
                     : 'text-secondary border-secondary/30 bg-secondary/10 hover:bg-secondary hover:text-slate-900'
@@ -169,7 +173,7 @@ const PublicLayout = () => {
               >
                 {GIVE_LINK.label}
                 <ChevronRight className={`w-4 h-4 ${isActive(GIVE_LINK.to) ? 'text-slate-900' : 'text-secondary'}`} />
-              </Link>
+              </button>
             </nav>
 
             {/* Divider */}
@@ -245,11 +249,20 @@ const PublicLayout = () => {
                   { to: '/blog',             label: 'Blog' },
                   { to: '/announcements',    label: 'Announcements' },
                   { to: '/prayer-requests',  label: 'Prayer Requests' },
-                  { to: '/give',             label: '🤲 Give Online' },
+                  { to: '/give',             label: '🤲 Give Online', isButton: true },
                   { to: '/portal/login',     label: 'Member Portal' },
-                ].map(({ to, label }) => (
+                ].map(({ to, label, isButton }) => (
                   <li key={to}>
-                    <Link to={to} className="hover:text-white transition-colors">{label}</Link>
+                    {isButton ? (
+                      <button
+                        onClick={() => setComingSoonModalOpen(true)}
+                        className="hover:text-white transition-colors cursor-pointer text-left"
+                      >
+                        {label}
+                      </button>
+                    ) : (
+                      <Link to={to} className="hover:text-white transition-colors">{label}</Link>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -282,6 +295,28 @@ const PublicLayout = () => {
           </div>
         </div>
       </footer>
+
+      {/* ── Coming Soon Modal ── */}
+      {comingSoonModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setComingSoonModalOpen(false)} />
+          <div className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center animate-slide-up">
+            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
+              <span className="text-3xl">🤲</span>
+            </div>
+            <h3 className="text-2xl font-heading font-extrabold text-slate-800 mb-2">Coming Soon</h3>
+            <p className="text-slate-500 mb-6">
+              Our online giving portal is currently being set up. Please check back later!
+            </p>
+            <button
+              onClick={() => setComingSoonModalOpen(false)}
+              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors"
+            >
+              Okay
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
