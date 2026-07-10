@@ -272,8 +272,21 @@ export default function GivePage() {
             >
               <div className="flex items-center gap-3">
                 <span className={`w-10 h-10 rounded-xl flex items-center justify-center text-sm font-extrabold text-white ${momo.badgeCls}`}>
-                  {momo.log            <div className="bg-white p-6 md:p-10">
-              <div className="max-w-xl space-y-6">
+                  {momo.logo}
+                </span>
+                <div>
+                  <p className={`font-heading font-extrabold text-lg ${momo.textCls}`}>{momo.tagline}</p>
+                  <p className="text-slate-500 text-xs">Instant · Secure · Trusted</p>
+                </div>
+              </div>
+              <div className="flex items-center gap-1.5 text-emerald-600 text-xs font-bold">
+                <Lock className="w-3.5 h-3.5" />
+                Secure
+              </div>
+            </div>
+
+            <div className="bg-white p-6 md:p-10">
+              <div className="max-w-xl mx-auto space-y-6">
                 {/* Phone number display */}
                 <div className={`${momo.bgCls} rounded-2xl p-6 border ${momo.borderCls}`}>
                   <p className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Account Number</p>
