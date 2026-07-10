@@ -4,7 +4,7 @@ import axios from 'axios';
 // The base URL points to our Node.js backend.
 // VITE_API_URL is set at build time via environment variables.
 const api = axios.create({
-  baseURL: import.meta.env.VITE_API_URL || 'http://localhost:5000/api/v1',
+  baseURL: import.meta.env.VITE_API_URL || 'https://lrt-backend.onrender.com/api/v1',
   headers: {
     'Content-Type': 'application/json',
   },
