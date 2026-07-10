@@ -19,7 +19,18 @@ const app: Application = express();
 
 // Middleware
 app.use(cors({
-  origin: process.env.CLIENT_URL || 'http://localhost:5173',
+  origin: (origin, callback) => {
+    const allowed = [
+      process.env.CLIENT_URL || 'http://localhost:5173',
+      'http://localhost:5173',
+    ];
+    // Allow requests with no origin (e.g. mobile apps, curl, Render health checks)
+    if (!origin || allowed.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error(`CORS: origin ${origin} not allowed`));
+    }
+  },
   credentials: true,
 }));
 app.use(express.json());
