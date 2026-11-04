@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { PenLine, Calendar, User, Loader2, ArrowRight, X } from 'lucide-react';
 import blogService from '../services/blogService';
 import type { BlogPost } from '../types';
+import PageBanner from '../components/ui/PageBanner';
 
 const BlogPage = () => {
   const [posts, setPosts] = useState<BlogPost[]>([]);
@@ -15,7 +16,7 @@ const BlogPage = () => {
         setIsLoading(true);
         const res = await blogService.getPublished();
         setPosts(res.data || []);
-      } catch (err) {
+      } catch {
         setError('Failed to load blog posts. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -40,24 +41,16 @@ const BlogPage = () => {
   }, [selectedPost]);
 
   return (
-    <div className="pt-24 pb-20 bg-background min-h-screen">
-      {/* Page Header */}
-      <div className="bg-slate-900 text-white py-20 mb-16 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary rounded-full filter blur-3xl opacity-15"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary rounded-full filter blur-3xl opacity-10"></div>
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-4">
-            <PenLine className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-semibold text-sm uppercase tracking-widest">Articles</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-extrabold mb-4">Blog & Devotionals</h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-lg">
-            Insights, devotionals, and reflections from the LRT family.
-          </p>
-        </div>
-      </div>
+    <div className="pb-24 bg-background min-h-screen">
+      {/* Page Header with Background Image & Video Animation */}
+      <PageBanner
+        badgeIcon={<PenLine className="w-4 h-4 text-secondary" />}
+        badgeText="Articles"
+        title="Blog & Devotionals"
+        subtitle="Insights, devotionals, and reflections from the LRT family."
+        backgroundImage="https://images.unsplash.com/photo-1457369804613-52c61a468e7d?auto=format&fit=crop&w=1920&q=85"
+        videoUrl="https://assets.mixkit.co/videos/preview/mixkit-rays-of-light-in-a-dark-room-41573-large.mp4"
+      />
 
       {/* Content */}
       <div className="container mx-auto px-4">
@@ -78,9 +71,11 @@ const BlogPage = () => {
 
         {/* Empty */}
         {!isLoading && !error && posts.length === 0 && (
-          <div className="text-center py-24">
-            <PenLine className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-heading font-bold text-slate-700 mb-2">No Posts Yet</h3>
+          <div className="text-center py-24 bg-white rounded-3xl border border-slate-100 shadow-sm max-w-xl mx-auto p-12">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+              <PenLine className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-heading font-bold text-slate-800 mb-2">No Posts Yet</h3>
             <p className="text-slate-400">Check back soon — articles will be published here.</p>
           </div>
         )}
@@ -91,28 +86,28 @@ const BlogPage = () => {
             {posts.map((post, index) => (
               <article
                 key={post._id}
-                className="group bg-white rounded-3xl shadow-md shadow-slate-200/50 hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 border border-slate-100 flex flex-col overflow-hidden"
+                className="group bg-white rounded-3xl shadow-lg shadow-slate-200/50 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col overflow-hidden"
                 style={{ animationDelay: `${index * 0.05}s` }}
               >
                 {/* Coloured header band */}
-                <div className="h-3 bg-gradient-to-r from-primary to-secondary" />
+                <div className="h-2.5 bg-gradient-to-r from-primary via-secondary to-primary-light" />
 
-                <div className="p-6 flex flex-col flex-1">
-                  <h2 className="text-xl font-heading font-bold text-slate-800 mb-3 group-hover:text-primary transition-colors leading-snug">
+                <div className="p-7 flex flex-col flex-1">
+                  <h2 className="text-xl font-heading font-bold text-slate-900 mb-3 group-hover:text-primary transition-colors leading-snug">
                     {post.title}
                   </h2>
 
                   {/* Preview text — first 150 chars of content */}
-                  <p className="text-slate-500 text-sm leading-relaxed mb-4 flex-1 line-clamp-3">
+                  <p className="text-slate-500 text-sm leading-relaxed mb-5 flex-1 line-clamp-3">
                     {post.content.length > 150 ? post.content.slice(0, 150) + '…' : post.content}
                   </p>
 
                   <div className="flex items-center justify-between text-xs text-slate-400 border-t border-slate-100 pt-4 mt-auto">
-                    <span className="flex items-center gap-1.5">
-                      <User className="w-3.5 h-3.5" /> {post.author}
+                    <span className="flex items-center gap-1.5 font-medium text-slate-600">
+                      <User className="w-3.5 h-3.5 text-primary" /> {post.author}
                     </span>
                     <span className="flex items-center gap-1.5">
-                      <Calendar className="w-3.5 h-3.5" />
+                      <Calendar className="w-3.5 h-3.5 text-secondary-dark" />
                       {new Date(post.createdAt).toLocaleDateString('en-US', {
                         month: 'short',
                         day: 'numeric',
@@ -123,10 +118,10 @@ const BlogPage = () => {
 
                   <button
                     onClick={() => setSelectedPost(post)}
-                    className="mt-4 flex items-center gap-2 text-primary font-semibold text-sm hover:text-primary-light transition-colors group/btn"
+                    className="mt-5 flex items-center gap-2 text-primary font-bold text-sm hover:text-primary-dark transition-colors group/btn cursor-pointer"
                   >
                     Read More
-                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1 transition-transform" />
+                    <ArrowRight className="w-4 h-4 group-hover/btn:translate-x-1.5 transition-transform" />
                   </button>
                 </div>
               </article>
@@ -139,23 +134,23 @@ const BlogPage = () => {
       {selectedPost && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
             onClick={() => setSelectedPost(null)}
           />
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col">
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col overflow-hidden">
             {/* Header */}
-            <div className="h-2 bg-gradient-to-r from-primary to-secondary rounded-t-3xl flex-shrink-0" />
+            <div className="h-2.5 bg-gradient-to-r from-primary via-secondary to-primary-light flex-shrink-0" />
             <div className="flex items-start justify-between px-8 py-6 border-b border-slate-100 flex-shrink-0">
               <div className="flex-1 pr-4">
-                <h2 className="text-2xl font-heading font-bold text-slate-800 leading-snug">
+                <h2 className="text-2xl font-heading font-bold text-slate-900 leading-snug">
                   {selectedPost.title}
                 </h2>
-                <div className="flex items-center gap-4 mt-2 text-xs text-slate-400">
-                  <span className="flex items-center gap-1.5">
-                    <User className="w-3.5 h-3.5" /> {selectedPost.author}
+                <div className="flex items-center gap-4 mt-2.5 text-xs text-slate-500">
+                  <span className="flex items-center gap-1.5 font-medium">
+                    <User className="w-3.5 h-3.5 text-primary" /> {selectedPost.author}
                   </span>
                   <span className="flex items-center gap-1.5">
-                    <Calendar className="w-3.5 h-3.5" />
+                    <Calendar className="w-3.5 h-3.5 text-secondary-dark" />
                     {new Date(selectedPost.createdAt).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
