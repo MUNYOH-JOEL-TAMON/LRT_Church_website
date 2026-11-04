@@ -1,3 +1,4 @@
+import { useState, useEffect } from 'react';
 import {
   ArrowRight,
   PlayCircle,
@@ -12,37 +13,65 @@ import {
 import { Link } from 'react-router-dom';
 import { AmbientLightCanvas } from '../components/ui/PageBanner';
 
-const HERO_BG_IMAGE =
-  'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=2000&q=85';
+/**
+ * ── HERO BACKGROUND SLIDESHOW IMAGES ──
+ * Replace these URLs (or import your own images from `../assets/`) whenever you are ready.
+ */
+const HERO_BG_IMAGES: string[] = [
+  'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=2000&q=85',
+];
 
 const HERO_VIDEO_URL =
   'https://assets.mixkit.co/videos/preview/mixkit-rays-of-light-in-a-dark-room-41573-large.mp4';
 
 const Home = () => {
+  const [currentSlide, setCurrentSlide] = useState(0);
+
+  // Automatically transition to the next background image every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % HERO_BG_IMAGES.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, []);
+
   return (
     <div className="flex flex-col overflow-hidden">
-      {/* ── Cinematic Hero Section with Video Animation & Background Image ── */}
+      {/* ── Cinematic Hero Section with Transitioning Background Images & Video Animation ── */}
       <section className="relative bg-slate-950 text-white min-h-screen flex flex-col justify-between pt-28 pb-16 overflow-hidden">
-        {/* Background Image + Looping Video Layer */}
+        {/* Transitioning Background Image Slideshow + Looping Video Layer */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          <img
-            src={HERO_BG_IMAGE}
-            alt="Worship sanctuary"
-            className="w-full h-full object-cover object-center opacity-40 animate-ken-burns"
-          />
+          {HERO_BG_IMAGES.map((src, index) => {
+            const isActive = index === currentSlide;
+            return (
+              <img
+                key={src + index}
+                src={src}
+                alt="Worship sanctuary"
+                className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-[1800ms] ease-in-out ${
+                  isActive ? 'opacity-45 scale-105' : 'opacity-0 scale-100'
+                }`}
+              />
+            );
+          })}
+
           <video
             autoPlay
             loop
             muted
             playsInline
-            poster={HERO_BG_IMAGE}
-            className="absolute inset-0 w-full h-full object-cover opacity-45 mix-blend-screen"
+            poster={HERO_BG_IMAGES[0]}
+            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-screen"
           >
             <source src={HERO_VIDEO_URL} type="video/mp4" />
           </video>
 
           {/* Deep Royal Blue, Slate & Gold Atmospheric Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/70 to-slate-950" />
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/65 to-slate-950" />
           <div className="absolute -top-40 -right-40 w-[32rem] h-[32rem] bg-primary rounded-full mix-blend-screen filter blur-[120px] opacity-45 animate-float" />
           <div
             className="absolute top-1/3 -left-40 w-[28rem] h-[28rem] bg-secondary rounded-full mix-blend-screen filter blur-[120px] opacity-25 animate-float"
@@ -64,7 +93,7 @@ const Home = () => {
         />
 
         {/* Hero Main Content */}
-        <div className="container relative z-10 mx-auto px-4 my-auto pt-12 pb-16 text-center">
+        <div className="container relative z-10 mx-auto px-4 my-auto pt-12 pb-12 text-center">
           <div className="inline-block mb-6 px-5 py-2 rounded-full border border-secondary/40 bg-secondary/10 backdrop-blur-md shadow-[0_0_25px_rgba(234,179,8,0.2)] animate-fade-in">
             <span className="text-secondary font-bold text-xs sm:text-sm tracking-[0.22em] uppercase">
               Welcome Home
@@ -115,6 +144,22 @@ const Home = () => {
               </span>
               Watch Latest Sermon
             </Link>
+          </div>
+
+          {/* Slide Indicator Pills */}
+          <div className="flex items-center justify-center gap-2 mt-10">
+            {HERO_BG_IMAGES.map((_, idx) => (
+              <button
+                key={idx}
+                onClick={() => setCurrentSlide(idx)}
+                aria-label={`Show background slide ${idx + 1}`}
+                className={`h-1.5 rounded-full transition-all duration-500 cursor-pointer ${
+                  idx === currentSlide
+                    ? 'w-8 bg-secondary shadow-[0_0_10px_rgba(234,179,8,0.8)]'
+                    : 'w-2 bg-white/30 hover:bg-white/60'
+                }`}
+              />
+            ))}
           </div>
         </div>
 

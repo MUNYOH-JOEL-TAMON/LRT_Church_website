@@ -1,4 +1,62 @@
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
+
+/**
+ * Default background slideshow images.
+ * Replace these URLs (or import local images from `src/assets/`) when your custom church photos are ready.
+ */
+export const DEFAULT_SLIDESHOW_IMAGES: string[] = [
+  'https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1478147427282-58a87a120781?auto=format&fit=crop&w=2000&q=85',
+  'https://images.unsplash.com/photo-1504052434569-70ad5836ab65?auto=format&fit=crop&w=2000&q=85',
+];
+
+interface BackgroundSlideshowProps {
+  images?: string[];
+  intervalMs?: number;
+  opacityClass?: string;
+}
+
+/**
+ * Smooth crossfade + slow-zoom background image slideshow.
+ */
+export const BackgroundSlideshow: React.FC<BackgroundSlideshowProps> = ({
+  images = DEFAULT_SLIDESHOW_IMAGES,
+  intervalMs = 5500,
+  opacityClass = 'opacity-40',
+}) => {
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  useEffect(() => {
+    if (images.length <= 1) return;
+    const timer = setInterval(() => {
+      setCurrentIndex((prev) => (prev + 1) % images.length);
+    }, intervalMs);
+    return () => clearInterval(timer);
+  }, [images.length, intervalMs]);
+
+  return (
+    <div className="absolute inset-0 overflow-hidden pointer-events-none">
+      {images.map((src, idx) => {
+        const isActive = idx === currentIndex;
+        return (
+          <img
+            key={src + idx}
+            src={src}
+            alt=""
+            aria-hidden="true"
+            className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-[1800ms] ease-in-out ${
+              isActive
+                ? `${opacityClass} scale-105`
+                : 'opacity-0 scale-100'
+            }`}
+          />
+        );
+      })}
+    </div>
+  );
+};
 
 interface AmbientLightCanvasProps {
   particleCount?: number;
@@ -135,7 +193,8 @@ interface PageBannerProps {
   badgeText?: string;
   title: string;
   subtitle: string;
-  backgroundImage: string;
+  backgroundImage?: string;
+  backgroundImages?: string[];
   videoUrl?: string;
 }
 
@@ -145,31 +204,39 @@ export const PageBanner: React.FC<PageBannerProps> = ({
   title,
   subtitle,
   backgroundImage,
+  backgroundImages,
   videoUrl,
 }) => {
+  // Combine any custom first image with the slideshow list so every page transitions smoothly
+  const slides =
+    backgroundImages && backgroundImages.length > 0
+      ? backgroundImages
+      : backgroundImage
+        ? [
+            backgroundImage,
+            ...DEFAULT_SLIDESHOW_IMAGES.filter((img) => img !== backgroundImage),
+          ]
+        : DEFAULT_SLIDESHOW_IMAGES;
+
   return (
     <div className="relative bg-slate-950 text-white py-24 md:py-32 mb-16 overflow-hidden border-b border-white/10">
-      {/* Background Image with slow Ken-Burns zoom animation */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <img
-          src={backgroundImage}
-          alt=""
-          aria-hidden="true"
-          className="w-full h-full object-cover object-center opacity-35 animate-ken-burns"
-        />
-        {videoUrl && (
+      {/* Transitioning Background Images + Optional Video Layer */}
+      <BackgroundSlideshow images={slides} intervalMs={5500} opacityClass="opacity-35" />
+
+      {videoUrl && (
+        <div className="absolute inset-0 overflow-hidden pointer-events-none">
           <video
             autoPlay
             loop
             muted
             playsInline
-            poster={backgroundImage}
+            poster={slides[0]}
             className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-lighten"
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
-        )}
-      </div>
+        </div>
+      )}
 
       {/* Multi-layered Royal Blue, Gold & Deep Slate Overlays */}
       <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/75 to-slate-950/95 pointer-events-none z-[1]" />
@@ -211,4 +278,3 @@ export const PageBanner: React.FC<PageBannerProps> = ({
 };
 
 export default PageBanner;
-
