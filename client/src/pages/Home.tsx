@@ -5,7 +5,6 @@ import {
   Heart,
   BookOpen,
   Clock,
-  Sparkles,
   Users,
   Megaphone,
   Image as ImageIcon,
@@ -66,8 +65,7 @@ const Home = () => {
 
         {/* Hero Main Content */}
         <div className="container relative z-10 mx-auto px-4 my-auto pt-12 pb-16 text-center">
-          <div className="inline-flex items-center gap-2.5 mb-6 px-5 py-2 rounded-full border border-secondary/40 bg-secondary/10 backdrop-blur-md shadow-[0_0_25px_rgba(234,179,8,0.2)] animate-fade-in">
-            <Sparkles className="w-4 h-4 text-secondary animate-pulse" />
+          <div className="inline-block mb-6 px-5 py-2 rounded-full border border-secondary/40 bg-secondary/10 backdrop-blur-md shadow-[0_0_25px_rgba(234,179,8,0.2)] animate-fade-in">
             <span className="text-secondary font-bold text-xs sm:text-sm tracking-[0.22em] uppercase">
               Welcome Home
             </span>

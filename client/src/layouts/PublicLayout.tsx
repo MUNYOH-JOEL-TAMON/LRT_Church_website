@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronRight, Sparkles, Clock, MapPin } from 'lucide-react';
+import { Menu, X, ChevronRight, Clock, MapPin } from 'lucide-react';
 import lrtLogo from '../assets/LRT_LOGO.jpeg';
 
 const NAV_LINKS = [
@@ -112,9 +112,8 @@ const PublicLayout = () => {
             <div className="flex items-center gap-3">
               <Link
                 to="/portal/login"
-                className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-light hover:from-secondary hover:to-secondary-light text-white hover:text-slate-900 border border-white/15 hover:border-transparent text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-[0_0_20px_rgba(234,179,8,0.45)]"
+                className="hidden sm:inline-flex items-center bg-gradient-to-r from-primary to-primary-light hover:from-secondary hover:to-secondary-light text-white hover:text-slate-900 border border-white/15 hover:border-transparent text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-[0_0_20px_rgba(234,179,8,0.45)]"
               >
-                <Sparkles className="w-4 h-4 text-secondary group-hover:text-slate-900" />
                 Member Portal
               </Link>
 

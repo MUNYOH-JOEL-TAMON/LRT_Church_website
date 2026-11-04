@@ -1,4 +1,4 @@
-import { Target, Eye, Heart, Users, Award, Sparkles, BookOpen } from 'lucide-react';
+import { Target, Eye, Heart, Users, Award, BookOpen } from 'lucide-react';
 import PageBanner from '../components/ui/PageBanner';
 
 const VALUES = [
@@ -19,7 +19,6 @@ const AboutPage = () => {
     <div className="pb-24 min-h-screen bg-background">
       {/* Page Header with Background Image & Video Animation */}
       <PageBanner
-        badgeIcon={<Sparkles className="w-4 h-4 text-secondary" />}
         badgeText="About Us"
         title="Our Story"
         subtitle="Founded on faith and fuelled by the Holy Spirit — Latter Rain Tabernacle is more than a church; it is a movement."
