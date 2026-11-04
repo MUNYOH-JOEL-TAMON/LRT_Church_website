@@ -52,11 +52,11 @@ const RegisterPage = () => {
         <img
           src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1920&q=80"
           alt=""
-          className="w-full h-full object-cover opacity-25 animate-ken-burns"
+          className="w-full h-full object-cover opacity-65 animate-ken-burns"
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-slate-950/95" />
-        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full filter blur-3xl opacity-30" />
-        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary rounded-full filter blur-3xl opacity-20" />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/60 via-slate-900/50 to-slate-950/75" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full filter blur-3xl opacity-20" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary rounded-full filter blur-3xl opacity-15" />
       </div>
 
       <AmbientLightCanvas particleCount={35} mode="rain-and-particles" />
