@@ -1,30 +1,30 @@
 import { useState, useEffect, useRef } from 'react';
 import { Outlet, Link, useLocation } from 'react-router-dom';
-import { Menu, X, ChevronRight } from 'lucide-react';
+import { Menu, X, ChevronRight, Sparkles, Clock, MapPin } from 'lucide-react';
 import lrtLogo from '../assets/LRT_LOGO.jpeg';
 
 const NAV_LINKS = [
-  { to: '/',              label: 'Home' },
-  { to: '/about',         label: 'About' },
-  { to: '/sermons',       label: 'Sermons' },
-  { to: '/events',        label: 'Events' },
-  { to: '/blog',          label: 'Blog' },
-  { to: '/announcements', label: 'Announcements' },
-  { to: '/gallery',       label: 'Gallery' },
+  { to: '/',                label: 'Home' },
+  { to: '/about',           label: 'About' },
+  { to: '/sermons',         label: 'Sermons' },
+  { to: '/events',          label: 'Events' },
+  { to: '/blog',            label: 'Blog' },
+  { to: '/announcements',   label: 'Announcements' },
+  { to: '/gallery',         label: 'Gallery' },
+  { to: '/prayer-requests', label: 'Prayer Requests' },
 ];
-
-/** Give gets a special gold CTA treatment — kept separate from NAV_LINKS */
-const GIVE_LINK = { to: '/give', label: '🤲 Give' };
 
 const PublicLayout = () => {
   const [menuOpen, setMenuOpen] = useState(false);
   const [scrolled, setScrolled]  = useState(false);
-  const [comingSoonModalOpen, setComingSoonModalOpen] = useState(false);
   const location = useLocation();
   const menuRef  = useRef<HTMLDivElement>(null);
 
-  // Close menu on route change
-  useEffect(() => { setMenuOpen(false); }, [location.pathname]);
+  // Close menu on route change & scroll to top
+  useEffect(() => {
+    setMenuOpen(false);
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }, [location.pathname]);
 
   // Shrink navbar on scroll
   useEffect(() => {
@@ -54,71 +54,67 @@ const PublicLayout = () => {
     to === '/' ? location.pathname === '/' : location.pathname.startsWith(to);
 
   return (
-    <div className="min-h-screen flex flex-col font-body selection:bg-secondary selection:text-slate-900">
+    <div className="min-h-screen flex flex-col font-body selection:bg-secondary selection:text-slate-900 bg-background">
 
       {/* ── Navbar ── */}
       <header
         ref={menuRef}
         className={`fixed w-full top-0 z-50 transition-all duration-300 ${
           scrolled
-            ? 'bg-slate-900/95 backdrop-blur-xl shadow-xl shadow-black/20 py-0'
-            : 'bg-slate-900/80 backdrop-blur-lg'
-        } border-b border-white/10`}
+            ? 'bg-slate-950/90 backdrop-blur-2xl shadow-2xl shadow-black/30 py-0 border-b border-white/10'
+            : 'bg-gradient-to-b from-slate-950/90 via-slate-900/75 to-transparent backdrop-blur-md border-b border-white/5'
+        }`}
       >
-        <div className="container mx-auto px-4">
+        <div className="container mx-auto px-4 lg:px-8">
           <div className={`flex justify-between items-center transition-all duration-300 ${scrolled ? 'py-3' : 'py-4'}`}>
 
             {/* Logo */}
-            <Link to="/" className="flex items-center gap-3 group flex-shrink-0">
-              <img
-                src={lrtLogo}
-                alt="Latter Rain Tabernacle"
-                className={`rounded-full object-cover border-2 border-secondary/40 group-hover:border-secondary transition-all duration-300 ${scrolled ? 'w-9 h-9' : 'w-11 h-11'}`}
-              />
+            <Link to="/" className="flex items-center gap-3.5 group flex-shrink-0">
+              <div className="relative">
+                <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-secondary to-primary opacity-50 blur-sm group-hover:opacity-100 transition-opacity duration-300" />
+                <img
+                  src={lrtLogo}
+                  alt="Latter Rain Tabernacle"
+                  className={`relative rounded-full object-cover border-2 border-secondary/60 group-hover:border-secondary transition-all duration-300 ${scrolled ? 'w-10 h-10' : 'w-11 h-11'}`}
+                />
+              </div>
               <div className="hidden sm:block">
-                <span className="text-lg font-heading font-extrabold text-white tracking-tight leading-none block">
+                <span className="text-lg font-heading font-extrabold text-white tracking-tight leading-none block group-hover:text-secondary-light transition-colors">
                   Latter Rain
                 </span>
-                <span className="text-xs font-semibold text-secondary tracking-widest uppercase">
+                <span className="text-[11px] font-bold text-secondary tracking-[0.22em] uppercase block mt-0.5">
                   Tabernacle
                 </span>
               </div>
             </Link>
 
             {/* Desktop nav */}
-            <nav className="hidden lg:flex items-center gap-1">
-              {NAV_LINKS.map(({ to, label }) => (
-                <Link
-                  key={to}
-                  to={to}
-                  className={`px-3 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
-                    isActive(to)
-                      ? 'text-secondary bg-white/10'
-                      : 'text-slate-300 hover:text-white hover:bg-white/10'
-                  }`}
-                >
-                  {label}
-                </Link>
-              ))}
-              {/* Give – gold CTA */}
-              <button
-                onClick={() => setComingSoonModalOpen(true)}
-                className={`ml-1 px-4 py-2 rounded-xl text-sm font-bold transition-all duration-200 shadow ${
-                  isActive(GIVE_LINK.to)
-                    ? 'bg-secondary text-slate-900 shadow-secondary/40'
-                    : 'bg-secondary/20 text-secondary border border-secondary/30 hover:bg-secondary hover:text-slate-900 hover:shadow-[0_0_12px_rgba(234,179,8,0.4)]'
-                }`}
-              >
-                {GIVE_LINK.label}
-              </button>
+            <nav className="hidden lg:flex items-center gap-1 bg-white/[0.04] border border-white/10 rounded-2xl p-1.5 backdrop-blur-xl">
+              {NAV_LINKS.map(({ to, label }) => {
+                const active = isActive(to);
+                return (
+                  <Link
+                    key={to}
+                    to={to}
+                    className={`relative px-3.5 py-2 rounded-xl text-sm font-medium transition-all duration-200 ${
+                      active
+                        ? 'text-slate-900 bg-secondary font-bold shadow-[0_0_15px_rgba(234,179,8,0.35)]'
+                        : 'text-slate-300 hover:text-white hover:bg-white/10'
+                    }`}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Right side */}
             <div className="flex items-center gap-3">
               <Link
                 to="/portal/login"
-                className="hidden sm:inline-flex items-center bg-white/10 backdrop-blur-md border border-white/20 text-white text-sm font-semibold px-4 py-2 rounded-xl hover:bg-secondary hover:text-slate-900 hover:border-transparent transition-all duration-300 shadow-lg hover:shadow-[0_0_15px_rgba(234,179,8,0.4)]"
+                className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-primary to-primary-light hover:from-secondary hover:to-secondary-light text-white hover:text-slate-900 border border-white/15 hover:border-transparent text-sm font-bold px-5 py-2.5 rounded-xl transition-all duration-300 shadow-lg shadow-primary/25 hover:shadow-[0_0_20px_rgba(234,179,8,0.45)]"
               >
+                <Sparkles className="w-4 h-4 text-secondary group-hover:text-slate-900" />
                 Member Portal
               </Link>
 
@@ -141,7 +137,7 @@ const PublicLayout = () => {
             menuOpen ? 'max-h-screen opacity-100' : 'max-h-0 opacity-0'
           }`}
         >
-          <div className="bg-slate-900/98 backdrop-blur-xl border-t border-white/10 px-4 pt-3 pb-6">
+          <div className="bg-slate-950/98 backdrop-blur-2xl border-t border-white/10 px-4 pt-3 pb-6">
 
             {/* Nav links */}
             <nav className="flex flex-col gap-1 mb-5">
@@ -151,7 +147,7 @@ const PublicLayout = () => {
                   to={to}
                   className={`flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-semibold transition-all duration-200 ${
                     isActive(to)
-                      ? 'bg-secondary text-slate-900'
+                      ? 'bg-secondary text-slate-900 shadow-md shadow-secondary/20'
                       : 'text-slate-300 hover:bg-white/10 hover:text-white'
                   }`}
                 >
@@ -159,21 +155,6 @@ const PublicLayout = () => {
                   <ChevronRight className={`w-4 h-4 ${isActive(to) ? 'text-slate-900' : 'text-slate-500'}`} />
                 </Link>
               ))}
-              {/* Give — gold highlight */}
-              <button
-                onClick={() => {
-                  setComingSoonModalOpen(true);
-                  setMenuOpen(false);
-                }}
-                className={`w-full flex items-center justify-between px-4 py-3.5 rounded-xl text-sm font-bold transition-all duration-200 border ${
-                  isActive(GIVE_LINK.to)
-                    ? 'bg-secondary text-slate-900 border-secondary'
-                    : 'text-secondary border-secondary/30 bg-secondary/10 hover:bg-secondary hover:text-slate-900'
-                }`}
-              >
-                {GIVE_LINK.label}
-                <ChevronRight className={`w-4 h-4 ${isActive(GIVE_LINK.to) ? 'text-slate-900' : 'text-secondary'}`} />
-              </button>
             </nav>
 
             {/* Divider */}
@@ -193,7 +174,7 @@ const PublicLayout = () => {
       {/* Backdrop overlay when menu open */}
       {menuOpen && (
         <div
-          className="fixed inset-0 z-40 bg-black/50 lg:hidden"
+          className="fixed inset-0 z-40 bg-black/60 backdrop-blur-xs lg:hidden"
           onClick={() => setMenuOpen(false)}
           aria-hidden="true"
         />
@@ -205,29 +186,47 @@ const PublicLayout = () => {
       </main>
 
       {/* ── Footer ── */}
-      <footer className="bg-slate-950 text-slate-400 border-t border-white/10">
-        <div className="container mx-auto px-4 py-12 md:py-16">
+      <footer className="relative bg-slate-950 text-slate-400 border-t border-white/10 overflow-hidden">
+        {/* Ambient footer glow */}
+        <div className="absolute -top-32 left-1/4 w-96 h-96 bg-primary/15 rounded-full blur-3xl pointer-events-none" />
+        <div className="absolute -bottom-32 right-1/4 w-96 h-96 bg-secondary/10 rounded-full blur-3xl pointer-events-none" />
+
+        {/* Top gradient accent line */}
+        <div className="h-1 w-full bg-gradient-to-r from-primary-dark via-secondary to-primary-dark opacity-80" />
+
+        <div className="container relative z-10 mx-auto px-4 lg:px-8 py-14 md:py-20">
 
           {/* Top section */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-12">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10 mb-14">
             {/* Brand */}
             <div className="sm:col-span-2 lg:col-span-1">
-              <div className="flex items-center gap-3 mb-4">
-                <img src={lrtLogo} alt="LRT" className="w-12 h-12 rounded-full object-cover border-2 border-secondary/30 opacity-80" />
+              <div className="flex items-center gap-3.5 mb-5">
+                <img
+                  src={lrtLogo}
+                  alt="LRT"
+                  className="w-12 h-12 rounded-full object-cover border-2 border-secondary/50 shadow-lg shadow-secondary/10"
+                />
                 <div>
-                  <p className="text-white font-heading font-bold leading-none">Latter Rain</p>
-                  <p className="text-secondary text-xs font-semibold tracking-widest uppercase">Tabernacle</p>
+                  <p className="text-white font-heading font-extrabold text-lg leading-none">Latter Rain</p>
+                  <p className="text-secondary text-xs font-bold tracking-[0.2em] uppercase mt-1">Tabernacle</p>
                 </div>
               </div>
-              <p className="text-sm leading-relaxed">
+              <p className="text-sm text-slate-400 leading-relaxed mb-6">
                 Equipping the saints for the work of the ministry, building up the body of Christ.
               </p>
+              <div className="inline-flex items-center gap-2 text-xs text-secondary/90 bg-secondary/10 border border-secondary/20 px-3.5 py-2 rounded-xl">
+                <MapPin className="w-3.5 h-3.5 flex-shrink-0" />
+                <span>Spirit-Filled Community for All Nations</span>
+              </div>
             </div>
 
             {/* Explore */}
             <div>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-4">Explore</h4>
-              <ul className="space-y-2.5 text-sm">
+              <h4 className="text-white font-heading font-bold text-sm uppercase tracking-widest mb-5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-secondary inline-block" />
+                Explore
+              </h4>
+              <ul className="space-y-3 text-sm">
                 {[
                   { to: '/about',   label: 'About Us' },
                   { to: '/sermons', label: 'Sermons' },
@@ -235,7 +234,13 @@ const PublicLayout = () => {
                   { to: '/gallery', label: 'Gallery' },
                 ].map(({ to, label }) => (
                   <li key={to}>
-                    <Link to={to} className="hover:text-white transition-colors">{label}</Link>
+                    <Link
+                      to={to}
+                      className="inline-flex items-center gap-1.5 hover:text-secondary hover:translate-x-1 transition-all duration-200"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5 text-primary-light" />
+                      {label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -243,26 +248,25 @@ const PublicLayout = () => {
 
             {/* Community */}
             <div>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-4">Community</h4>
-              <ul className="space-y-2.5 text-sm">
+              <h4 className="text-white font-heading font-bold text-sm uppercase tracking-widest mb-5 flex items-center gap-2">
+                <span className="w-2 h-2 rounded-full bg-primary-light inline-block" />
+                Community
+              </h4>
+              <ul className="space-y-3 text-sm">
                 {[
-                  { to: '/blog',             label: 'Blog' },
-                  { to: '/announcements',    label: 'Announcements' },
-                  { to: '/prayer-requests',  label: 'Prayer Requests' },
-                  { to: '/give',             label: '🤲 Give Online', isButton: true },
-                  { to: '/portal/login',     label: 'Member Portal' },
-                ].map(({ to, label, isButton }) => (
+                  { to: '/blog',            label: 'Blog' },
+                  { to: '/announcements',   label: 'Announcements' },
+                  { to: '/prayer-requests', label: 'Prayer Requests' },
+                  { to: '/portal/login',    label: 'Member Portal' },
+                ].map(({ to, label }) => (
                   <li key={to}>
-                    {isButton ? (
-                      <button
-                        onClick={() => setComingSoonModalOpen(true)}
-                        className="hover:text-white transition-colors cursor-pointer text-left"
-                      >
-                        {label}
-                      </button>
-                    ) : (
-                      <Link to={to} className="hover:text-white transition-colors">{label}</Link>
-                    )}
+                    <Link
+                      to={to}
+                      className="inline-flex items-center gap-1.5 hover:text-secondary hover:translate-x-1 transition-all duration-200"
+                    >
+                      <ChevronRight className="w-3.5 h-3.5 text-secondary/70" />
+                      {label}
+                    </Link>
                   </li>
                 ))}
               </ul>
@@ -270,53 +274,34 @@ const PublicLayout = () => {
 
             {/* Service times */}
             <div>
-              <h4 className="text-white font-semibold text-sm uppercase tracking-widest mb-4">Service Times</h4>
-              <ul className="space-y-3 text-sm">
-                <li>
-                  <p className="text-white font-medium">Sunday Service</p>
-                  <p>9:00 AM</p>
+              <h4 className="text-white font-heading font-bold text-sm uppercase tracking-widest mb-5 flex items-center gap-2">
+                <Clock className="w-4 h-4 text-secondary" />
+                Service Times
+              </h4>
+              <ul className="space-y-3.5 text-sm">
+                <li className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-secondary/30 transition-colors">
+                  <p className="text-white font-semibold">Sunday Service</p>
+                  <p className="text-secondary text-xs font-medium mt-0.5">9:00 AM</p>
                 </li>
-                <li>
-                  <p className="text-white font-medium">Bible Study</p>
-                  <p>Friday, 4:00 PM</p>
+                <li className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-secondary/30 transition-colors">
+                  <p className="text-white font-semibold">Bible Study</p>
+                  <p className="text-secondary text-xs font-medium mt-0.5">Friday, 4:00 PM</p>
                 </li>
-                <li>
-                  <p className="text-white font-medium">Prayer Meeting</p>
-                  <p>Saturday, 4:00 PM</p>
+                <li className="p-3 rounded-xl bg-white/[0.03] border border-white/5 hover:border-secondary/30 transition-colors">
+                  <p className="text-white font-semibold">Prayer Meeting</p>
+                  <p className="text-secondary text-xs font-medium mt-0.5">Saturday, 4:00 PM</p>
                 </li>
               </ul>
             </div>
           </div>
 
           {/* Bottom bar */}
-          <div className="border-t border-white/10 pt-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-slate-500">
+          <div className="border-t border-white/10 pt-8 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs text-slate-500">
             <p>&copy; {new Date().getFullYear()} Latter Rain Tabernacle. All rights reserved.</p>
-            <p>Built with ❤️ for the Kingdom</p>
+            <p className="text-slate-400">Built with ❤️ for the Kingdom</p>
           </div>
         </div>
       </footer>
-
-      {/* ── Coming Soon Modal ── */}
-      {comingSoonModalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-sm" onClick={() => setComingSoonModalOpen(false)} />
-          <div className="relative bg-white rounded-3xl shadow-2xl max-w-sm w-full p-8 text-center animate-slide-up">
-            <div className="w-16 h-16 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-3xl">🤲</span>
-            </div>
-            <h3 className="text-2xl font-heading font-extrabold text-slate-800 mb-2">Coming Soon</h3>
-            <p className="text-slate-500 mb-6">
-              Our online giving portal is currently being set up. Please check back later!
-            </p>
-            <button
-              onClick={() => setComingSoonModalOpen(false)}
-              className="w-full bg-slate-900 hover:bg-slate-800 text-white font-bold py-3 rounded-xl transition-colors"
-            >
-              Okay
-            </button>
-          </div>
-        </div>
-      )}
     </div>
   );
 };
