@@ -4,6 +4,7 @@ import { Heart, Lock, LogIn, UserPlus, Send, CheckCircle, ArrowRight } from 'luc
 import useAuthStore from '../store/useAuthStore';
 import prayerService from '../services/prayerService';
 import Button from '../components/ui/Button';
+import PageBanner from '../components/ui/PageBanner';
 
 const PrayerRequestPage = () => {
   const { isAuthenticated, user } = useAuthStore();
@@ -31,34 +32,27 @@ const PrayerRequestPage = () => {
   };
 
   return (
-    <div className="pt-24 pb-20 bg-background min-h-screen">
-      {/* Page Header */}
-      <div className="bg-slate-900 text-white py-20 mb-16 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-rose-500 rounded-full filter blur-3xl opacity-10"></div>
-          <div className="absolute bottom-0 left-0 w-64 h-64 bg-secondary rounded-full filter blur-3xl opacity-10"></div>
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-4">
-            <Heart className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-semibold text-sm uppercase tracking-widest">Prayer</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-extrabold mb-4">Submit a Prayer Request</h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-lg">
-            Our intercessory team is standing by to agree with you in prayer.
-          </p>
-        </div>
-      </div>
+    <div className="pb-24 bg-background min-h-screen">
+      {/* Page Header with Background Image & Video Animation */}
+      <PageBanner
+        badgeIcon={<Heart className="w-4 h-4 text-secondary" />}
+        badgeText="Prayer"
+        title="Submit a Prayer Request"
+        subtitle="Our intercessory team is standing by to agree with you in prayer."
+        backgroundImage="https://images.unsplash.com/photo-1507692049790-de58290a4334?auto=format&fit=crop&w=1920&q=85"
+        videoUrl="https://assets.mixkit.co/videos/preview/mixkit-rays-of-light-in-a-dark-room-41573-large.mp4"
+      />
 
       <div className="container mx-auto px-4 max-w-xl">
 
         {/* ── NOT LOGGED IN ── */}
         {!isAuthenticated && (
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-10 text-center">
-            <div className="w-20 h-20 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-6">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-10 text-center relative overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-primary via-secondary to-primary absolute top-0 left-0 right-0" />
+            <div className="w-20 h-20 rounded-3xl bg-primary/10 border border-primary/20 flex items-center justify-center mx-auto mb-6">
               <Lock className="w-9 h-9 text-primary" />
             </div>
-            <h2 className="text-2xl font-heading font-bold text-slate-800 mb-3">
+            <h2 className="text-2xl font-heading font-bold text-slate-900 mb-3">
               Sign In to Submit a Request
             </h2>
             <p className="text-slate-500 leading-relaxed mb-8">
@@ -68,7 +62,7 @@ const PrayerRequestPage = () => {
               <Link
                 to="/portal/login"
                 state={{ from: '/prayer-requests' }}
-                className="flex items-center justify-center gap-2 bg-primary text-white font-bold px-6 py-3 rounded-xl hover:bg-primary-light transition-all shadow-lg shadow-primary/30"
+                className="flex items-center justify-center gap-2 bg-primary text-white font-bold px-6 py-3.5 rounded-xl hover:bg-primary-light transition-all shadow-lg shadow-primary/30"
               >
                 <LogIn className="w-5 h-5" />
                 Sign In
@@ -76,7 +70,7 @@ const PrayerRequestPage = () => {
               <Link
                 to="/portal/register"
                 state={{ from: '/prayer-requests' }}
-                className="flex items-center justify-center gap-2 bg-secondary text-slate-900 font-bold px-6 py-3 rounded-xl hover:bg-secondary-light transition-all shadow-lg shadow-secondary/30"
+                className="flex items-center justify-center gap-2 bg-secondary text-slate-950 font-bold px-6 py-3.5 rounded-xl hover:bg-secondary-light transition-all shadow-lg shadow-secondary/30"
               >
                 <UserPlus className="w-5 h-5" />
                 Create Account
@@ -93,11 +87,12 @@ const PrayerRequestPage = () => {
 
         {/* ── SUCCESS STATE ── */}
         {isAuthenticated && isSuccess && (
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-10 text-center">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-10 text-center relative overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-primary via-secondary to-primary absolute top-0 left-0 right-0" />
             <div className="w-20 h-20 rounded-full bg-emerald-50 flex items-center justify-center mx-auto mb-6">
               <CheckCircle className="w-10 h-10 text-emerald-500" />
             </div>
-            <h2 className="text-2xl font-heading font-bold text-slate-800 mb-3">
+            <h2 className="text-2xl font-heading font-bold text-slate-900 mb-3">
               Request Submitted!
             </h2>
             <p className="text-slate-500 leading-relaxed mb-8">
@@ -124,17 +119,19 @@ const PrayerRequestPage = () => {
 
         {/* ── FORM (logged in, not yet submitted) ── */}
         {isAuthenticated && !isSuccess && (
-          <div className="bg-white rounded-3xl border border-slate-100 shadow-lg p-8">
+          <div className="bg-white rounded-3xl border border-slate-100 shadow-xl shadow-slate-200/50 p-8 relative overflow-hidden">
+            <div className="h-2 bg-gradient-to-r from-primary via-secondary to-primary absolute top-0 left-0 right-0" />
+
             {/* Greeting */}
-            <div className="flex items-center gap-3 mb-8 p-4 bg-primary/5 rounded-2xl border border-primary/10">
-              <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary font-bold text-sm flex-shrink-0">
+            <div className="flex items-center gap-3.5 mb-8 p-4 bg-primary/5 rounded-2xl border border-primary/15">
+              <div className="w-11 h-11 rounded-2xl bg-primary text-white flex items-center justify-center font-bold text-sm flex-shrink-0 shadow-md shadow-primary/20">
                 {user?.firstName?.[0]}{user?.lastName?.[0]}
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-700">
+                <p className="text-sm font-bold text-slate-800">
                   Submitting as {user?.firstName} {user?.lastName}
                 </p>
-                <p className="text-xs text-slate-400">Your request will be received by our prayer team</p>
+                <p className="text-xs text-slate-500">Your request will be received by our prayer team</p>
               </div>
             </div>
 
@@ -155,13 +152,13 @@ const PrayerRequestPage = () => {
                   placeholder="Share what's on your heart. Our team will pray specifically for your needs..."
                   value={form.request}
                   onChange={(e) => setForm({ ...form, request: e.target.value })}
-                  className="w-full bg-white border border-slate-200 rounded-xl py-3 px-4 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-none"
+                  className="w-full bg-slate-50/60 border border-slate-200 rounded-2xl py-3.5 px-4 text-slate-800 placeholder:text-slate-400 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/40 focus:border-primary transition-all resize-none"
                 />
-                <p className="text-xs text-slate-400 mt-1">{form.request.length} characters</p>
+                <p className="text-xs text-slate-400 mt-1.5">{form.request.length} characters</p>
               </div>
 
               {/* Private toggle */}
-              <label className="flex items-start gap-3 p-4 rounded-xl border border-slate-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group">
+              <label className="flex items-start gap-3 p-4 rounded-2xl border border-slate-200 cursor-pointer hover:border-primary/40 hover:bg-primary/5 transition-all group">
                 <div className="relative flex-shrink-0 mt-0.5">
                   <input
                     type="checkbox"
@@ -178,8 +175,8 @@ const PrayerRequestPage = () => {
                   </div>
                 </div>
                 <div>
-                  <p className="text-sm font-semibold text-slate-700">Keep this request private</p>
-                  <p className="text-xs text-slate-400 mt-0.5">
+                  <p className="text-sm font-semibold text-slate-800">Keep this request private</p>
+                  <p className="text-xs text-slate-500 mt-0.5">
                     Only the prayer team will see this. It will not be visible to other members.
                   </p>
                 </div>

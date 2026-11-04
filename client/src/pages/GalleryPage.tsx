@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Image as ImageIcon, Loader2, X, ZoomIn } from 'lucide-react';
 import galleryService from '../services/galleryService';
 import type { GalleryImage } from '../types';
+import PageBanner from '../components/ui/PageBanner';
 
 const GalleryPage = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
@@ -15,7 +16,7 @@ const GalleryPage = () => {
         setIsLoading(true);
         const res = await galleryService.getAll();
         setImages(res.data || []);
-      } catch (err) {
+      } catch {
         setError('Failed to load gallery. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -40,24 +41,16 @@ const GalleryPage = () => {
   }, [lightboxImage]);
 
   return (
-    <div className="pt-24 pb-20 bg-background min-h-screen">
-      {/* Page Header */}
-      <div className="bg-slate-900 text-white py-20 mb-16 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 right-0 w-80 h-80 bg-primary rounded-full filter blur-3xl opacity-15"></div>
-          <div className="absolute bottom-0 left-1/3 w-64 h-64 bg-secondary rounded-full filter blur-3xl opacity-10"></div>
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-4">
-            <ImageIcon className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-semibold text-sm uppercase tracking-widest">Photos</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-extrabold mb-4">Gallery</h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-lg">
-            Moments captured from our services, events, and community life at LRT.
-          </p>
-        </div>
-      </div>
+    <div className="pb-24 bg-background min-h-screen">
+      {/* Page Header with Background Image & Video Animation */}
+      <PageBanner
+        badgeIcon={<ImageIcon className="w-4 h-4 text-secondary" />}
+        badgeText="Photos"
+        title="Gallery"
+        subtitle="Moments captured from our services, events, and community life at LRT."
+        backgroundImage="https://images.unsplash.com/photo-1438232992991-995b7058bbb3?auto=format&fit=crop&w=1920&q=85"
+        videoUrl="https://assets.mixkit.co/videos/preview/mixkit-rays-of-light-in-a-dark-room-41573-large.mp4"
+      />
 
       {/* Content */}
       <div className="container mx-auto px-4">
@@ -78,20 +71,22 @@ const GalleryPage = () => {
 
         {/* Empty */}
         {!isLoading && !error && images.length === 0 && (
-          <div className="text-center py-24">
-            <ImageIcon className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-heading font-bold text-slate-700 mb-2">No Photos Yet</h3>
+          <div className="text-center py-24 bg-white rounded-3xl border border-slate-100 shadow-sm max-w-xl mx-auto p-12">
+            <div className="w-16 h-16 rounded-2xl bg-primary/10 flex items-center justify-center mx-auto mb-5">
+              <ImageIcon className="w-8 h-8 text-primary" />
+            </div>
+            <h3 className="text-xl font-heading font-bold text-slate-800 mb-2">No Photos Yet</h3>
             <p className="text-slate-400">Check back soon — photos will be added here.</p>
           </div>
         )}
 
         {/* Masonry-style grid */}
         {!isLoading && !error && images.length > 0 && (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-4 space-y-4">
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 space-y-5">
             {images.map((img, index) => (
               <div
                 key={img._id}
-                className="break-inside-avoid group relative rounded-2xl overflow-hidden cursor-pointer shadow-md hover:shadow-xl transition-all duration-300"
+                className="break-inside-avoid group relative rounded-3xl overflow-hidden cursor-pointer shadow-lg shadow-slate-200/50 hover:shadow-2xl border border-slate-100 transition-all duration-300"
                 style={{ animationDelay: `${index * 0.04}s` }}
                 onClick={() => setLightboxImage(img)}
               >
@@ -99,7 +94,7 @@ const GalleryPage = () => {
                   <img
                     src={img.imageUrl}
                     alt={img.title}
-                    className="w-full object-cover group-hover:scale-105 transition-transform duration-500"
+                    className="w-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
                   />
                 ) : (
@@ -109,16 +104,16 @@ const GalleryPage = () => {
                 )}
 
                 {/* Hover overlay */}
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all duration-300 flex items-end">
-                  <div className="w-full p-4 translate-y-2 group-hover:translate-y-0 opacity-0 group-hover:opacity-100 transition-all duration-300">
-                    <p className="text-white font-semibold text-sm truncate">{img.title}</p>
-                    <p className="text-white/60 text-xs mt-0.5">
+                <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/20 to-transparent opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-end">
+                  <div className="w-full p-5 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
+                    <p className="text-white font-heading font-bold text-base truncate">{img.title}</p>
+                    <p className="text-secondary text-xs font-medium mt-0.5">
                       {new Date(img.createdAt).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })}
                     </p>
                   </div>
-                  <div className="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                    <div className="w-8 h-8 rounded-lg bg-white/20 backdrop-blur-sm flex items-center justify-center">
-                      <ZoomIn className="w-4 h-4 text-white" />
+                  <div className="absolute top-3.5 right-3.5">
+                    <div className="w-9 h-9 rounded-xl bg-secondary text-slate-950 shadow-lg flex items-center justify-center">
+                      <ZoomIn className="w-4 h-4" />
                     </div>
                   </div>
                 </div>
@@ -131,11 +126,11 @@ const GalleryPage = () => {
       {/* Lightbox */}
       {lightboxImage && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/90 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-950/95 backdrop-blur-md"
           onClick={() => setLightboxImage(null)}
         >
           <button
-            className="absolute top-4 right-4 p-2.5 rounded-xl bg-white/10 hover:bg-white/20 text-white transition-colors"
+            className="absolute top-5 right-5 p-3 rounded-2xl bg-white/10 hover:bg-secondary hover:text-slate-950 text-white transition-colors"
             onClick={() => setLightboxImage(null)}
           >
             <X className="w-6 h-6" />
@@ -148,11 +143,11 @@ const GalleryPage = () => {
             <img
               src={lightboxImage.imageUrl}
               alt={lightboxImage.title}
-              className="max-h-[75vh] max-w-full object-contain rounded-2xl shadow-2xl"
+              className="max-h-[75vh] max-w-full object-contain rounded-3xl shadow-2xl border border-white/10"
             />
             <div className="text-center">
-              <p className="text-white font-semibold">{lightboxImage.title}</p>
-              <p className="text-white/50 text-sm mt-1">
+              <p className="text-white font-heading font-bold text-lg">{lightboxImage.title}</p>
+              <p className="text-secondary text-sm mt-1">
                 {new Date(lightboxImage.createdAt).toLocaleDateString('en-US', {
                   month: 'long', day: 'numeric', year: 'numeric',
                 })}

@@ -4,6 +4,7 @@ import { Mail, Lock, User } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
+import { AmbientLightCanvas } from '../../components/ui/PageBanner';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
 const RegisterPage = () => {
@@ -45,16 +46,26 @@ const RegisterPage = () => {
   const displayError = validationError || error;
 
   return (
-    <div className="min-h-screen bg-slate-900 flex items-center justify-center p-4 relative overflow-hidden">
-      {/* Decorative blobs */}
-      <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full filter blur-3xl opacity-20"></div>
-      <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary rounded-full filter blur-3xl opacity-15"></div>
+    <div className="min-h-screen bg-slate-950 flex items-center justify-center p-4 relative overflow-hidden">
+      {/* Background image + Ken Burns + ambient light animation */}
+      <div className="absolute inset-0 pointer-events-none overflow-hidden">
+        <img
+          src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=1920&q=80"
+          alt=""
+          className="w-full h-full object-cover opacity-25 animate-ken-burns"
+        />
+        <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/80 to-slate-950/95" />
+        <div className="absolute -top-40 -right-40 w-96 h-96 bg-primary rounded-full filter blur-3xl opacity-30" />
+        <div className="absolute -bottom-40 -left-40 w-96 h-96 bg-secondary rounded-full filter blur-3xl opacity-20" />
+      </div>
+
+      <AmbientLightCanvas particleCount={35} mode="rain-and-particles" />
 
       <div className="relative z-10 w-full max-w-md">
-        <div className="bg-white/5 border border-white/10 backdrop-blur-xl rounded-3xl p-8 shadow-2xl">
+        <div className="bg-slate-900/70 border border-white/15 backdrop-blur-2xl rounded-3xl p-8 shadow-2xl">
           {/* Logo */}
           <div className="flex flex-col items-center mb-8">
-            <img src={lrtLogo} alt="LRT" className="w-20 h-20 rounded-full object-cover border-2 border-secondary/40 mb-4 shadow-lg" />
+            <img src={lrtLogo} alt="LRT" className="w-20 h-20 rounded-full object-cover border-2 border-secondary/50 mb-4 shadow-lg shadow-secondary/10" />
             <h1 className="text-3xl font-heading font-extrabold text-white">Join LRT</h1>
             <p className="text-slate-400 text-sm mt-1">Create your member account</p>
           </div>
@@ -151,8 +162,8 @@ const RegisterPage = () => {
             </Link>
           </p>
         </div>
-        <p className="text-center text-slate-600 text-xs mt-6">
-          <Link to="/" className="hover:text-slate-400 transition-colors">← Back to website</Link>
+        <p className="text-center text-slate-400 text-xs mt-6">
+          <Link to="/" className="hover:text-secondary transition-colors">← Back to website</Link>
         </p>
       </div>
     </div>

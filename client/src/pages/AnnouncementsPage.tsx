@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { Megaphone, Calendar, Loader2, X, ChevronRight } from 'lucide-react';
 import announcementService from '../services/announcementService';
 import type { Announcement } from '../types';
+import PageBanner from '../components/ui/PageBanner';
 
 const AnnouncementsPage = () => {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
@@ -15,7 +16,7 @@ const AnnouncementsPage = () => {
         setIsLoading(true);
         const res = await announcementService.getPublished();
         setAnnouncements(res.data || []);
-      } catch (err) {
+      } catch {
         setError('Failed to load announcements. Please try again later.');
       } finally {
         setIsLoading(false);
@@ -40,24 +41,16 @@ const AnnouncementsPage = () => {
   }, [selectedItem]);
 
   return (
-    <div className="pt-24 pb-20 bg-background min-h-screen">
-      {/* Page Header */}
-      <div className="bg-slate-900 text-white py-20 mb-16 relative overflow-hidden">
-        <div className="absolute inset-0 pointer-events-none">
-          <div className="absolute top-0 left-0 w-80 h-80 bg-secondary rounded-full filter blur-3xl opacity-10"></div>
-          <div className="absolute bottom-0 right-0 w-64 h-64 bg-primary rounded-full filter blur-3xl opacity-15"></div>
-        </div>
-        <div className="container mx-auto px-4 text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full border border-secondary/30 bg-secondary/10 mb-4">
-            <Megaphone className="w-4 h-4 text-secondary" />
-            <span className="text-secondary font-semibold text-sm uppercase tracking-widest">Updates</span>
-          </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-extrabold mb-4">Announcements</h1>
-          <p className="text-slate-400 max-w-xl mx-auto text-lg">
-            Stay up to date with the latest news and updates from Latter Rain Tabernacle.
-          </p>
-        </div>
-      </div>
+    <div className="pb-24 bg-background min-h-screen">
+      {/* Page Header with Background Image & Video Animation */}
+      <PageBanner
+        badgeIcon={<Megaphone className="w-4 h-4 text-secondary" />}
+        badgeText="Updates"
+        title="Announcements"
+        subtitle="Stay up to date with the latest news and updates from Latter Rain Tabernacle."
+        backgroundImage="https://images.unsplash.com/photo-1519791883288-dc8bd696e667?auto=format&fit=crop&w=1920&q=85"
+        videoUrl="https://assets.mixkit.co/videos/preview/mixkit-rays-of-light-in-a-dark-room-41573-large.mp4"
+      />
 
       {/* Content */}
       <div className="container mx-auto px-4 max-w-3xl">
@@ -78,38 +71,42 @@ const AnnouncementsPage = () => {
 
         {/* Empty */}
         {!isLoading && !error && announcements.length === 0 && (
-          <div className="text-center py-24">
-            <Megaphone className="w-14 h-14 text-slate-300 mx-auto mb-4" />
-            <h3 className="text-xl font-heading font-bold text-slate-700 mb-2">No Announcements</h3>
+          <div className="text-center py-24 bg-white rounded-3xl border border-slate-100 shadow-sm p-12">
+            <div className="w-16 h-16 rounded-2xl bg-secondary/15 flex items-center justify-center mx-auto mb-5">
+              <Megaphone className="w-8 h-8 text-secondary-dark" />
+            </div>
+            <h3 className="text-xl font-heading font-bold text-slate-800 mb-2">No Announcements</h3>
             <p className="text-slate-400">Check back soon for updates from the church.</p>
           </div>
         )}
 
         {/* Announcements list */}
         {!isLoading && !error && announcements.length > 0 && (
-          <div className="flex flex-col gap-4">
+          <div className="flex flex-col gap-5">
             {announcements.map((item, index) => (
               <article
                 key={item._id}
-                className="group bg-white rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-all duration-300 p-6 flex gap-5 cursor-pointer"
+                className="group bg-white rounded-3xl border border-slate-100 shadow-md shadow-slate-200/40 hover:shadow-xl hover:-translate-y-1 transition-all duration-300 p-7 flex gap-5 cursor-pointer relative overflow-hidden"
                 style={{ animationDelay: `${index * 0.04}s` }}
                 onClick={() => setSelectedItem(item)}
               >
+                <div className="absolute left-0 top-0 bottom-0 w-1.5 bg-gradient-to-b from-primary to-secondary opacity-0 group-hover:opacity-100 transition-opacity" />
+
                 {/* Icon */}
-                <div className="flex-shrink-0 w-12 h-12 rounded-xl bg-secondary/10 flex items-center justify-center group-hover:bg-secondary/20 transition-colors">
-                  <Megaphone className="w-6 h-6 text-secondary-dark" />
+                <div className="flex-shrink-0 w-14 h-14 rounded-2xl bg-secondary/15 border border-secondary/30 flex items-center justify-center group-hover:bg-secondary group-hover:text-slate-950 transition-colors text-secondary-dark">
+                  <Megaphone className="w-6 h-6" />
                 </div>
 
                 {/* Content */}
                 <div className="flex-1 min-w-0">
-                  <h2 className="text-lg font-heading font-bold text-slate-800 group-hover:text-primary transition-colors mb-1">
+                  <h2 className="text-xl font-heading font-bold text-slate-900 group-hover:text-primary transition-colors mb-1.5">
                     {item.title}
                   </h2>
                   <p className="text-slate-500 text-sm leading-relaxed line-clamp-2">
                     {item.content}
                   </p>
-                  <div className="flex items-center gap-1.5 mt-3 text-xs text-slate-400">
-                    <Calendar className="w-3.5 h-3.5" />
+                  <div className="flex items-center gap-1.5 mt-3.5 text-xs text-slate-400 font-medium">
+                    <Calendar className="w-3.5 h-3.5 text-primary" />
                     {new Date(item.createdAt).toLocaleDateString('en-US', {
                       month: 'long',
                       day: 'numeric',
@@ -129,12 +126,12 @@ const AnnouncementsPage = () => {
       {selectedItem && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
-            className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-md"
             onClick={() => setSelectedItem(null)}
           />
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col">
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-xl max-h-[90vh] flex flex-col overflow-hidden">
             {/* Accent bar */}
-            <div className="h-2 bg-gradient-to-r from-secondary to-primary rounded-t-3xl flex-shrink-0" />
+            <div className="h-2.5 bg-gradient-to-r from-secondary via-primary to-secondary flex-shrink-0" />
 
             {/* Header */}
             <div className="flex items-start justify-between px-8 py-6 border-b border-slate-100 flex-shrink-0">
@@ -143,9 +140,9 @@ const AnnouncementsPage = () => {
                   <Megaphone className="w-4 h-4 text-secondary-dark" />
                   <span className="text-xs font-bold text-secondary-dark uppercase tracking-widest">Announcement</span>
                 </div>
-                <h2 className="text-2xl font-heading font-bold text-slate-800">{selectedItem.title}</h2>
-                <p className="text-xs text-slate-400 mt-1 flex items-center gap-1.5">
-                  <Calendar className="w-3.5 h-3.5" />
+                <h2 className="text-2xl font-heading font-bold text-slate-900">{selectedItem.title}</h2>
+                <p className="text-xs text-slate-400 mt-1.5 flex items-center gap-1.5">
+                  <Calendar className="w-3.5 h-3.5 text-primary" />
                   {new Date(selectedItem.createdAt).toLocaleDateString('en-US', {
                     month: 'long', day: 'numeric', year: 'numeric',
                   })}
