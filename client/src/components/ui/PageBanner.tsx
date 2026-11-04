@@ -24,7 +24,7 @@ interface BackgroundSlideshowProps {
 export const BackgroundSlideshow: React.FC<BackgroundSlideshowProps> = ({
   images = DEFAULT_SLIDESHOW_IMAGES,
   intervalMs = 5500,
-  opacityClass = 'opacity-40',
+  opacityClass = 'opacity-85',
 }) => {
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -221,7 +221,7 @@ export const PageBanner: React.FC<PageBannerProps> = ({
   return (
     <div className="relative bg-slate-950 text-white py-24 md:py-32 mb-16 overflow-hidden border-b border-white/10">
       {/* Transitioning Background Images + Optional Video Layer */}
-      <BackgroundSlideshow images={slides} intervalMs={5500} opacityClass="opacity-35" />
+      <BackgroundSlideshow images={slides} intervalMs={5500} opacityClass="opacity-85" />
 
       {videoUrl && (
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
@@ -231,16 +231,16 @@ export const PageBanner: React.FC<PageBannerProps> = ({
             muted
             playsInline
             poster={slides[0]}
-            className="absolute inset-0 w-full h-full object-cover opacity-35 mix-blend-lighten"
+            className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-lighten"
           >
             <source src={videoUrl} type="video/mp4" />
           </video>
         </div>
       )}
 
-      {/* Multi-layered Royal Blue, Gold & Deep Slate Overlays */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/90 via-slate-900/75 to-slate-950/95 pointer-events-none z-[1]" />
-      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(29,78,216,0.32),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(234,179,8,0.18),transparent_55%)] pointer-events-none z-[1]" />
+      {/* Lightened Overlays so Background Images are clear & vibrant */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-900/35 to-slate-950/75 pointer-events-none z-[1]" />
+      <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top_right,rgba(29,78,216,0.20),transparent_60%),radial-gradient(ellipse_at_bottom_left,rgba(234,179,8,0.12),transparent_55%)] pointer-events-none z-[1]" />
 
       {/* Animated Golden & Blue Light Particles */}
       <AmbientLightCanvas particleCount={32} mode="rain-and-particles" />

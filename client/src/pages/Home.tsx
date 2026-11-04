@@ -53,7 +53,7 @@ const Home = () => {
                 src={src}
                 alt="Worship sanctuary"
                 className={`absolute inset-0 w-full h-full object-cover object-center transition-all duration-[1800ms] ease-in-out ${
-                  isActive ? 'opacity-45 scale-105' : 'opacity-0 scale-100'
+                  isActive ? 'opacity-85 scale-105' : 'opacity-0 scale-100'
                 }`}
               />
             );
@@ -65,16 +65,16 @@ const Home = () => {
             muted
             playsInline
             poster={HERO_BG_IMAGES[0]}
-            className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-screen"
+            className="absolute inset-0 w-full h-full object-cover opacity-25 mix-blend-screen"
           >
             <source src={HERO_VIDEO_URL} type="video/mp4" />
           </video>
 
-          {/* Deep Royal Blue, Slate & Gold Atmospheric Overlays */}
-          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/85 via-slate-900/65 to-slate-950" />
-          <div className="absolute -top-40 -right-40 w-[32rem] h-[32rem] bg-primary rounded-full mix-blend-screen filter blur-[120px] opacity-45 animate-float" />
+          {/* Lightened Atmospheric Overlays so BG Images shine through clearly */}
+          <div className="absolute inset-0 bg-gradient-to-b from-slate-950/55 via-slate-900/35 to-slate-950/80" />
+          <div className="absolute -top-40 -right-40 w-[32rem] h-[32rem] bg-primary rounded-full mix-blend-screen filter blur-[120px] opacity-25 animate-float" />
           <div
-            className="absolute top-1/3 -left-40 w-[28rem] h-[28rem] bg-secondary rounded-full mix-blend-screen filter blur-[120px] opacity-25 animate-float"
+            className="absolute top-1/3 -left-40 w-[28rem] h-[28rem] bg-secondary rounded-full mix-blend-screen filter blur-[120px] opacity-15 animate-float"
             style={{ animationDelay: '2s' }}
           />
         </div>
@@ -312,9 +312,9 @@ const Home = () => {
           <img
             src="https://images.unsplash.com/photo-1519791883288-dc8bd696e667?auto=format&fit=crop&w=1920&q=80"
             alt="Church community"
-            className="w-full h-full object-cover opacity-25 animate-ken-burns"
+            className="w-full h-full object-cover opacity-70 animate-ken-burns"
           />
-          <div className="absolute inset-0 bg-gradient-to-r from-slate-950 via-primary-dark/85 to-slate-950/95" />
+          <div className="absolute inset-0 bg-gradient-to-r from-slate-950/75 via-primary-dark/50 to-slate-950/75" />
         </div>
 
         <AmbientLightCanvas particleCount={30} mode="particles-only" />
