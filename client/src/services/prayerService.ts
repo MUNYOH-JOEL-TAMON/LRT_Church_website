@@ -12,6 +12,11 @@ const prayerService = {
     return data;
   },
 
+  getMy: async (): Promise<ApiResponse<PrayerRequest[]>> => {
+    const { data } = await api.get<ApiResponse<PrayerRequest[]>>('/prayer-requests/my');
+    return data;
+  },
+
   create: async (requestData: { request: string; isPrivate: boolean }): Promise<ApiResponse<PrayerRequest>> => {
     const { data } = await api.post<ApiResponse<PrayerRequest>>('/prayer-requests', requestData);
     return data;

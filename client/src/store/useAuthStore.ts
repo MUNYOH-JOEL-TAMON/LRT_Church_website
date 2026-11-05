@@ -16,6 +16,7 @@ interface AuthState {
   register: (firstName: string, lastName: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   clearError: () => void;
+  updateUser: (updatedUser: User) => void;
 }
 
 // The `persist` middleware automatically saves the token to localStorage
@@ -77,6 +78,10 @@ const useAuthStore = create<AuthState>()(
       },
 
       clearError: () => set({ error: null }),
+
+      updateUser: (updatedUser: User) => {
+        set({ user: updatedUser });
+      },
     }),
     {
       name: 'lrt-auth-storage', // Key used in localStorage

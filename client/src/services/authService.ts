@@ -28,6 +28,11 @@ const authService = {
     const { data } = await api.get<ApiResponse<User>>('/auth/me');
     return data;
   },
+
+  updateProfile: async (profileData: { firstName?: string; lastName?: string; phoneNumber?: string }): Promise<ApiResponse<User>> => {
+    const { data } = await api.put<ApiResponse<User>>('/auth/profile', profileData);
+    return data;
+  },
 };
 
 export default authService;
