@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import {
   LayoutDashboard,
@@ -7,157 +7,1536 @@ import {
   HeartHandshake,
   LogOut,
   User,
-  Bell,
   Menu,
   X,
+  ChevronRight,
+  Clock,
+  MapPin,
+  Sparkles,
+  CheckCircle2,
+  Calendar,
+  Mic,
+  Play,
+  Send,
+  Lock,
+  Plus,
+  Search,
+  ExternalLink,
+  ShieldCheck,
+  AlertCircle,
+  Phone,
+  Mail,
+  RefreshCw,
+  Check,
 } from 'lucide-react';
 import useAuthStore from '../../store/useAuthStore';
+import sermonService from '../../services/sermonService';
+import eventService from '../../services/eventService';
+import prayerService from '../../services/prayerService';
+import authService from '../../services/authService';
+import type { Sermon, Event, PrayerRequest } from '../../types';
+import Button from '../../components/ui/Button';
+import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 
-const navItems = [
-  { icon: LayoutDashboard, label: 'Dashboard', to: '/portal/dashboard' },
-  { icon: BookOpen, label: 'Sermons', to: '/portal/sermons' },
-  { icon: CalendarDays, label: 'Events', to: '/portal/events' },
-  { icon: HeartHandshake, label: 'Prayer Requests', to: '/portal/prayer' },
-];
+type TabType = 'overview' | 'sermons' | 'events' | 'prayer' | 'profile';
 
 const PortalDashboard = () => {
-  const { user, logout } = useAuthStore();
+  const { user, logout, updateUser } = useAuthStore();
+  const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
+  // Data states
+  const [sermons, setSermons] = useState<Sermon[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
+  const [myPrayers, setMyPrayers] = useState<PrayerRequest[]>([]);
+  const [publicPrayers, setPublicPrayers] = useState<PrayerRequest[]>([]);
+  const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // Action states
+  const [registeringEventId, setRegisteringEventId] = useState<string | null>(null);
+  const [prayerModalOpen, setPrayerModalOpen] = useState(false);
+  const [prayerForm, setPrayerForm] = useState({ request: '', isPrivate: false });
+  const [isSubmittingPrayer, setIsSubmittingPrayer] = useState(false);
+  const [prayerSuccessMsg, setPrayerSuccessMsg] = useState('');
+  const [prayerErrorMsg, setPrayerErrorMsg] = useState('');
+
+  // Profile update form
+  const [profileForm, setProfileForm] = useState({
+    firstName: user?.firstName || '',
+    lastName: user?.lastName || '',
+    phoneNumber: user?.phone || '',
+  });
+  const [isUpdatingProfile, setIsUpdatingProfile] = useState(false);
+  const [profileSuccessMsg, setProfileSuccessMsg] = useState('');
+  const [profileErrorMsg, setProfileErrorMsg] = useState('');
+
+  // Search & filter states
+  const [sermonSearch, setSermonSearch] = useState('');
+  const [eventFilter, setEventFilter] = useState<'all' | 'registered'>('all');
+  const [prayerWallTab, setPrayerWallTab] = useState<'my' | 'community'>('my');
+
+  // Load all initial portal data
+  const fetchPortalData = async () => {
+    setIsLoadingData(true);
+    try {
+      const [sermonsRes, eventsRes, myPrayersRes, publicPrayersRes] = await Promise.allSettled([
+        sermonService.getAll(),
+        eventService.getAll(),
+        prayerService.getMy(),
+        prayerService.getPublic(),
+      ]);
+
+      if (sermonsRes.status === 'fulfilled' && sermonsRes.value.data) {
+        setSermons(sermonsRes.value.data);
+      }
+      if (eventsRes.status === 'fulfilled' && eventsRes.value.data) {
+        setEvents(eventsRes.value.data);
+      }
+      if (myPrayersRes.status === 'fulfilled' && myPrayersRes.value.data) {
+        setMyPrayers(myPrayersRes.value.data);
+      }
+      if (publicPrayersRes.status === 'fulfilled' && publicPrayersRes.value.data) {
+        setPublicPrayers(publicPrayersRes.value.data);
+      }
+    } catch {
+      // Data fetch fallback
+    } finally {
+      setIsLoadingData(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchPortalData();
+  }, []);
+
+  // Update profileForm if user changes in store
+  useEffect(() => {
+    if (user) {
+      setProfileForm({
+        firstName: user.firstName || '',
+        lastName: user.lastName || '',
+        phoneNumber: user.phone || '',
+      });
+    }
+  }, [user]);
+
+  // Handle Event Registration
+  const handleEventRegister = async (eventId: string) => {
+    try {
+      setRegisteringEventId(eventId);
+      await eventService.register(eventId);
+      setEvents((prev) =>
+        prev.map((e) =>
+          e._id === eventId
+            ? { ...e, registeredAttendees: [...(e.registeredAttendees || []), user!._id] }
+            : e
+        )
+      );
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to register for this event');
+    } finally {
+      setRegisteringEventId(null);
+    }
+  };
+
+  // Handle Prayer Request Submission
+  const handleSubmitPrayer = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!prayerForm.request.trim()) return;
+    setIsSubmittingPrayer(true);
+    setPrayerErrorMsg('');
+    try {
+      const res = await prayerService.create({
+        request: prayerForm.request,
+        isPrivate: prayerForm.isPrivate,
+      });
+      if (res.data) {
+        setMyPrayers((prev) => [res.data!, ...prev]);
+        if (!res.data.isPrivate) {
+          setPublicPrayers((prev) => [res.data!, ...prev]);
+        }
+      }
+      setPrayerSuccessMsg('Your prayer request has been received by the intercessory team.');
+      setPrayerForm({ request: '', isPrivate: false });
+      setTimeout(() => {
+        setPrayerModalOpen(false);
+        setPrayerSuccessMsg('');
+      }, 1600);
+    } catch (err: any) {
+      setPrayerErrorMsg(err.response?.data?.message || 'Failed to submit prayer request');
+    } finally {
+      setIsSubmittingPrayer(false);
+    }
+  };
+
+  // Handle Profile Update
+  const handleUpdateProfile = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsUpdatingProfile(true);
+    setProfileErrorMsg('');
+    setProfileSuccessMsg('');
+    try {
+      const res = await authService.updateProfile({
+        firstName: profileForm.firstName,
+        lastName: profileForm.lastName,
+        phoneNumber: profileForm.phoneNumber,
+      });
+      if (res.data) {
+        updateUser(res.data);
+      }
+      setProfileSuccessMsg('Your personal profile has been updated successfully.');
+      setTimeout(() => setProfileSuccessMsg(''), 4000);
+    } catch (err: any) {
+      setProfileErrorMsg(err.response?.data?.message || 'Failed to update profile');
+    } finally {
+      setIsUpdatingProfile(false);
+    }
+  };
+
+  // Derived calculations
+  const registeredEvents = events.filter((e) => e.registeredAttendees?.includes(user?._id || ''));
+  const answeredPrayersCount = myPrayers.filter((p) => p.status === 'Answered').length;
+  const latestSermon = sermons[0];
+
+  const filteredSermons = sermons.filter(
+    (s) =>
+      s.title?.toLowerCase().includes(sermonSearch.toLowerCase()) ||
+      s.speaker?.toLowerCase().includes(sermonSearch.toLowerCase()) ||
+      s.notes?.toLowerCase().includes(sermonSearch.toLowerCase())
+  );
+
+  const displayedEvents =
+    eventFilter === 'registered' ? registeredEvents : events;
+
+  const isAdminOrPastor = ['admin', 'pastor', 'editor'].includes(user?.role?.toLowerCase() || '');
+
+  // Navigation items config
+  const navItems = [
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
+    { id: 'sermons', label: 'Sermons', icon: BookOpen, count: sermons.length || undefined },
+    { id: 'events', label: 'Events', icon: CalendarDays, count: registeredEvents.length || undefined },
+    { id: 'prayer', label: 'Prayer Requests', icon: HeartHandshake, count: myPrayers.length || undefined },
+    { id: 'profile', label: 'My Profile', icon: User, count: undefined },
+  ];
+
   return (
-    <div className="min-h-screen bg-slate-50 flex">
-      {/* Backdrop overlay for mobile menu */}
+    <div className="min-h-screen bg-slate-50 flex font-body">
+      {/* Mobile Drawer Overlay */}
       {isMobileMenuOpen && (
         <div
-          className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-40 lg:hidden"
+          className="fixed inset-0 bg-slate-950/60 backdrop-blur-xs z-40 lg:hidden"
           onClick={() => setIsMobileMenuOpen(false)}
-        ></div>
+        />
       )}
 
-      {/* Sidebar */}
+      {/* ── Sidebar ── */}
       <aside
-        className={`w-64 bg-slate-900 text-white flex flex-col fixed h-full z-50 transition-transform duration-300 ease-in-out lg:translate-x-0 ${
+        className={`w-72 bg-slate-950 text-white flex flex-col fixed h-full z-50 transition-transform duration-300 ease-in-out border-r border-white/10 lg:translate-x-0 ${
           isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'
         }`}
       >
         {/* Brand */}
-        <div className="flex items-center justify-between gap-3 px-6 py-5 border-b border-white/10">
-          <div className="flex items-center gap-3">
-            <img src={lrtLogo} alt="LRT" className="w-10 h-10 rounded-full object-cover border border-secondary/40" />
-            <span className="text-lg font-heading font-extrabold text-white">
-              Latter Rain <span className="text-secondary">LRT</span>
-            </span>
-          </div>
-          {/* Mobile Sidebar Close Button */}
+        <div className="flex items-center justify-between px-6 py-5 border-b border-white/10 bg-slate-950/80">
+          <Link to="/" className="flex items-center gap-3 group">
+            <div className="relative">
+              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-secondary to-primary opacity-60 blur-xs group-hover:opacity-100 transition-opacity" />
+              <img
+                src={lrtLogo}
+                alt="LRT"
+                className="relative w-10 h-10 rounded-full object-cover border-2 border-secondary/60"
+              />
+            </div>
+            <div>
+              <span className="text-base font-heading font-extrabold text-white tracking-tight leading-none block">
+                Latter Rain
+              </span>
+              <span className="text-[10px] font-bold text-secondary tracking-[0.2em] uppercase block mt-0.5">
+                Member Portal
+              </span>
+            </div>
+          </Link>
           <button
             onClick={() => setIsMobileMenuOpen(false)}
-            className="p-1.5 rounded-lg hover:bg-white/10 text-slate-400 hover:text-white lg:hidden transition-colors"
+            className="p-1.5 rounded-xl hover:bg-white/10 text-slate-400 hover:text-white lg:hidden transition-colors"
           >
             <X className="w-5 h-5" />
           </button>
         </div>
 
-        {/* Navigation */}
-        <nav className="flex-1 px-4 py-6 flex flex-col gap-1">
-          {navItems.map(({ icon: Icon, label, to }) => (
+        {/* Navigation list */}
+        <nav className="flex-1 px-4 py-6 flex flex-col gap-1.5 overflow-y-auto">
+          <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
+            Menu
+          </div>
+          {navItems.map(({ id, label, icon: Icon, count }) => {
+            const isActive = activeTab === id;
+            return (
+              <button
+                key={id}
+                onClick={() => {
+                  setActiveTab(id as TabType);
+                  setIsMobileMenuOpen(false);
+                }}
+                className={`w-full flex items-center justify-between px-4 py-3 rounded-2xl text-sm font-semibold transition-all duration-200 cursor-pointer ${
+                  isActive
+                    ? 'bg-gradient-to-r from-primary to-primary-light text-white shadow-lg shadow-primary/25'
+                    : 'text-slate-300 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon
+                    className={`w-5 h-5 transition-colors ${
+                      isActive ? 'text-secondary-light' : 'text-slate-400'
+                    }`}
+                  />
+                  <span>{label}</span>
+                </div>
+                {count !== undefined && (
+                  <span
+                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                      isActive
+                        ? 'bg-white/20 text-white'
+                        : 'bg-white/10 text-secondary'
+                    }`}
+                  >
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+
+          {/* Quick External Links */}
+          <div className="pt-6 mt-4 border-t border-white/10 px-3">
+            <span className="text-[11px] font-bold uppercase tracking-widest text-slate-400 block mb-2">
+              Church Links
+            </span>
             <Link
-              key={to}
-              to={to}
-              onClick={() => setIsMobileMenuOpen(false)}
-              className="flex items-center gap-3 px-4 py-3 rounded-xl text-slate-300 hover:bg-white/10 hover:text-white transition-all duration-200 group"
+              to="/"
+              className="flex items-center justify-between py-2.5 text-xs text-slate-300 hover:text-secondary transition-colors"
             >
-              <Icon className="w-5 h-5 group-hover:text-secondary transition-colors" />
-              <span className="font-medium">{label}</span>
+              <span className="flex items-center gap-2">
+                <ExternalLink className="w-3.5 h-3.5 text-primary-light" />
+                Public Website
+              </span>
+              <ChevronRight className="w-3 h-3 text-slate-400" />
             </Link>
-          ))}
+
+            {isAdminOrPastor && (
+              <Link
+                to="/admin/dashboard"
+                className="flex items-center justify-between py-2.5 text-xs text-secondary hover:text-secondary-light font-bold transition-colors"
+              >
+                <span className="flex items-center gap-2">
+                  <ShieldCheck className="w-3.5 h-3.5 text-secondary" />
+                  Admin Dashboard
+                </span>
+                <ChevronRight className="w-3 h-3 text-secondary" />
+              </Link>
+            )}
+          </div>
         </nav>
 
-        {/* User + Logout */}
-        <div className="px-4 py-4 border-t border-white/10">
-          <div className="flex items-center gap-3 px-4 py-3 mb-1 rounded-xl bg-white/5">
-            <div className="w-9 h-9 rounded-full bg-secondary/20 border border-secondary/30 flex items-center justify-center text-secondary font-bold text-sm">
-              {user?.firstName?.[0]}{user?.lastName?.[0]}
+        {/* Member Card & Sign Out at bottom */}
+        <div className="p-4 border-t border-white/10 bg-slate-950/90">
+          <div className="flex items-center gap-3 p-3 rounded-2xl bg-white/5 border border-white/10 mb-2">
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-secondary via-secondary to-amber-600 text-slate-950 font-bold flex items-center justify-center text-sm shadow-md flex-shrink-0">
+              {user?.firstName?.[0]}
+              {user?.lastName?.[0]}
             </div>
             <div className="flex-1 min-w-0">
-              <p className="text-sm font-semibold text-white truncate">
+              <p className="text-sm font-bold text-white truncate">
                 {user?.firstName} {user?.lastName}
               </p>
-              <p className="text-xs text-slate-400 truncate capitalize">{user?.role}</p>
+              <div className="flex items-center gap-1.5 mt-0.5">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
+                <span className="text-[11px] text-slate-300 font-medium capitalize truncate">
+                  {user?.role || 'Member'}
+                </span>
+              </div>
             </div>
           </div>
+
           <button
             onClick={logout}
-            className="w-full flex items-center gap-3 px-4 py-3 rounded-xl text-slate-400 hover:bg-red-500/10 hover:text-red-400 transition-all duration-200 group"
+            className="w-full flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl text-xs font-bold text-red-300 hover:bg-red-500/10 hover:text-red-200 border border-transparent hover:border-red-500/20 transition-all cursor-pointer"
           >
-            <LogOut className="w-5 h-5" />
-            <span className="font-medium">Sign Out</span>
+            <LogOut className="w-4 h-4" />
+            Sign Out
           </button>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 lg:ml-64 flex flex-col min-w-0">
-        {/* Top Bar */}
-        <header className="sticky top-0 z-20 bg-white border-b border-slate-200 px-4 lg:px-8 py-4 flex items-center justify-between">
+      {/* ── Main Content Area ── */}
+      <div className="flex-1 lg:ml-72 flex flex-col min-w-0">
+        {/* Top Sticky Bar */}
+        <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
           <div className="flex items-center gap-3">
-            {/* Hamburger Toggle Button */}
             <button
-              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-              className="p-2 -ml-2 rounded-xl hover:bg-slate-100 text-slate-500 lg:hidden transition-colors"
-              aria-label="Toggle menu"
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="p-2 -ml-2 rounded-xl hover:bg-slate-100 text-slate-600 lg:hidden transition-colors cursor-pointer"
+              aria-label="Open portal navigation"
             >
               <Menu className="w-6 h-6" />
             </button>
-            <h1 className="text-lg lg:text-xl font-heading font-bold text-slate-800">Dashboard</h1>
-          </div>
-          <div className="flex items-center gap-3">
-            <button className="relative p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-secondary rounded-full"></span>
-            </button>
-            <Link to="/portal/profile" className="p-2 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
-              <User className="w-5 h-5" />
-            </Link>
-          </div>
-        </header>
-
-        {/* Page Body */}
-        <main className="flex-1 p-4 lg:p-8">
-          {/* Welcome Banner */}
-          <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-6 lg:p-8 mb-8 relative overflow-hidden shadow-xl shadow-primary/20">
-            <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
-            <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-white/5 rounded-full translate-y-1/2"></div>
-            <div className="relative z-10">
-              <p className="text-secondary font-semibold text-xs lg:text-sm tracking-widest uppercase mb-2">Member Portal</p>
-              <h2 className="text-2xl md:text-3xl lg:text-4xl font-heading font-extrabold mb-3">
-                Welcome back, {user?.firstName}! 👋
-              </h2>
-              <p className="text-blue-100 text-sm lg:text-base max-w-lg">
-                You are connected to your LRT account. Explore sermons, register for events, and submit prayer requests below.
+            <div>
+              <h1 className="text-lg sm:text-xl font-heading font-extrabold text-slate-900 capitalize">
+                {activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ')}
+              </h1>
+              <p className="text-xs text-slate-400 hidden sm:block">
+                Latter Rain Tabernacle • Member Sanctuary
               </p>
             </div>
           </div>
 
-          {/* Quick Stats */}
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
-            {[
-              { label: 'Latest Sermon', value: 'Available', sub: 'Watch the most recent message', icon: BookOpen, color: 'text-primary' },
-              { label: 'Upcoming Events', value: '3 Events', sub: 'Register and save your spot', icon: CalendarDays, color: 'text-secondary-dark' },
-              { label: 'Prayer Requests', value: 'Submit Now', sub: 'Our team is praying for you', icon: HeartHandshake, color: 'text-emerald-600' },
-            ].map(({ label, value, sub, icon: Icon, color }) => (
-              <div key={label} className="bg-white rounded-2xl p-6 border border-slate-100 shadow-sm hover:shadow-md transition-shadow">
-                <div className={`${color} mb-4`}>
-                  <Icon className="w-8 h-8" />
-                </div>
-                <p className="text-slate-500 text-sm font-medium mb-1">{label}</p>
-                <p className="text-2xl font-heading font-bold text-slate-800 mb-1">{value}</p>
-                <p className="text-slate-400 text-xs">{sub}</p>
-              </div>
-            ))}
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => fetchPortalData()}
+              title="Refresh data"
+              className="p-2.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors cursor-pointer"
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoadingData ? 'animate-spin text-primary' : ''}`} />
+            </button>
+
+            <button
+              onClick={() => setPrayerModalOpen(true)}
+              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary-light hover:from-amber-400 hover:to-secondary text-slate-950 text-xs font-extrabold px-4 py-2 rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer"
+            >
+              <Plus className="w-4 h-4 text-slate-950" />
+              Submit Prayer
+            </button>
+
+            <button
+              onClick={() => setActiveTab('profile')}
+              className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs hover:bg-primary hover:text-white transition-all cursor-pointer"
+              title="My Profile"
+            >
+              {user?.firstName?.[0]}
+              {user?.lastName?.[0]}
+            </button>
           </div>
+        </header>
+
+        {/* Main Tab Pages */}
+        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+          {/* ══════════════════════════════════════════════════════════
+              TAB 1: OVERVIEW
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'overview' && (
+            <div className="space-y-8 animate-fade-in">
+              {/* Hero Banner with Royal Blue & Gold theme */}
+              <div className="relative rounded-3xl bg-gradient-to-br from-slate-950 via-primary-dark to-primary text-white p-6 sm:p-10 overflow-hidden shadow-2xl shadow-primary/20 border border-white/10">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
+                <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-light/20 rounded-full blur-2xl pointer-events-none" />
+
+                <div className="relative z-10 max-w-3xl">
+                  <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4">
+                    <Sparkles className="w-3.5 h-3.5 text-secondary" />
+                    <span className="text-secondary text-xs font-bold uppercase tracking-widest">
+                      Member Portal
+                    </span>
+                  </div>
+
+                  <h2 className="text-2xl sm:text-4xl font-heading font-extrabold text-white tracking-tight mb-3">
+                    Welcome back, {user?.firstName} {user?.lastName}
+                  </h2>
+                  <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-6">
+                    Stay equipped and spiritually nourished. Access recent sermons, track prayer requests,
+                    and reserve your attendance for upcoming church fellowships.
+                  </p>
+
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      onClick={() => setPrayerModalOpen(true)}
+                      className="inline-flex items-center gap-2 bg-secondary text-slate-950 font-bold text-xs sm:text-sm px-5 py-3 rounded-xl hover:bg-secondary-light transition-all shadow-lg shadow-secondary/30 cursor-pointer"
+                    >
+                      <Plus className="w-4 h-4" />
+                      Submit Prayer Request
+                    </button>
+                    <button
+                      onClick={() => setActiveTab('events')}
+                      className="inline-flex items-center gap-2 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-semibold text-xs sm:text-sm px-5 py-3 rounded-xl transition-all cursor-pointer"
+                    >
+                      <CalendarDays className="w-4 h-4 text-secondary" />
+                      Browse Events
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              {/* Stat Summary Cards */}
+              <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
+                {[
+                  {
+                    label: 'Registered Events',
+                    value: registeredEvents.length,
+                    subtext: 'Upcoming fellowships',
+                    icon: CalendarDays,
+                    iconBg: 'bg-primary/10 text-primary',
+                    borderGlow: 'hover:border-primary/40',
+                    onClick: () => setActiveTab('events'),
+                  },
+                  {
+                    label: 'Prayer Requests',
+                    value: myPrayers.length,
+                    subtext: 'Submitted by you',
+                    icon: HeartHandshake,
+                    iconBg: 'bg-secondary/20 text-secondary-dark',
+                    borderGlow: 'hover:border-secondary/40',
+                    onClick: () => setActiveTab('prayer'),
+                  },
+                  {
+                    label: 'Answered Prayers',
+                    value: answeredPrayersCount,
+                    subtext: 'Praise reports',
+                    icon: CheckCircle2,
+                    iconBg: 'bg-emerald-50 text-emerald-600',
+                    borderGlow: 'hover:border-emerald-300',
+                    onClick: () => setActiveTab('prayer'),
+                  },
+                  {
+                    label: 'Sermons in Archive',
+                    value: sermons.length,
+                    subtext: 'Messages available',
+                    icon: BookOpen,
+                    iconBg: 'bg-indigo-50 text-indigo-600',
+                    borderGlow: 'hover:border-indigo-300',
+                    onClick: () => setActiveTab('sermons'),
+                  },
+                ].map(({ label, value, subtext, icon: Icon, iconBg, borderGlow, onClick }) => (
+                  <div
+                    key={label}
+                    onClick={onClick}
+                    className={`bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1 transition-all duration-300 cursor-pointer ${borderGlow}`}
+                  >
+                    <div className="flex items-center justify-between mb-4">
+                      <div className={`w-12 h-12 rounded-2xl flex items-center justify-center ${iconBg}`}>
+                        <Icon className="w-6 h-6" />
+                      </div>
+                      <ChevronRight className="w-4 h-4 text-slate-300" />
+                    </div>
+                    <p className="text-2xl sm:text-3xl font-heading font-extrabold text-slate-900 leading-none mb-1">
+                      {value}
+                    </p>
+                    <p className="text-xs sm:text-sm font-bold text-slate-700">{label}</p>
+                    <p className="text-[11px] text-slate-400 mt-0.5">{subtext}</p>
+                  </div>
+                ))}
+              </div>
+
+              {/* Main Dual Grid: Registered Events & Latest Sermon */}
+              <div className="grid lg:grid-cols-12 gap-8">
+                {/* Left 7 Columns: Registered Events & Recent Prayers */}
+                <div className="lg:col-span-7 space-y-8">
+                  {/* Registered Events Card */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm">
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary flex items-center justify-center">
+                          <CalendarDays className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900">
+                            Your Event Registrations
+                          </h3>
+                          <p className="text-xs text-slate-400">Events you are attending</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('events')}
+                        className="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        View All
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {registeredEvents.length === 0 ? (
+                      <div className="text-center py-8 px-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <CalendarDays className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                        <p className="font-heading font-bold text-slate-700 text-sm mb-1">
+                          No Active Event Registrations
+                        </p>
+                        <p className="text-slate-400 text-xs max-w-xs mx-auto mb-4">
+                          Browse upcoming fellowships and reserve your attendance with one click.
+                        </p>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setActiveTab('events')}
+                          leftIcon={<CalendarDays className="w-4 h-4" />}
+                        >
+                          Explore Upcoming Events
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {registeredEvents.slice(0, 3).map((event) => (
+                          <div
+                            key={event._id}
+                            className="flex items-center justify-between p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/70 border border-slate-100 transition-colors"
+                          >
+                            <div className="flex items-center gap-3.5 min-w-0">
+                              <div className="w-12 h-12 rounded-xl bg-primary text-white flex flex-col items-center justify-center flex-shrink-0 font-heading">
+                                <span className="text-xs font-bold leading-none">
+                                  {event.date ? new Date(event.date).getDate() : '--'}
+                                </span>
+                                <span className="text-[10px] text-blue-200 uppercase font-semibold">
+                                  {event.date
+                                    ? new Date(event.date).toLocaleDateString('en-US', { month: 'short' })
+                                    : ''}
+                                </span>
+                              </div>
+                              <div className="min-w-0">
+                                <h4 className="font-heading font-bold text-slate-900 text-sm truncate">
+                                  {event.title}
+                                </h4>
+                                <div className="flex items-center gap-3 text-xs text-slate-500 mt-0.5">
+                                  <span className="flex items-center gap-1">
+                                    <MapPin className="w-3 h-3 text-primary" />
+                                    {event.location}
+                                  </span>
+                                  {event.date && (
+                                    <span className="flex items-center gap-1">
+                                      <Clock className="w-3 h-3 text-secondary-dark" />
+                                      {new Date(event.date).toLocaleTimeString([], {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+
+                            <span className="inline-flex items-center gap-1 text-xs font-bold text-emerald-700 bg-emerald-50 border border-emerald-200 px-3 py-1.5 rounded-xl flex-shrink-0">
+                              <Check className="w-3.5 h-3.5 text-emerald-600" />
+                              Registered
+                            </span>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Prayer Requests Status Tracker */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm">
+                    <div className="flex items-center justify-between mb-5">
+                      <div className="flex items-center gap-2.5">
+                        <div className="w-9 h-9 rounded-xl bg-secondary/20 text-secondary-dark flex items-center justify-center">
+                          <HeartHandshake className="w-5 h-5" />
+                        </div>
+                        <div>
+                          <h3 className="font-heading font-bold text-base sm:text-lg text-slate-900">
+                            Your Prayer Requests
+                          </h3>
+                          <p className="text-xs text-slate-400">Intercessory status updates</p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => setActiveTab('prayer')}
+                        className="text-xs font-bold text-secondary-dark hover:text-secondary inline-flex items-center gap-1 cursor-pointer"
+                      >
+                        View All
+                        <ChevronRight className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+
+                    {myPrayers.length === 0 ? (
+                      <div className="text-center py-8 px-4 rounded-2xl bg-slate-50 border border-slate-100">
+                        <HeartHandshake className="w-10 h-10 text-slate-300 mx-auto mb-3" />
+                        <p className="font-heading font-bold text-slate-700 text-sm mb-1">
+                          No Prayer Requests Submitted
+                        </p>
+                        <p className="text-slate-400 text-xs max-w-xs mx-auto mb-4">
+                          Need prayer? Share what is on your heart and our pastoral intercessory team will stand with you.
+                        </p>
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => setPrayerModalOpen(true)}
+                          leftIcon={<Plus className="w-4 h-4" />}
+                        >
+                          Submit a Prayer Request
+                        </Button>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        {myPrayers.slice(0, 3).map((p) => {
+                          const statusConfig = {
+                            Answered: {
+                              bg: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                              icon: CheckCircle2,
+                            },
+                            Praying: {
+                              bg: 'bg-blue-50 text-blue-700 border-blue-200',
+                              icon: HeartHandshake,
+                            },
+                            Pending: {
+                              bg: 'bg-amber-50 text-amber-700 border-amber-200',
+                              icon: Clock,
+                            },
+                          }[p.status || 'Pending'] || {
+                            bg: 'bg-slate-100 text-slate-700 border-slate-200',
+                            icon: Clock,
+                          };
+                          const StatusIcon = statusConfig.icon;
+
+                          return (
+                            <div
+                              key={p._id}
+                              className="p-4 rounded-2xl bg-slate-50 hover:bg-slate-100/70 border border-slate-100 transition-colors"
+                            >
+                              <div className="flex items-center justify-between mb-2">
+                                <span
+                                  className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl border ${statusConfig.bg}`}
+                                >
+                                  <StatusIcon className="w-3.5 h-3.5" />
+                                  {p.status}
+                                </span>
+                                <span className="text-[11px] text-slate-400 flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(p.createdAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                  })}
+                                </span>
+                              </div>
+                              <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-2">
+                                {p.request}
+                              </p>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Right 5 Columns: Latest Sermon & Profile Snippet */}
+                <div className="lg:col-span-5 space-y-8">
+                  {/* Latest Sermon Highlight Card */}
+                  {latestSermon && (
+                    <div className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm flex flex-col">
+                      <div className="relative bg-slate-950 h-44 flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-slate-950 opacity-90" />
+                        <div className="relative z-10 text-center px-4">
+                          <div className="w-12 h-12 rounded-full bg-secondary text-slate-950 flex items-center justify-center mx-auto mb-2.5 shadow-lg shadow-secondary/40">
+                            <Play className="w-5 h-5 ml-0.5" fill="currentColor" />
+                          </div>
+                          <span className="text-secondary text-[11px] font-bold uppercase tracking-widest block">
+                            Latest Message
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="p-6 flex flex-col flex-1">
+                        <h4 className="font-heading font-extrabold text-slate-900 text-lg mb-2 line-clamp-1">
+                          {latestSermon.title}
+                        </h4>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                          <Mic className="w-3.5 h-3.5 text-primary" />
+                          <span className="font-semibold text-slate-700">{latestSermon.speaker}</span>
+                          <span>•</span>
+                          <span>
+                            {latestSermon.datePreached
+                              ? new Date(latestSermon.datePreached).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })
+                              : 'Recent'}
+                          </span>
+                        </div>
+                        {latestSermon.notes && (
+                          <p className="text-xs text-slate-500 leading-relaxed line-clamp-2 mb-4">
+                            {latestSermon.notes}
+                          </p>
+                        )}
+                        <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                          <button
+                            onClick={() => setActiveTab('sermons')}
+                            className="text-xs font-bold text-primary hover:text-primary-dark inline-flex items-center gap-1 cursor-pointer"
+                          >
+                            Listen in Portal
+                            <ChevronRight className="w-3.5 h-3.5" />
+                          </button>
+                          {latestSermon.videoUrl && (
+                            <a
+                              href={latestSermon.videoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-xs font-bold text-secondary-dark hover:text-secondary inline-flex items-center gap-1"
+                            >
+                              External Link
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  {/* Member Profile Summary */}
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm">
+                    <div className="flex items-center gap-3.5 mb-5">
+                      <div className="w-12 h-12 rounded-2xl bg-gradient-to-br from-primary to-primary-light text-white font-bold flex items-center justify-center text-base shadow-md shadow-primary/20">
+                        {user?.firstName?.[0]}
+                        {user?.lastName?.[0]}
+                      </div>
+                      <div>
+                        <h4 className="font-heading font-bold text-slate-900 text-base">
+                          {user?.firstName} {user?.lastName}
+                        </h4>
+                        <div className="inline-flex items-center gap-1.5 text-xs text-slate-500">
+                          <ShieldCheck className="w-3.5 h-3.5 text-secondary-dark" />
+                          <span className="capitalize">{user?.role || 'Church Member'}</span>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div className="space-y-3 py-3 border-y border-slate-100 text-xs text-slate-600">
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-slate-400">
+                          <Mail className="w-3.5 h-3.5 text-primary" />
+                          Email
+                        </span>
+                        <span className="font-semibold text-slate-800 truncate max-w-[180px]">
+                          {user?.email}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-slate-400">
+                          <Phone className="w-3.5 h-3.5 text-primary" />
+                          Phone
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {user?.phone || 'Not provided'}
+                        </span>
+                      </div>
+                      <div className="flex items-center justify-between">
+                        <span className="flex items-center gap-2 text-slate-400">
+                          <Calendar className="w-3.5 h-3.5 text-secondary-dark" />
+                          Member Since
+                        </span>
+                        <span className="font-semibold text-slate-800">
+                          {user?.createdAt
+                            ? new Date(user.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                year: 'numeric',
+                              })
+                            : '2026'}
+                        </span>
+                      </div>
+                    </div>
+
+                    <button
+                      onClick={() => setActiveTab('profile')}
+                      className="w-full mt-4 py-2.5 rounded-xl border border-slate-200 text-xs font-bold text-slate-700 hover:bg-slate-50 hover:border-primary/40 transition-all flex items-center justify-center gap-2 cursor-pointer"
+                    >
+                      <User className="w-3.5 h-3.5 text-primary" />
+                      Manage Profile Information
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════
+              TAB 2: SERMONS IN-DASHBOARD
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'sermons' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header with Search */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+                <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
+                  <div>
+                    <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                      Sermon Archive
+                    </h2>
+                    <p className="text-xs sm:text-sm text-slate-500">
+                      Explore anointed teachings and messages from Latter Rain Tabernacle.
+                    </p>
+                  </div>
+
+                  <div className="relative w-full md:w-80">
+                    <Search className="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2" />
+                    <input
+                      type="text"
+                      placeholder="Search title, speaker, notes..."
+                      value={sermonSearch}
+                      onChange={(e) => setSermonSearch(e.target.value)}
+                      className="w-full bg-slate-50 border border-slate-200 rounded-2xl pl-10 pr-4 py-2.5 text-xs sm:text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Sermons Grid */}
+              {filteredSermons.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                  <BookOpen className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="font-heading font-bold text-slate-700 text-lg mb-1">
+                    No Sermons Found
+                  </h3>
+                  <p className="text-slate-400 text-sm">
+                    {sermonSearch ? 'Try a different search query' : 'Messages will appear here as they are published.'}
+                  </p>
+                </div>
+              ) : (
+                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {filteredSermons.map((sermon) => (
+                    <div
+                      key={sermon._id}
+                      className="group bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl hover:-translate-y-1.5 transition-all duration-300 flex flex-col"
+                    >
+                      <div className="relative bg-slate-950 h-44 flex items-center justify-center overflow-hidden">
+                        <div className="absolute inset-0 bg-gradient-to-br from-primary-dark via-primary to-slate-950 opacity-90 group-hover:scale-105 transition-transform duration-700" />
+                        {sermon.videoUrl ? (
+                          <a
+                            href={sermon.videoUrl}
+                            target="_blank"
+                            rel="noreferrer"
+                            className="relative z-10 w-14 h-14 rounded-full bg-secondary text-slate-950 flex items-center justify-center shadow-lg shadow-secondary/40 group-hover:scale-110 transition-transform"
+                          >
+                            <Play className="w-6 h-6 ml-1" fill="currentColor" />
+                          </a>
+                        ) : (
+                          <div className="relative z-10 w-14 h-14 rounded-full bg-white/15 border border-white/20 flex items-center justify-center text-white/60">
+                            <Play className="w-6 h-6 ml-1" />
+                          </div>
+                        )}
+                      </div>
+
+                      <div className="p-6 flex flex-col flex-1">
+                        <h3 className="font-heading font-bold text-slate-900 text-base mb-2 group-hover:text-primary transition-colors line-clamp-1">
+                          {sermon.title}
+                        </h3>
+                        <div className="flex items-center gap-2 text-xs text-slate-500 mb-3">
+                          <Mic className="w-3.5 h-3.5 text-primary flex-shrink-0" />
+                          <span className="font-semibold text-slate-700 truncate">{sermon.speaker}</span>
+                        </div>
+                        {sermon.notes && (
+                          <p className="text-xs text-slate-500 leading-relaxed mb-4 line-clamp-2">
+                            {sermon.notes}
+                          </p>
+                        )}
+                        <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between text-xs text-slate-400">
+                          <span className="flex items-center gap-1">
+                            <Calendar className="w-3.5 h-3.5 text-secondary-dark" />
+                            {sermon.datePreached
+                              ? new Date(sermon.datePreached).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })
+                              : 'Date not set'}
+                          </span>
+                          {sermon.videoUrl && (
+                            <a
+                              href={sermon.videoUrl}
+                              target="_blank"
+                              rel="noreferrer"
+                              className="text-primary font-bold hover:text-primary-dark inline-flex items-center gap-1"
+                            >
+                              Watch
+                              <ExternalLink className="w-3 h-3" />
+                            </a>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════
+              TAB 3: EVENTS IN-DASHBOARD
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'events' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header with Filter Pills */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                    Church Events & Fellowships
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500">
+                    Manage your event registrations and save your spot for upcoming services.
+                  </p>
+                </div>
+
+                <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1 self-start sm:self-auto">
+                  <button
+                    onClick={() => setEventFilter('all')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      eventFilter === 'all'
+                        ? 'bg-white text-slate-900 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    All Events ({events.length})
+                  </button>
+                  <button
+                    onClick={() => setEventFilter('registered')}
+                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      eventFilter === 'registered'
+                        ? 'bg-secondary text-slate-950 shadow-sm'
+                        : 'text-slate-500 hover:text-slate-800'
+                    }`}
+                  >
+                    My Registered ({registeredEvents.length})
+                  </button>
+                </div>
+              </div>
+
+              {/* Events List */}
+              {displayedEvents.length === 0 ? (
+                <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                  <CalendarDays className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                  <h3 className="font-heading font-bold text-slate-700 text-lg mb-1">
+                    {eventFilter === 'registered'
+                      ? 'No Event Registrations Yet'
+                      : 'No Upcoming Events'}
+                  </h3>
+                  <p className="text-slate-400 text-sm max-w-sm mx-auto mb-4">
+                    {eventFilter === 'registered'
+                      ? 'You have not registered for any events yet. Click below to view all upcoming church events.'
+                      : 'Check back soon for new announcements and schedules.'}
+                  </p>
+                  {eventFilter === 'registered' && (
+                    <Button
+                      variant="primary"
+                      size="sm"
+                      onClick={() => setEventFilter('all')}
+                    >
+                      Browse All Events
+                    </Button>
+                  )}
+                </div>
+              ) : (
+                <div className="grid md:grid-cols-2 gap-6">
+                  {displayedEvents.map((event) => {
+                    const isRegistered = event.registeredAttendees?.includes(user?._id || '');
+                    const atCapacity =
+                      !!event.maxCapacity && (event.registeredAttendees?.length || 0) >= event.maxCapacity;
+
+                    return (
+                      <div
+                        key={event._id}
+                        className="bg-white rounded-3xl overflow-hidden border border-slate-200/80 shadow-sm hover:shadow-xl transition-all duration-300 flex flex-col"
+                      >
+                        {event.flierUrl ? (
+                          <div className="relative h-48 overflow-hidden">
+                            <img
+                              src={event.flierUrl}
+                              alt={event.title}
+                              className="w-full h-full object-cover"
+                            />
+                            {event.date && (
+                              <div className="absolute top-3 left-3 bg-slate-950/80 backdrop-blur-md text-white rounded-xl px-3 py-1.5 text-xs font-semibold flex items-center gap-1.5 border border-white/10">
+                                <CalendarDays className="w-3.5 h-3.5 text-secondary" />
+                                {new Date(event.date).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
+                              </div>
+                            )}
+                          </div>
+                        ) : (
+                          <div className="bg-gradient-to-r from-primary-dark via-primary to-slate-950 p-6 flex items-center justify-between text-white">
+                            <div>
+                              <span className="text-[11px] font-bold text-secondary uppercase tracking-widest block">
+                                LRT Fellowship
+                              </span>
+                              <h3 className="text-xl font-heading font-extrabold">{event.title}</h3>
+                            </div>
+                            <div className="w-12 h-12 rounded-2xl bg-white/10 border border-white/20 flex flex-col items-center justify-center font-heading">
+                              <span className="text-sm font-bold leading-none">
+                                {event.date ? new Date(event.date).getDate() : '--'}
+                              </span>
+                              <span className="text-[10px] text-blue-200 uppercase font-semibold">
+                                {event.date
+                                  ? new Date(event.date).toLocaleDateString('en-US', { month: 'short' })
+                                  : ''}
+                              </span>
+                            </div>
+                          </div>
+                        )}
+
+                        <div className="p-6 flex flex-col flex-1">
+                          {event.flierUrl && (
+                            <h3 className="font-heading font-bold text-slate-900 text-lg mb-2">
+                              {event.title}
+                            </h3>
+                          )}
+
+                          <p className="text-xs sm:text-sm text-slate-500 leading-relaxed mb-5 line-clamp-3">
+                            {event.description}
+                          </p>
+
+                          <div className="space-y-2 text-xs text-slate-600 mb-6 bg-slate-50 p-3.5 rounded-2xl border border-slate-100">
+                            {event.date && (
+                              <div className="flex items-center gap-2">
+                                <Clock className="w-3.5 h-3.5 text-primary" />
+                                <span>
+                                  {new Date(event.date).toLocaleDateString('en-US', {
+                                    weekday: 'long',
+                                    month: 'long',
+                                    day: 'numeric',
+                                  })}{' '}
+                                  at{' '}
+                                  {new Date(event.date).toLocaleTimeString([], {
+                                    hour: '2-digit',
+                                    minute: '2-digit',
+                                  })}
+                                </span>
+                              </div>
+                            )}
+                            <div className="flex items-center gap-2">
+                              <MapPin className="w-3.5 h-3.5 text-secondary-dark" />
+                              <span>{event.location}</span>
+                            </div>
+                          </div>
+
+                          <div className="mt-auto pt-3 border-t border-slate-100 flex items-center justify-between">
+                            <span className="text-xs text-slate-400">
+                              {event.maxCapacity
+                                ? `${event.registeredAttendees?.length || 0} / ${event.maxCapacity} spots registered`
+                                : `${event.registeredAttendees?.length || 0} registered`}
+                            </span>
+
+                            {isRegistered ? (
+                              <span className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                                <Check className="w-4 h-4 text-emerald-600" />
+                                Registered
+                              </span>
+                            ) : (
+                              <Button
+                                variant={atCapacity ? 'ghost' : 'secondary'}
+                                size="sm"
+                                onClick={() => handleEventRegister(event._id)}
+                                isLoading={registeringEventId === event._id}
+                                disabled={atCapacity}
+                              >
+                                {atCapacity ? 'Fully Booked' : 'Register Now'}
+                              </Button>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════
+              TAB 4: PRAYER REQUESTS IN-DASHBOARD
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'prayer' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Header with Submit CTA */}
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div>
+                  <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                    Prayer Requests & Intercession
+                  </h2>
+                  <p className="text-xs sm:text-sm text-slate-500">
+                    Track the prayers you have submitted and join the church in agreeing for others.
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-3">
+                  <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1">
+                    <button
+                      onClick={() => setPrayerWallTab('my')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        prayerWallTab === 'my'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      My Requests ({myPrayers.length})
+                    </button>
+                    <button
+                      onClick={() => setPrayerWallTab('community')}
+                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                        prayerWallTab === 'community'
+                          ? 'bg-white text-slate-900 shadow-sm'
+                          : 'text-slate-500 hover:text-slate-800'
+                      }`}
+                    >
+                      Community Wall ({publicPrayers.length})
+                    </button>
+                  </div>
+
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setPrayerModalOpen(true)}
+                    leftIcon={<Plus className="w-4 h-4" />}
+                  >
+                    New Request
+                  </Button>
+                </div>
+              </div>
+
+              {/* Prayer Requests Content */}
+              {prayerWallTab === 'my' ? (
+                myPrayers.length === 0 ? (
+                  <div className="text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                    <HeartHandshake className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                    <h3 className="font-heading font-bold text-slate-700 text-lg mb-1">
+                      No Personal Prayer Requests Yet
+                    </h3>
+                    <p className="text-slate-400 text-sm max-w-md mx-auto mb-5">
+                      You haven't submitted any prayer requests. The pastoral intercessory team is always ready to agree with you in faith.
+                    </p>
+                    <Button
+                      variant="secondary"
+                      size="sm"
+                      onClick={() => setPrayerModalOpen(true)}
+                      leftIcon={<Plus className="w-4 h-4" />}
+                    >
+                      Submit a Prayer Request
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="grid md:grid-cols-2 gap-5">
+                    {myPrayers.map((prayer) => {
+                      const statusStyles = {
+                        Answered: {
+                          badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
+                          border: 'border-l-4 border-l-emerald-500',
+                          icon: CheckCircle2,
+                        },
+                        Praying: {
+                          badge: 'bg-blue-50 text-blue-700 border-blue-200',
+                          border: 'border-l-4 border-l-primary',
+                          icon: HeartHandshake,
+                        },
+                        Pending: {
+                          badge: 'bg-amber-50 text-amber-700 border-amber-200',
+                          border: 'border-l-4 border-l-secondary',
+                          icon: Clock,
+                        },
+                      }[prayer.status || 'Pending'] || {
+                        badge: 'bg-slate-100 text-slate-700 border-slate-200',
+                        border: 'border-l-4 border-l-slate-400',
+                        icon: Clock,
+                      };
+                      const StatusIcon = statusStyles.icon;
+
+                      return (
+                        <div
+                          key={prayer._id}
+                          className={`bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow ${statusStyles.border}`}
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <span
+                              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl border ${statusStyles.badge}`}
+                            >
+                              <StatusIcon className="w-3.5 h-3.5" />
+                              {prayer.status}
+                            </span>
+                            <div className="flex items-center gap-2 text-xs text-slate-400">
+                              {prayer.isPrivate && (
+                                <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                  <Lock className="w-3 h-3 text-slate-400" />
+                                  Private
+                                </span>
+                              )}
+                              <span className="flex items-center gap-1">
+                                <Calendar className="w-3 h-3" />
+                                {new Date(prayer.createdAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                  year: 'numeric',
+                                })}
+                              </span>
+                            </div>
+                          </div>
+                          <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
+                            {prayer.request}
+                          </p>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )
+              ) : (
+                /* Community Wall Tab */
+                <div className="grid md:grid-cols-2 gap-5">
+                  {publicPrayers.length === 0 ? (
+                    <div className="col-span-2 text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                      <HeartHandshake className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <h3 className="font-heading font-bold text-slate-700 text-lg mb-1">
+                        Community Prayer Wall Empty
+                      </h3>
+                      <p className="text-slate-400 text-sm">
+                        Public prayer requests shared by church members will appear here.
+                      </p>
+                    </div>
+                  ) : (
+                    publicPrayers.map((prayer) => (
+                      <div
+                        key={prayer._id}
+                        className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow"
+                      >
+                        <div className="flex items-center justify-between mb-3">
+                          <div className="flex items-center gap-2">
+                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                              {prayer.user?.firstName?.[0] || 'M'}
+                            </div>
+                            <span className="text-xs font-bold text-slate-800">
+                              {prayer.user ? `${prayer.user.firstName} ${prayer.user.lastName}` : 'Anonymous Member'}
+                            </span>
+                          </div>
+                          <span className="text-[11px] text-slate-400">
+                            {new Date(prayer.createdAt).toLocaleDateString('en-US', {
+                              month: 'short',
+                              day: 'numeric',
+                            })}
+                          </span>
+                        </div>
+                        <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                          {prayer.request}
+                        </p>
+                      </div>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════
+              TAB 5: MY PROFILE IN-DASHBOARD
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'profile' && (
+            <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
+              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+                <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
+                  <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary via-primary to-primary-light text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-primary/20">
+                    {user?.firstName?.[0]}
+                    {user?.lastName?.[0]}
+                  </div>
+                  <div>
+                    <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-slate-900">
+                      {user?.firstName} {user?.lastName}
+                    </h2>
+                    <div className="flex items-center gap-2 mt-1">
+                      <span className="inline-flex items-center gap-1 text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-xl">
+                        <ShieldCheck className="w-3.5 h-3.5" />
+                        {user?.role || 'Member'}
+                      </span>
+                      <span className="text-xs text-slate-400 font-medium">
+                        Latter Rain Tabernacle
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {profileSuccessMsg && (
+                  <div className="mt-6 p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm flex items-center gap-2.5">
+                    <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                    <span>{profileSuccessMsg}</span>
+                  </div>
+                )}
+
+                {profileErrorMsg && (
+                  <div className="mt-6 p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-xs sm:text-sm flex items-center gap-2.5">
+                    <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                    <span>{profileErrorMsg}</span>
+                  </div>
+                )}
+
+                <form onSubmit={handleUpdateProfile} className="mt-6 space-y-4">
+                  <div className="grid sm:grid-cols-2 gap-4">
+                    <Input
+                      id="prof-firstName"
+                      label="First Name"
+                      value={profileForm.firstName}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({ ...p, firstName: e.target.value }))
+                      }
+                      required
+                    />
+                    <Input
+                      id="prof-lastName"
+                      label="Last Name"
+                      value={profileForm.lastName}
+                      onChange={(e) =>
+                        setProfileForm((p) => ({ ...p, lastName: e.target.value }))
+                      }
+                      required
+                    />
+                  </div>
+
+                  <Input
+                    id="prof-email"
+                    label="Email Address"
+                    value={user?.email || ''}
+                    disabled
+                    leftIcon={<Mail className="w-4 h-4 text-slate-400" />}
+                    className="bg-slate-100 text-slate-500 cursor-not-allowed"
+                  />
+                  <p className="text-[11px] text-slate-400 -mt-2">
+                    Email address is tied to your login credentials and cannot be modified here.
+                  </p>
+
+                  <Input
+                    id="prof-phone"
+                    label="Phone Number"
+                    placeholder="e.g. +237 677 000 000"
+                    value={profileForm.phoneNumber}
+                    onChange={(e) =>
+                      setProfileForm((p) => ({ ...p, phoneNumber: e.target.value }))
+                    }
+                    leftIcon={<Phone className="w-4 h-4 text-slate-400" />}
+                  />
+
+                  <div className="pt-4 flex justify-end">
+                    <Button
+                      type="submit"
+                      variant="primary"
+                      isLoading={isUpdatingProfile}
+                      leftIcon={<Check className="w-4 h-4" />}
+                    >
+                      Save Profile Changes
+                    </Button>
+                  </div>
+                </form>
+              </div>
+
+              {/* Security info card */}
+              <div className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm flex items-start gap-4">
+                <div className="w-10 h-10 rounded-xl bg-secondary/15 text-secondary-dark flex items-center justify-center flex-shrink-0">
+                  <Lock className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="font-heading font-bold text-slate-900 text-sm mb-0.5">
+                    Account Protection
+                  </h4>
+                  <p className="text-xs text-slate-500 leading-relaxed">
+                    Your session is securely authenticated with encrypted JWT tokens. Remember to sign out when accessing your account from a public device.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
         </main>
       </div>
+
+      {/* ── Submit Prayer Request Modal ── */}
+      {prayerModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"
+            onClick={() => setPrayerModalOpen(false)}
+          />
+
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-6 sm:p-8 overflow-hidden animate-slide-up">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-2.5">
+                <div className="w-9 h-9 rounded-xl bg-secondary/20 text-secondary-dark flex items-center justify-center">
+                  <HeartHandshake className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-extrabold text-slate-900 text-lg">
+                    New Prayer Request
+                  </h3>
+                  <p className="text-xs text-slate-400">Our intercessors will agree with you</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setPrayerModalOpen(false)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {prayerSuccessMsg && (
+              <div className="p-4 bg-emerald-50 border border-emerald-200 text-emerald-800 rounded-2xl text-xs sm:text-sm mb-4 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5 text-emerald-600 flex-shrink-0" />
+                <span>{prayerSuccessMsg}</span>
+              </div>
+            )}
+
+            {prayerErrorMsg && (
+              <div className="p-4 bg-red-50 border border-red-200 text-red-700 rounded-2xl text-xs sm:text-sm mb-4 flex items-center gap-2">
+                <AlertCircle className="w-5 h-5 text-red-500 flex-shrink-0" />
+                <span>{prayerErrorMsg}</span>
+              </div>
+            )}
+
+            <form onSubmit={handleSubmitPrayer} className="space-y-4">
+              <div>
+                <label className="text-xs font-bold uppercase tracking-wider text-slate-700 block mb-1.5">
+                  Your Prayer Need <span className="text-red-500">*</span>
+                </label>
+                <textarea
+                  rows={5}
+                  required
+                  placeholder="Share what's on your heart. The intercessory team will lift this up in prayer..."
+                  value={prayerForm.request}
+                  onChange={(e) =>
+                    setPrayerForm((prev) => ({ ...prev, request: e.target.value }))
+                  }
+                  className="w-full bg-slate-50 border border-slate-200 rounded-2xl p-4 text-xs sm:text-sm text-slate-800 focus:outline-none focus:bg-white focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all resize-none"
+                />
+                <p className="text-[11px] text-slate-400 mt-1">
+                  {prayerForm.request.length} characters
+                </p>
+              </div>
+
+              {/* Private Checkbox */}
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl border border-slate-200 hover:bg-slate-50 cursor-pointer transition-colors">
+                <input
+                  type="checkbox"
+                  checked={prayerForm.isPrivate}
+                  onChange={(e) =>
+                    setPrayerForm((prev) => ({ ...prev, isPrivate: e.target.checked }))
+                  }
+                  className="mt-0.5 rounded border-slate-300 text-primary focus:ring-primary/30"
+                />
+                <div>
+                  <p className="text-xs font-bold text-slate-800">Keep this request private</p>
+                  <p className="text-[11px] text-slate-400">
+                    Only church pastors and the intercessory team will see this. It will not appear on the community wall.
+                  </p>
+                </div>
+              </label>
+
+              <div className="pt-2 flex items-center justify-end gap-3">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPrayerModalOpen(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  variant="secondary"
+                  size="sm"
+                  isLoading={isSubmittingPrayer}
+                  leftIcon={<Send className="w-4 h-4" />}
+                >
+                  Submit Prayer
+                </Button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
