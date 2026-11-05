@@ -17,6 +17,13 @@ export class PrayerRequestService {
   }
 
   /**
+   * Get prayer requests for a specific user
+   */
+  public static async getByUser(userId: string) {
+    return await PrayerRequest.find({ user: userId }).sort({ createdAt: -1 });
+  }
+
+  /**
    * Get all prayer requests (Admin/Pastor view)
    */
   public static async getAll() {

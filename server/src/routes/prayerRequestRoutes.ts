@@ -31,8 +31,13 @@ const optionalAuth = (req: AuthRequest, res: any, next: any) => {
 
 router.post('/', optionalAuth, PrayerRequestController.create);
 
-// Protected routes for Admins and Pastors
+// Protected routes
 router.use(protect);
+
+// Authenticated member route: Get personal prayer requests
+router.get('/my', PrayerRequestController.getMy);
+
+// Admin & Pastor routes
 router.use(authorize('Admin', 'Pastor'));
 
 router.get('/', PrayerRequestController.getAll);

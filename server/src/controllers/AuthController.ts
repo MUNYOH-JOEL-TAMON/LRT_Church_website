@@ -51,4 +51,16 @@ export class AuthController {
       res.status(404).json({ success: false, message: error.message });
     }
   }
+
+  /**
+   * Update personal profile of authenticated user
+   */
+  public static async updateProfile(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      const updatedUser = await AuthService.updateProfile(req.user.id, req.body);
+      res.status(200).json({ success: true, data: updatedUser, message: 'Profile updated successfully' });
+    } catch (error: any) {
+      res.status(400).json({ success: false, message: error.message });
+    }
+  }
 }

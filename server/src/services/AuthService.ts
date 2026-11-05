@@ -87,4 +87,26 @@ export class AuthService {
     }
     return user;
   }
+
+  /**
+   * Update a user's personal profile
+   */
+  public static async updateProfile(id: string, data: { firstName?: string; lastName?: string; phoneNumber?: string }) {
+    const { firstName, lastName, phoneNumber } = data;
+    const updateData: any = {};
+    if (firstName) updateData.firstName = firstName.trim();
+    if (lastName) updateData.lastName = lastName.trim();
+    if (phoneNumber !== undefined) updateData.phoneNumber = phoneNumber.trim();
+
+    const user = await User.findByIdAndUpdate(
+      id,
+      { $set: updateData },
+      { new: true, runValidators: true }
+    ).select('-passwordHash');
+
+    if (!user) {
+      throw new Error('User not found');
+    }
+    return user;
+  }
 }

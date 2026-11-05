@@ -20,6 +20,23 @@ export class PrayerRequestController {
   }
 
   /**
+   * Get prayer requests for the authenticated user
+   * GET /api/v1/prayer-requests/my
+   */
+  public static async getMy(req: AuthRequest, res: Response): Promise<void> {
+    try {
+      if (!req.user || !req.user.id) {
+        res.status(401).json({ success: false, message: 'Not authorized' });
+        return;
+      }
+      const requests = await PrayerRequestService.getByUser(req.user.id);
+      res.status(200).json({ success: true, data: requests });
+    } catch (error: any) {
+      res.status(500).json({ success: false, message: error.message });
+    }
+  }
+
+  /**
    * Get all prayer requests (For Admins/Pastors)
    * GET /api/v1/prayer-requests
    */
