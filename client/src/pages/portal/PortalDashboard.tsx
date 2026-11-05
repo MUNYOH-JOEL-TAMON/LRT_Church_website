@@ -407,37 +407,37 @@ const PortalDashboard = () => {
       {/* ── Main Content Area ── */}
       <div className="flex-1 lg:ml-72 flex flex-col min-w-0">
         {/* Top Sticky Bar */}
-        <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-4 sm:px-8 py-3.5 flex items-center justify-between">
-          <div className="flex items-center gap-3">
+        <header className="sticky top-0 z-30 bg-white/85 backdrop-blur-xl border-b border-slate-200/80 px-3.5 sm:px-8 py-3 sm:py-3.5 flex items-center justify-between">
+          <div className="flex items-center gap-2.5 sm:gap-3 min-w-0">
             <button
               onClick={() => setIsMobileMenuOpen(true)}
-              className="p-2 -ml-2 rounded-xl hover:bg-slate-100 text-slate-600 lg:hidden transition-colors cursor-pointer"
+              className="p-2 -ml-1 sm:-ml-2 rounded-xl hover:bg-slate-100 text-slate-600 lg:hidden transition-colors cursor-pointer flex-shrink-0"
               aria-label="Open portal navigation"
             >
-              <Menu className="w-6 h-6" />
+              <Menu className="w-5 h-5 sm:w-6 sm:h-6" />
             </button>
-            <div>
-              <h1 className="text-lg sm:text-xl font-heading font-extrabold text-slate-900 capitalize">
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-xl font-heading font-extrabold text-slate-900 capitalize truncate">
                 {activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ')}
               </h1>
-              <p className="text-xs text-slate-400 hidden sm:block">
+              <p className="text-xs text-slate-400 hidden sm:block truncate">
                 Latter Rain Tabernacle • Member Sanctuary
               </p>
             </div>
           </div>
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             <button
               onClick={() => fetchPortalData()}
               title="Refresh data"
-              className="p-2.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors cursor-pointer"
+              className="p-2 sm:p-2.5 rounded-xl hover:bg-slate-100 text-slate-500 hover:text-primary transition-colors cursor-pointer"
             >
               <RefreshCw className={`w-4 h-4 ${isLoadingData ? 'animate-spin text-primary' : ''}`} />
             </button>
 
             <button
               onClick={() => setPrayerModalOpen(true)}
-              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary-light hover:from-amber-400 hover:to-secondary text-slate-950 text-xs font-extrabold px-4 py-2 rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer"
+              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary-light hover:from-amber-400 hover:to-secondary text-slate-950 text-xs font-extrabold px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer"
             >
               <Plus className="w-4 h-4 text-slate-950" />
               Submit Prayer
@@ -445,7 +445,7 @@ const PortalDashboard = () => {
 
             <button
               onClick={() => setActiveTab('profile')}
-              className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs hover:bg-primary hover:text-white transition-all cursor-pointer"
+              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs hover:bg-primary hover:text-white transition-all cursor-pointer"
               title="My Profile"
             >
               {user?.firstName?.[0]}
@@ -455,7 +455,7 @@ const PortalDashboard = () => {
         </header>
 
         {/* Main Tab Pages */}
-        <main className="flex-1 p-4 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto">
+        <main className="flex-1 p-3.5 sm:p-6 lg:p-8 max-w-7xl w-full mx-auto min-w-0 overflow-x-hidden">
           {/* ══════════════════════════════════════════════════════════
               TAB 1: OVERVIEW
              ══════════════════════════════════════════════════════════ */}
@@ -742,6 +742,16 @@ const PortalDashboard = () => {
                               <p className="text-xs sm:text-sm text-slate-700 leading-relaxed line-clamp-2">
                                 {p.request}
                               </p>
+                              {p.request.length > 80 && (
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedPrayerDetail(p)}
+                                  className="mt-2 inline-flex items-center gap-1 text-[11px] font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer group"
+                                >
+                                  <span>Read full request</span>
+                                  <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform text-secondary-dark" />
+                                </button>
+                              )}
                             </div>
                           );
                         })}
@@ -885,10 +895,10 @@ const PortalDashboard = () => {
           {activeTab === 'sermons' && (
             <div className="space-y-6 animate-fade-in">
               {/* Header with Search */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm">
                 <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                   <div>
-                    <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                    <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-slate-900">
                       Sermon Archive
                     </h2>
                     <p className="text-xs sm:text-sm text-slate-500">
@@ -921,7 +931,7 @@ const PortalDashboard = () => {
                   </p>
                 </div>
               ) : (
-                <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
                   {filteredSermons.map((sermon) => (
                     <div
                       key={sermon._id}
@@ -995,9 +1005,9 @@ const PortalDashboard = () => {
           {activeTab === 'events' && (
             <div className="space-y-6 animate-fade-in">
               {/* Header with Filter Pills */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                  <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-slate-900">
                     Church Events & Fellowships
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500">
@@ -1005,10 +1015,10 @@ const PortalDashboard = () => {
                   </p>
                 </div>
 
-                <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1 self-start sm:self-auto">
+                <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1 w-full sm:w-auto">
                   <button
                     onClick={() => setEventFilter('all')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       eventFilter === 'all'
                         ? 'bg-white text-slate-900 shadow-sm'
                         : 'text-slate-500 hover:text-slate-800'
@@ -1018,7 +1028,7 @@ const PortalDashboard = () => {
                   </button>
                   <button
                     onClick={() => setEventFilter('registered')}
-                    className={`px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                    className={`flex-1 sm:flex-initial px-4 py-2 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                       eventFilter === 'registered'
                         ? 'bg-secondary text-slate-950 shadow-sm'
                         : 'text-slate-500 hover:text-slate-800'
@@ -1054,7 +1064,7 @@ const PortalDashboard = () => {
                   )}
                 </div>
               ) : (
-                <div className="grid md:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6">
                   {displayedEvents.map((event) => {
                     const isRegistered = event.registeredAttendees?.includes(user?._id || '');
                     const atCapacity =
@@ -1177,9 +1187,9 @@ const PortalDashboard = () => {
           {activeTab === 'prayer' && (
             <div className="space-y-6 animate-fade-in">
               {/* Header with Submit CTA */}
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
-                  <h2 className="text-2xl font-heading font-extrabold text-slate-900">
+                  <h2 className="text-xl sm:text-2xl font-heading font-extrabold text-slate-900">
                     Prayer Requests & Intercession
                   </h2>
                   <p className="text-xs sm:text-sm text-slate-500">
@@ -1187,11 +1197,11 @@ const PortalDashboard = () => {
                   </p>
                 </div>
 
-                <div className="flex items-center gap-3">
-                  <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1">
+                <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
+                  <div className="inline-flex p-1 bg-slate-100 rounded-2xl gap-1 w-full sm:w-auto">
                     <button
                       onClick={() => setPrayerWallTab('my')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         prayerWallTab === 'my'
                           ? 'bg-white text-slate-900 shadow-sm'
                           : 'text-slate-500 hover:text-slate-800'
@@ -1201,7 +1211,7 @@ const PortalDashboard = () => {
                     </button>
                     <button
                       onClick={() => setPrayerWallTab('community')}
-                      className={`px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
+                      className={`flex-1 sm:flex-initial px-3.5 py-1.5 rounded-xl text-xs font-bold transition-all cursor-pointer ${
                         prayerWallTab === 'community'
                           ? 'bg-white text-slate-900 shadow-sm'
                           : 'text-slate-500 hover:text-slate-800'
@@ -1216,6 +1226,7 @@ const PortalDashboard = () => {
                     size="sm"
                     onClick={() => setPrayerModalOpen(true)}
                     leftIcon={<Plus className="w-4 h-4" />}
+                    className="w-full sm:w-auto"
                   >
                     New Request
                   </Button>
@@ -1243,7 +1254,7 @@ const PortalDashboard = () => {
                     </Button>
                   </div>
                 ) : (
-                  <div className="grid md:grid-cols-2 gap-5">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                     {myPrayers.map((prayer) => {
                       const statusStyles = {
                         Answered: {
@@ -1267,39 +1278,65 @@ const PortalDashboard = () => {
                         icon: Clock,
                       };
                       const StatusIcon = statusStyles.icon;
+                      const isLong = prayer.request.length > 110;
+                      const previewText = isLong
+                        ? `${prayer.request.slice(0, 110).trimEnd()}…`
+                        : prayer.request;
 
                       return (
                         <div
                           key={prayer._id}
-                          className={`bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow ${statusStyles.border}`}
+                          className={`bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between ${statusStyles.border}`}
                         >
-                          <div className="flex items-center justify-between mb-3">
-                            <span
-                              className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl border ${statusStyles.badge}`}
-                            >
-                              <StatusIcon className="w-3.5 h-3.5" />
-                              {prayer.status}
-                            </span>
-                            <div className="flex items-center gap-2 text-xs text-slate-400">
-                              {prayer.isPrivate && (
-                                <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
-                                  <Lock className="w-3 h-3 text-slate-400" />
-                                  Private
-                                </span>
-                              )}
-                              <span className="flex items-center gap-1">
-                                <Calendar className="w-3 h-3" />
-                                {new Date(prayer.createdAt).toLocaleDateString('en-US', {
-                                  month: 'short',
-                                  day: 'numeric',
-                                  year: 'numeric',
-                                })}
+                          <div>
+                            <div className="flex items-center justify-between mb-3 gap-2">
+                              <span
+                                className={`inline-flex items-center gap-1.5 text-xs font-bold px-3 py-1 rounded-xl border ${statusStyles.badge}`}
+                              >
+                                <StatusIcon className="w-3.5 h-3.5" />
+                                {prayer.status}
                               </span>
+                              <div className="flex items-center gap-2 text-xs text-slate-400">
+                                {prayer.isPrivate && (
+                                  <span className="inline-flex items-center gap-1 text-[11px] text-slate-500 bg-slate-100 px-2 py-0.5 rounded-md">
+                                    <Lock className="w-3 h-3 text-slate-400" />
+                                    Private
+                                  </span>
+                                )}
+                                <span className="flex items-center gap-1">
+                                  <Calendar className="w-3 h-3" />
+                                  {new Date(prayer.createdAt).toLocaleDateString('en-US', {
+                                    month: 'short',
+                                    day: 'numeric',
+                                    year: 'numeric',
+                                  })}
+                                </span>
+                              </div>
                             </div>
+                            <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
+                              {previewText}
+                            </p>
                           </div>
-                          <p className="text-slate-800 text-sm leading-relaxed whitespace-pre-wrap">
-                            {prayer.request}
-                          </p>
+                          <div className="pt-3 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            {isLong ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPrayerDetail(prayer)}
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer group"
+                              >
+                                <span>Read full request</span>
+                                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-secondary-dark" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPrayerDetail(prayer)}
+                                className="text-[11px] font-semibold text-slate-500 hover:text-primary transition-colors cursor-pointer"
+                              >
+                                View Details
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })}
@@ -1307,9 +1344,9 @@ const PortalDashboard = () => {
                 )
               ) : (
                 /* Community Wall Tab */
-                <div className="grid md:grid-cols-2 gap-5">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
                   {publicPrayers.length === 0 ? (
-                    <div className="col-span-2 text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
+                    <div className="col-span-full text-center py-16 bg-white rounded-3xl border border-slate-200/80 shadow-sm p-8">
                       <HeartHandshake className="w-12 h-12 text-slate-300 mx-auto mb-3" />
                       <h3 className="font-heading font-bold text-slate-700 text-lg mb-1">
                         Community Prayer Wall Empty
@@ -1329,31 +1366,57 @@ const PortalDashboard = () => {
                         u && typeof u === 'object' && u.firstName
                           ? u.firstName[0].toUpperCase()
                           : 'M';
+                      const isLong = prayer.request.length > 110;
+                      const previewText = isLong
+                        ? `${prayer.request.slice(0, 110).trimEnd()}…`
+                        : prayer.request;
 
                       return (
                         <div
                           key={prayer._id}
-                          className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow"
+                          className="bg-white rounded-3xl p-5 sm:p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow flex flex-col justify-between"
                         >
-                          <div className="flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
-                              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                                {authorInitial}
+                          <div>
+                            <div className="flex items-center justify-between mb-3 gap-2">
+                              <div className="flex items-center gap-2 min-w-0">
+                                <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs flex-shrink-0">
+                                  {authorInitial}
+                                </div>
+                                <span className="text-xs font-bold text-slate-800 truncate">
+                                  {authorName}
+                                </span>
                               </div>
-                              <span className="text-xs font-bold text-slate-800">
-                                {authorName}
+                              <span className="text-[11px] text-slate-400 flex-shrink-0">
+                                {new Date(prayer.createdAt).toLocaleDateString('en-US', {
+                                  month: 'short',
+                                  day: 'numeric',
+                                })}
                               </span>
                             </div>
-                            <span className="text-[11px] text-slate-400">
-                              {new Date(prayer.createdAt).toLocaleDateString('en-US', {
-                                month: 'short',
-                                day: 'numeric',
-                              })}
-                            </span>
+                            <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                              {previewText}
+                            </p>
                           </div>
-                          <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
-                            {prayer.request}
-                          </p>
+                          <div className="pt-3 mt-4 border-t border-slate-100 flex items-center justify-between">
+                            {isLong ? (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPrayerDetail(prayer)}
+                                className="inline-flex items-center gap-1.5 text-xs font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer group"
+                              >
+                                <span>Read full request</span>
+                                <ChevronRight className="w-3.5 h-3.5 group-hover:translate-x-0.5 transition-transform text-secondary-dark" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={() => setSelectedPrayerDetail(prayer)}
+                                className="text-[11px] font-semibold text-slate-500 hover:text-primary transition-colors cursor-pointer"
+                              >
+                                View Details
+                              </button>
+                            )}
+                          </div>
                         </div>
                       );
                     })
@@ -1368,7 +1431,7 @@ const PortalDashboard = () => {
              ══════════════════════════════════════════════════════════ */}
           {activeTab === 'profile' && (
             <div className="max-w-2xl mx-auto space-y-6 animate-fade-in">
-              <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-sm">
+              <div className="bg-white rounded-3xl p-5 sm:p-8 border border-slate-200/80 shadow-sm">
                 <div className="flex items-center gap-4 pb-6 border-b border-slate-100">
                   <div className="w-16 h-16 rounded-3xl bg-gradient-to-br from-primary via-primary to-primary-light text-white font-extrabold text-2xl flex items-center justify-center shadow-lg shadow-primary/20">
                     {user?.firstName?.[0]}
@@ -1582,6 +1645,113 @@ const PortalDashboard = () => {
                 </Button>
               </div>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* ── View Full Prayer Request Detail Modal ── */}
+      {selectedPrayerDetail && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"
+            onClick={() => setSelectedPrayerDetail(null)}
+          />
+
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-lg p-5 sm:p-7 overflow-hidden animate-slide-up flex flex-col max-h-[88vh]">
+            {/* Header */}
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-4 gap-3">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="w-10 h-10 rounded-2xl bg-secondary/20 text-secondary-dark flex items-center justify-center flex-shrink-0">
+                  <HeartHandshake className="w-5 h-5" />
+                </div>
+                <div className="min-w-0">
+                  <h3 className="font-heading font-extrabold text-slate-900 text-base sm:text-lg leading-tight truncate">
+                    Prayer Request
+                  </h3>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <span className="text-[11px] text-slate-400">
+                      {new Date(selectedPrayerDetail.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                      })}
+                    </span>
+                    {selectedPrayerDetail.isPrivate && (
+                      <span className="inline-flex items-center gap-1 text-[10px] font-semibold text-rose-600 bg-rose-50 px-2 py-0.5 rounded-md border border-rose-100">
+                        <Lock className="w-2.5 h-2.5" /> Private
+                      </span>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <button
+                onClick={() => setSelectedPrayerDetail(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer flex-shrink-0"
+                aria-label="Close modal"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            {/* Submitter & Status Row */}
+            <div className="flex items-center justify-between mb-4 bg-slate-50/80 p-3 rounded-2xl border border-slate-100 gap-2">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="w-8 h-8 rounded-xl bg-primary/10 text-primary font-bold flex items-center justify-center text-xs flex-shrink-0">
+                  {(() => {
+                    const u: any = selectedPrayerDetail.user;
+                    if (u && typeof u === 'object' && u.firstName) return u.firstName[0].toUpperCase();
+                    return 'M';
+                  })()}
+                </div>
+                <div className="min-w-0">
+                  <p className="text-xs font-bold text-slate-800 truncate">
+                    {(() => {
+                      const u: any = selectedPrayerDetail.user;
+                      if (!u) return 'Anonymous';
+                      if (typeof u === 'object' && (u.firstName || u.lastName)) {
+                        return `${u.firstName || ''} ${u.lastName || ''}`.trim();
+                      }
+                      return 'Church Member';
+                    })()}
+                  </p>
+                  <p className="text-[10px] text-slate-400">Prayer Requester</p>
+                </div>
+              </div>
+
+              <span
+                className={`inline-flex items-center gap-1 text-xs font-bold px-3 py-1 rounded-xl border flex-shrink-0 ${
+                  selectedPrayerDetail.status === 'Answered'
+                    ? 'bg-emerald-50 text-emerald-700 border-emerald-200'
+                    : selectedPrayerDetail.status === 'Praying'
+                    ? 'bg-blue-50 text-blue-700 border-blue-200'
+                    : 'bg-amber-50 text-amber-700 border-amber-200'
+                }`}
+              >
+                {selectedPrayerDetail.status || 'Pending'}
+              </span>
+            </div>
+
+            {/* Full Request Body */}
+            <div className="flex-1 overflow-y-auto mb-4 p-4 rounded-2xl bg-slate-50/60 border border-slate-100">
+              <p className="text-slate-800 text-xs sm:text-sm leading-relaxed whitespace-pre-wrap">
+                {selectedPrayerDetail.request}
+              </p>
+            </div>
+
+            {/* Footer */}
+            <div className="flex items-center justify-between pt-3 border-t border-slate-100 gap-3">
+              <p className="text-[11px] text-slate-400 italic hidden sm:block truncate">
+                "For where two or three are gathered together in my name, there am I in the midst of them."
+              </p>
+              <Button
+                variant="primary"
+                size="sm"
+                onClick={() => setSelectedPrayerDetail(null)}
+                className="w-full sm:w-auto"
+              >
+                Close
+              </Button>
+            </div>
           </div>
         </div>
       )}
