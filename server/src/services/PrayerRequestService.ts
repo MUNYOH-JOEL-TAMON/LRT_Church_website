@@ -13,6 +13,11 @@ export class PrayerRequestService {
       user: userId || undefined,
     });
 
+    // Populate user details so immediate responses and live UI have author firstName & lastName
+    if (userId) {
+      await request.populate('user', 'firstName lastName email');
+    }
+
     return request;
   }
 
@@ -20,7 +25,7 @@ export class PrayerRequestService {
    * Get prayer requests for a specific user
    */
   public static async getByUser(userId: string) {
-    return await PrayerRequest.find({ user: userId }).sort({ createdAt: -1 });
+    return await PrayerRequest.find({ user: userId }).populate('user', 'firstName lastName email').sort({ createdAt: -1 });
   }
 
   /**

@@ -100,14 +100,18 @@ const ManagePrayerRequests = () => {
     {
       key: 'user',
       header: 'Submitted By',
-      render: (item: PrayerRequest) =>
-        item.user ? (
-          <span className="text-slate-700">
-            {(item.user as any).firstName} {(item.user as any).lastName}
-          </span>
-        ) : (
-          <span className="text-slate-400 italic">Anonymous</span>
-        ),
+      render: (item: PrayerRequest) => {
+        const u: any = item.user;
+        if (!u) return <span className="text-slate-400 italic">Anonymous</span>;
+        if (typeof u === 'object' && (u.firstName || u.lastName)) {
+          return (
+            <span className="text-slate-700 font-medium">
+              {`${u.firstName || ''} ${u.lastName || ''}`.trim()}
+            </span>
+          );
+        }
+        return <span className="text-slate-700">Church Member</span>;
+      },
     },
     {
       key: 'status',
@@ -180,9 +184,14 @@ const ManagePrayerRequests = () => {
                 <div className="flex items-center gap-2 mb-1">
                   <User className="w-3.5 h-3.5 text-slate-400" />
                   <span className="text-sm font-semibold text-slate-700">
-                    {selectedRequest.user
-                      ? `${(selectedRequest.user as any).firstName} ${(selectedRequest.user as any).lastName}`
-                      : 'Anonymous'}
+                    {(() => {
+                      const u: any = selectedRequest.user;
+                      if (!u) return 'Anonymous';
+                      if (typeof u === 'object' && (u.firstName || u.lastName)) {
+                        return `${u.firstName || ''} ${u.lastName || ''}`.trim();
+                      }
+                      return 'Church Member';
+                    })()}
                   </span>
                   {selectedRequest.isPrivate && (
                     <span className="inline-flex items-center gap-1 text-xs bg-rose-100 text-rose-600 font-semibold px-2 py-0.5 rounded-full">
