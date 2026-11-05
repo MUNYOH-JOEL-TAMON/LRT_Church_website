@@ -10,7 +10,6 @@ import {
   PenLine,
   Image,
   LogOut,
-  Bell,
   ChevronRight,
   Menu,
   X,
