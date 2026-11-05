@@ -112,6 +112,16 @@ const AdminLayout = () => {
               </Link>
             );
           })}
+
+          <div className="pt-3 px-1 border-t border-white/10 mt-2">
+            <Link
+              to="/portal/dashboard"
+              className="flex items-center gap-3 px-3 py-2.5 rounded-xl text-xs font-semibold text-slate-300 hover:text-secondary hover:bg-white/5 transition-all"
+            >
+              <Users className="w-4 h-4 text-primary-light" />
+              <span>Go to Member Portal →</span>
+            </Link>
+          </div>
         </nav>
 
         {/* User + Logout */}
@@ -158,10 +168,12 @@ const AdminLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <button className="relative p-2.5 rounded-xl hover:bg-slate-100 transition-colors text-slate-500">
-              <Bell className="w-5 h-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-red-500 rounded-full"></span>
-            </button>
+            <Link
+              to="/portal/dashboard"
+              className="text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 py-2 rounded-xl transition-all flex items-center gap-1.5"
+            >
+              Member Portal
+            </Link>
             <Link
               to="/"
               className="text-xs lg:text-sm text-slate-500 hover:text-primary px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors"

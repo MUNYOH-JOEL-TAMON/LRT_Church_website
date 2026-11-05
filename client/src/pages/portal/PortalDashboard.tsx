@@ -152,9 +152,19 @@ const PortalDashboard = () => {
         isPrivate: prayerForm.isPrivate,
       });
       if (res.data) {
-        setMyPrayers((prev) => [res.data!, ...prev]);
-        if (!res.data.isPrivate) {
-          setPublicPrayers((prev) => [res.data!, ...prev]);
+        // Ensure user object is populated with current user's profile if missing
+        const newPrayer = { ...res.data };
+        if (!newPrayer.user || typeof newPrayer.user !== 'object' || !newPrayer.user.firstName) {
+          newPrayer.user = {
+            _id: user?._id || '',
+            firstName: user?.firstName || 'Member',
+            lastName: user?.lastName || '',
+            email: user?.email || '',
+          };
+        }
+        setMyPrayers((prev) => [newPrayer, ...prev]);
+        if (!newPrayer.isPrivate) {
+          setPublicPrayers((prev) => [newPrayer, ...prev]);
         }
       }
       setPrayerSuccessMsg('Your prayer request has been received by the intercessory team.');
@@ -326,13 +336,13 @@ const PortalDashboard = () => {
             {isAdminOrPastor && (
               <Link
                 to="/admin/dashboard"
-                className="flex items-center justify-between py-2.5 text-xs text-secondary hover:text-secondary-light font-bold transition-colors"
+                className="flex items-center justify-between py-2 text-xs text-slate-400 hover:text-secondary transition-colors"
               >
                 <span className="flex items-center gap-2">
-                  <ShieldCheck className="w-3.5 h-3.5 text-secondary" />
-                  Admin Dashboard
+                  <ShieldCheck className="w-3.5 h-3.5 text-slate-400" />
+                  Admin Console
                 </span>
-                <ChevronRight className="w-3 h-3 text-secondary" />
+                <ChevronRight className="w-3 h-3 text-slate-400" />
               </Link>
             )}
           </div>
@@ -351,8 +361,8 @@ const PortalDashboard = () => {
               </p>
               <div className="flex items-center gap-1.5 mt-0.5">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-400 animate-pulse" />
-                <span className="text-[11px] text-slate-300 font-medium capitalize truncate">
-                  {user?.role || 'Member'}
+                <span className="text-[11px] text-slate-300 font-medium truncate">
+                  Church Member
                 </span>
               </div>
             </div>
@@ -789,8 +799,8 @@ const PortalDashboard = () => {
                           {user?.firstName} {user?.lastName}
                         </h4>
                         <div className="inline-flex items-center gap-1.5 text-xs text-slate-500">
-                          <ShieldCheck className="w-3.5 h-3.5 text-secondary-dark" />
-                          <span className="capitalize">{user?.role || 'Church Member'}</span>
+                          <CheckCircle2 className="w-3.5 h-3.5 text-emerald-500" />
+                          <span>Church Member</span>
                         </div>
                       </div>
                     </div>
@@ -1283,32 +1293,44 @@ const PortalDashboard = () => {
                       </p>
                     </div>
                   ) : (
-                    publicPrayers.map((prayer) => (
-                      <div
-                        key={prayer._id}
-                        className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow"
-                      >
-                        <div className="flex items-center justify-between mb-3">
-                          <div className="flex items-center gap-2">
-                            <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
-                              {prayer.user?.firstName?.[0] || 'M'}
+                    publicPrayers.map((prayer) => {
+                      const u: any = prayer.user;
+                      const authorName =
+                        u && typeof u === 'object' && (u.firstName || u.lastName)
+                          ? `${u.firstName || ''} ${u.lastName || ''}`.trim()
+                          : 'Church Member';
+                      const authorInitial =
+                        u && typeof u === 'object' && u.firstName
+                          ? u.firstName[0].toUpperCase()
+                          : 'M';
+
+                      return (
+                        <div
+                          key={prayer._id}
+                          className="bg-white rounded-3xl p-6 border border-slate-200/80 shadow-sm hover:shadow-md transition-shadow"
+                        >
+                          <div className="flex items-center justify-between mb-3">
+                            <div className="flex items-center gap-2">
+                              <div className="w-7 h-7 rounded-lg bg-primary/10 text-primary font-bold flex items-center justify-center text-xs">
+                                {authorInitial}
+                              </div>
+                              <span className="text-xs font-bold text-slate-800">
+                                {authorName}
+                              </span>
                             </div>
-                            <span className="text-xs font-bold text-slate-800">
-                              {prayer.user ? `${prayer.user.firstName} ${prayer.user.lastName}` : 'Anonymous Member'}
+                            <span className="text-[11px] text-slate-400">
+                              {new Date(prayer.createdAt).toLocaleDateString('en-US', {
+                                month: 'short',
+                                day: 'numeric',
+                              })}
                             </span>
                           </div>
-                          <span className="text-[11px] text-slate-400">
-                            {new Date(prayer.createdAt).toLocaleDateString('en-US', {
-                              month: 'short',
-                              day: 'numeric',
-                            })}
-                          </span>
+                          <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
+                            {prayer.request}
+                          </p>
                         </div>
-                        <p className="text-slate-700 text-sm leading-relaxed whitespace-pre-wrap">
-                          {prayer.request}
-                        </p>
-                      </div>
-                    ))
+                      );
+                    })
                   )}
                 </div>
               )}
@@ -1331,9 +1353,9 @@ const PortalDashboard = () => {
                       {user?.firstName} {user?.lastName}
                     </h2>
                     <div className="flex items-center gap-2 mt-1">
-                      <span className="inline-flex items-center gap-1 text-xs font-bold bg-primary/10 text-primary px-3 py-1 rounded-xl">
-                        <ShieldCheck className="w-3.5 h-3.5" />
-                        {user?.role || 'Member'}
+                      <span className="inline-flex items-center gap-1 text-xs font-bold bg-emerald-50 text-emerald-700 border border-emerald-200 px-3 py-1 rounded-xl">
+                        <CheckCircle2 className="w-3.5 h-3.5" />
+                        Church Member
                       </span>
                       <span className="text-xs text-slate-400 font-medium">
                         Latter Rain Tabernacle
