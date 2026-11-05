@@ -10,6 +10,7 @@ import {
   Image,
   TrendingUp,
   Loader2,
+  ShieldCheck,
 } from 'lucide-react';
 import StatCard from '../../components/admin/StatCard';
 import useAuthStore from '../../store/useAuthStore';
@@ -202,11 +203,14 @@ const DashboardOverview = () => {
         <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-white/5 rounded-full translate-y-1/2"></div>
         <div className="relative z-10 flex items-center justify-between">
           <div>
-            <p className="text-secondary font-semibold text-sm tracking-widest uppercase mb-2">Admin Dashboard</p>
-            <h2 className="text-3xl font-heading font-extrabold mb-2">
-              Welcome back, {user?.firstName}! 👋
+            <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-secondary font-bold text-xs uppercase tracking-widest mb-3">
+              <ShieldCheck className="w-3.5 h-3.5" />
+              <span>Admin Management</span>
+            </div>
+            <h2 className="text-3xl font-heading font-extrabold mb-2 text-white">
+              Welcome back, {user?.firstName}!
             </h2>
-            <p className="text-blue-100 max-w-lg">
+            <p className="text-blue-100 max-w-lg text-sm">
               Here is an overview of your church platform. Manage members, content, and events all from one place.
             </p>
           </div>
