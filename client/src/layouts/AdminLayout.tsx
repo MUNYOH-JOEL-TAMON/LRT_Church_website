@@ -168,12 +168,6 @@ const AdminLayout = () => {
           </div>
           <div className="flex items-center gap-3">
             <Link
-              to="/portal/dashboard"
-              className="text-xs font-bold text-primary bg-primary/10 hover:bg-primary hover:text-white px-3 py-2 rounded-xl transition-all flex items-center gap-1.5"
-            >
-              Member Portal
-            </Link>
-            <Link
               to="/"
               className="text-xs lg:text-sm text-slate-500 hover:text-primary px-2.5 py-2 rounded-lg hover:bg-slate-50 transition-colors"
             >
