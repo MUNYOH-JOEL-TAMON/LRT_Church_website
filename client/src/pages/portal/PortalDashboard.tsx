@@ -56,6 +56,7 @@ const PortalDashboard = () => {
   // Action states
   const [registeringEventId, setRegisteringEventId] = useState<string | null>(null);
   const [prayerModalOpen, setPrayerModalOpen] = useState(false);
+  const [selectedPrayerDetail, setSelectedPrayerDetail] = useState<PrayerRequest | null>(null);
   const [prayerForm, setPrayerForm] = useState({ request: '', isPrivate: false });
   const [isSubmittingPrayer, setIsSubmittingPrayer] = useState(false);
   const [prayerSuccessMsg, setPrayerSuccessMsg] = useState('');
@@ -108,6 +109,31 @@ const PortalDashboard = () => {
 
   useEffect(() => {
     fetchPortalData();
+  }, []);
+
+  // Prevent body scroll when mobile drawer or modal is open
+  useEffect(() => {
+    if (isMobileMenuOpen || prayerModalOpen || selectedPrayerDetail) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [isMobileMenuOpen, prayerModalOpen, selectedPrayerDetail]);
+
+  // Close modals on Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') {
+        setIsMobileMenuOpen(false);
+        setPrayerModalOpen(false);
+        setSelectedPrayerDetail(null);
+      }
+    };
+    window.addEventListener('keydown', handleEsc);
+    return () => window.removeEventListener('keydown', handleEsc);
   }, []);
 
   // Update profileForm if user changes in store

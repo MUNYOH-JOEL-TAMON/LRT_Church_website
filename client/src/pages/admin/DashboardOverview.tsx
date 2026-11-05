@@ -207,10 +207,10 @@ const DashboardOverview = () => {
               <ShieldCheck className="w-3.5 h-3.5" />
               <span>Admin Management</span>
             </div>
-            <h2 className="text-3xl font-heading font-extrabold mb-2 text-white">
+            <h2 className="text-2xl sm:text-3xl font-heading font-extrabold mb-2 text-white">
               Welcome back, {user?.firstName}!
             </h2>
-            <p className="text-blue-100 max-w-lg text-sm">
+            <p className="text-blue-100 max-w-lg text-xs sm:text-sm">
               Here is an overview of your church platform. Manage members, content, and events all from one place.
             </p>
           </div>
@@ -219,7 +219,7 @@ const DashboardOverview = () => {
       </div>
 
       {/* KPI Stats */}
-      <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
         {statCards.map((stat) => (
           <StatCard key={stat.label} {...stat} />
         ))}
@@ -228,9 +228,9 @@ const DashboardOverview = () => {
       {/* Quick Actions + Recent Activity */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Quick Actions */}
-        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-5">
-          <h3 className="text-lg font-heading font-bold text-slate-800 mb-4">Quick Actions</h3>
-          <div className="grid grid-cols-4 sm:grid-cols-4 lg:grid-cols-2 gap-3">
+        <div className="bg-white rounded-2xl border border-slate-100 shadow-sm p-4 sm:p-5">
+          <h3 className="text-base sm:text-lg font-heading font-bold text-slate-800 mb-4">Quick Actions</h3>
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-2 gap-2.5 sm:gap-3">
             {QUICK_ACTIONS.map(({ label, to, icon: Icon, color }) => (
               <Link
                 key={label}

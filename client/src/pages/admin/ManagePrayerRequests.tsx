@@ -162,7 +162,107 @@ const ManagePrayerRequests = () => {
           <Loader2 className="w-8 h-8 text-primary animate-spin" />
         </div>
       ) : (
-        <DataTable columns={columns} data={filtered} emptyMessage="No prayer requests found." />
+        <>
+          {/* Desktop Table View */}
+          <div className="hidden md:block">
+            <DataTable columns={columns} data={filtered} emptyMessage="No prayer requests found." />
+          </div>
+
+          {/* Mobile Responsive Cards View */}
+          <div className="block md:hidden space-y-3.5">
+            {filtered.length === 0 ? (
+              <div className="bg-white rounded-2xl p-8 text-center text-slate-400 border border-slate-100 shadow-sm text-sm">
+                No prayer requests found.
+              </div>
+            ) : (
+              filtered.map((item) => {
+                const isLong = item.request.length > PREVIEW_LENGTH;
+                const preview = isLong
+                  ? item.request.slice(0, PREVIEW_LENGTH).trimEnd() + '…'
+                  : item.request;
+                const u: any = item.user;
+                const authorName =
+                  !u
+                    ? 'Anonymous'
+                    : typeof u === 'object' && (u.firstName || u.lastName)
+                    ? `${u.firstName || ''} ${u.lastName || ''}`.trim()
+                    : 'Church Member';
+
+                return (
+                  <div
+                    key={item._id}
+                    className="bg-white rounded-2xl p-4 border border-slate-100 shadow-sm space-y-3"
+                  >
+                    <div className="flex items-start justify-between gap-2">
+                      <div className="min-w-0">
+                        <div className="flex items-center gap-1.5 mb-0.5">
+                          <User className="w-3.5 h-3.5 text-slate-400 flex-shrink-0" />
+                          <span className="text-xs font-bold text-slate-800 truncate">
+                            {authorName}
+                          </span>
+                        </div>
+                        <span className="text-[10px] text-slate-400">
+                          {new Date(item.createdAt).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {item.isPrivate && (
+                          <span className="inline-flex items-center gap-1 text-[10px] font-semibold bg-rose-50 text-rose-600 px-2 py-0.5 rounded-full border border-rose-100">
+                            <Lock className="w-2.5 h-2.5" /> Private
+                          </span>
+                        )}
+                        <span
+                          className={`text-[10px] font-bold px-2.5 py-0.5 rounded-full ${STATUS_BADGE_STYLES[item.status]}`}
+                        >
+                          {item.status}
+                        </span>
+                      </div>
+                    </div>
+
+                    <p className="text-xs text-slate-700 leading-relaxed bg-slate-50/70 p-3 rounded-xl border border-slate-100/60">
+                      {preview}
+                    </p>
+
+                    <div className="pt-2 border-t border-slate-100 flex items-center justify-between gap-2">
+                      {isLong ? (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedRequest(item)}
+                          className="flex items-center gap-1 text-xs font-bold text-primary hover:text-primary-dark transition-colors cursor-pointer group"
+                        >
+                          <span>Read full request</span>
+                          <ChevronRight className="w-3 h-3 group-hover:translate-x-0.5 transition-transform" />
+                        </button>
+                      ) : (
+                        <button
+                          type="button"
+                          onClick={() => setSelectedRequest(item)}
+                          className="text-[11px] font-semibold text-slate-500 hover:text-primary transition-colors cursor-pointer"
+                        >
+                          View Details
+                        </button>
+                      )}
+
+                      <select
+                        value={item.status}
+                        onChange={(e) => handleStatusChange(item._id, e.target.value)}
+                        className={`text-xs font-bold px-3 py-1.5 rounded-lg border-0 cursor-pointer focus:outline-none focus:ring-2 focus:ring-primary/30 ${STATUS_STYLES[item.status]}`}
+                      >
+                        <option value="Pending">Pending</option>
+                        <option value="Praying">Praying</option>
+                        <option value="Answered">Answered</option>
+                      </select>
+                    </div>
+                  </div>
+                );
+              })
+            )}
+          </div>
+        </>
       )}
 
       {/* ── Full Prayer Request Detail Modal ── */}
