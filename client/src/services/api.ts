@@ -15,7 +15,8 @@ const api = axios.create({
 // never cross-contaminate or overwrite each other.
 api.interceptors.request.use(
   (config) => {
-    const token = sessionStorage.getItem('lrt_token') || localStorage.getItem('lrt_token');
+    // Read strictly from tab-isolated sessionStorage
+    const token = sessionStorage.getItem('lrt_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }

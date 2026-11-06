@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
-import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon } from 'lucide-react';
+import { Link } from 'react-router-dom';
+import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon, CheckCircle2, UserCheck, LogIn, X } from 'lucide-react';
 import Button from '../components/ui/Button';
 import PageBanner from '../components/ui/PageBanner';
 import eventService from '../services/eventService';
@@ -13,6 +14,8 @@ const EventsPage = () => {
   const [error, setError] = useState('');
   const [registeringId, setRegisteringId] = useState<string | null>(null);
   const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
+  const [authPromptEvent, setAuthPromptEvent] = useState<Event | null>(null);
+  const [confirmEvent, setConfirmEvent] = useState<Event | null>(null);
   const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
@@ -37,8 +40,15 @@ const EventsPage = () => {
     fetch();
   }, [user]);
 
-  const handleRegister = async (eventId: string) => {
-    if (!isAuthenticated) { window.location.href = '/portal/login'; return; }
+  const handleRegisterClick = (event: Event) => {
+    if (!isAuthenticated || !user) {
+      setAuthPromptEvent(event);
+      return;
+    }
+    setConfirmEvent(event);
+  };
+
+  const handleConfirmRegister = async (eventId: string) => {
     try {
       setRegisteringId(eventId);
       await eventService.register(eventId);
@@ -48,6 +58,7 @@ const EventsPage = () => {
           e._id === eventId ? { ...e, registeredAttendees: [...e.registeredAttendees, user!._id] } : e
         )
       );
+      setConfirmEvent(null);
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to register for event');
     } finally {
@@ -218,7 +229,7 @@ const EventsPage = () => {
                         <Button
                           variant={atCapacity ? 'ghost' : 'secondary'}
                           size="sm"
-                          onClick={() => handleRegister(event._id)}
+                          onClick={() => handleRegisterClick(event)}
                           isLoading={isRegistering}
                           disabled={atCapacity}
                         >
@@ -233,6 +244,122 @@ const EventsPage = () => {
           </div>
         )}
       </div>
+
+      {/* ── Public Visitor Auth Prompt Modal ── */}
+      {authPromptEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"
+            onClick={() => setAuthPromptEvent(null)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 overflow-hidden animate-slide-up">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-5">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-primary/10 text-primary flex items-center justify-center flex-shrink-0">
+                  <LogIn className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-extrabold text-slate-900 text-lg leading-tight">
+                    Member Registration
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">{authPromptEvent.title}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setAuthPromptEvent(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <p className="text-slate-600 text-sm leading-relaxed mb-6">
+              Event registrations are reserved for members of the Latter Rain Tabernacle family. Please sign in to your Member Portal to register, or create a free member account.
+            </p>
+
+            <div className="space-y-3">
+              <Link
+                to="/portal/login"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-primary hover:bg-primary-dark text-white font-bold text-sm shadow-lg shadow-primary/25 transition-all"
+              >
+                <LogIn className="w-4 h-4" />
+                Sign In to Register
+              </Link>
+              <Link
+                to="/portal/register"
+                className="flex items-center justify-center gap-2 w-full py-3 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm transition-all"
+              >
+                Create Member Account
+              </Link>
+              <button
+                onClick={() => setAuthPromptEvent(null)}
+                className="w-full py-2 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+              >
+                Cancel
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* ── Member Confirm Registration Modal ── */}
+      {confirmEvent && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"
+            onClick={() => setConfirmEvent(null)}
+          />
+          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 overflow-hidden animate-slide-up">
+            <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-4">
+              <div className="flex items-center gap-3">
+                <div className="w-10 h-10 rounded-2xl bg-secondary/20 text-secondary-dark flex items-center justify-center flex-shrink-0">
+                  <UserCheck className="w-5 h-5" />
+                </div>
+                <div>
+                  <h3 className="font-heading font-extrabold text-slate-900 text-lg leading-tight">
+                    Confirm Event Registration
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">{confirmEvent.title}</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setConfirmEvent(null)}
+                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+              >
+                <X className="w-5 h-5" />
+              </button>
+            </div>
+
+            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-5">
+              <p className="text-xs text-slate-500 mb-1">Registering attendee:</p>
+              <p className="text-sm font-bold text-slate-800">
+                {user?.firstName} {user?.lastName}
+              </p>
+              <p className="text-xs text-slate-400">{user?.email}</p>
+            </div>
+
+            <div className="flex items-center justify-end gap-3">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => setConfirmEvent(null)}
+                disabled={registeringId === confirmEvent._id}
+              >
+                Cancel
+              </Button>
+              <Button
+                variant="secondary"
+                size="sm"
+                onClick={() => handleConfirmRegister(confirmEvent._id)}
+                isLoading={registeringId === confirmEvent._id}
+                leftIcon={<CheckCircle2 className="w-4 h-4" />}
+              >
+                Confirm Registration
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

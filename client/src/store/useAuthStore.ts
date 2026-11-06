@@ -4,23 +4,13 @@ import type { StateStorage } from 'zustand/middleware';
 import type { User } from '../types';
 import authService from '../services/authService';
 
-// Custom StateStorage that isolates sessions per browser tab (sessionStorage),
-// while allowing seamless initial hydration from localStorage for newly opened tabs.
+// Custom StateStorage that isolates sessions strictly per browser tab (sessionStorage).
+// Public visitor tabs (like the homepage or events page) stay completely anonymous and
+// never accidentally inherit or bleed member/admin logins across tabs.
 const tabStorage: StateStorage = {
   getItem: (name: string): string | null => {
     try {
-      // 1. Prioritize tab-isolated sessionStorage
-      const sessionVal = sessionStorage.getItem(name);
-      if (sessionVal) return sessionVal;
-
-      // 2. Fallback to localStorage on fresh tab launch
-      const localVal = localStorage.getItem(name);
-      if (localVal) {
-        // Copy to sessionStorage so this tab is isolated from now on
-        sessionStorage.setItem(name, localVal);
-        return localVal;
-      }
-      return null;
+      return sessionStorage.getItem(name);
     } catch {
       return null;
     }
@@ -28,7 +18,6 @@ const tabStorage: StateStorage = {
   setItem: (name: string, value: string): void => {
     try {
       sessionStorage.setItem(name, value);
-      localStorage.setItem(name, value);
     } catch {}
   },
   removeItem: (name: string): void => {
@@ -72,7 +61,10 @@ const useAuthStore = create<AuthState>()(
           const response = await authService.login({ email, password });
           if (response.token) {
             sessionStorage.setItem('lrt_token', response.token);
-            localStorage.setItem('lrt_token', response.token);
+            try {
+              localStorage.removeItem('lrt_token');
+              localStorage.removeItem('lrt-auth-storage');
+            } catch {}
           }
           set({
             user: response.data ?? null,
@@ -94,7 +86,10 @@ const useAuthStore = create<AuthState>()(
           const response = await authService.register({ firstName, lastName, email, password });
           if (response.token) {
             sessionStorage.setItem('lrt_token', response.token);
-            localStorage.setItem('lrt_token', response.token);
+            try {
+              localStorage.removeItem('lrt_token');
+              localStorage.removeItem('lrt-auth-storage');
+            } catch {}
           }
           set({
             user: response.data ?? null,
