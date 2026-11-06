@@ -11,10 +11,11 @@ const api = axios.create({
 });
 
 // Request interceptor: automatically attaches the JWT token
-// from localStorage to every outgoing authenticated request.
+// Prioritizes tab-isolated sessionStorage so multiple open tabs (e.g. Admin & Member)
+// never cross-contaminate or overwrite each other.
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('lrt_token');
+    const token = sessionStorage.getItem('lrt_token') || localStorage.getItem('lrt_token');
     if (token) {
       config.headers.Authorization = `Bearer ${token}`;
     }
@@ -36,6 +37,8 @@ api.interceptors.response.use(
         currentPath.includes('/portal/register');
 
       if (!isAuthPage) {
+        sessionStorage.removeItem('lrt_token');
+        sessionStorage.removeItem('lrt-auth-storage');
         localStorage.removeItem('lrt_token');
         localStorage.removeItem('lrt-auth-storage');
         window.location.href = '/portal/login';
