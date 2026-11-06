@@ -41,3 +41,4 @@ export const getMediaUrl = (url?: string | null): string => {
 };
 
 export default getMediaUrl;
+

@@ -38,6 +38,7 @@ import type { Sermon, Event, PrayerRequest } from '../../types';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
+import getMediaUrl from '../../utils/imageUrl';
 
 type TabType = 'overview' | 'sermons' | 'events' | 'prayer' | 'profile';
 
@@ -1078,7 +1079,7 @@ const PortalDashboard = () => {
                         {event.flierUrl ? (
                           <div className="relative h-48 overflow-hidden">
                             <img
-                              src={event.flierUrl}
+                              src={getMediaUrl(event.flierUrl)}
                               alt={event.title}
                               className="w-full h-full object-cover"
                             />
