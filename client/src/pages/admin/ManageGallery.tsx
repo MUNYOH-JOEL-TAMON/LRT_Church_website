@@ -4,6 +4,7 @@ import Modal from '../../components/admin/Modal';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import galleryService from '../../services/galleryService';
+import getMediaUrl from '../../utils/imageUrl';
 import type { GalleryImage } from '../../types';
 
 type UploadMode = 'file' | 'url';
@@ -126,7 +127,7 @@ const ManageGallery = () => {
             <div key={img._id} className="group bg-white rounded-2xl border border-slate-100 shadow-sm overflow-hidden hover:shadow-lg transition-all duration-300">
               <div className="h-48 bg-slate-100 relative overflow-hidden">
                 {img.imageUrl ? (
-                  <img src={img.imageUrl} alt={img.title} className="w-full h-full object-cover" />
+                  <img src={getMediaUrl(img.imageUrl)} alt={img.title} className="w-full h-full object-cover" />
                 ) : (
                   <div className="w-full h-full bg-gradient-to-br from-primary-dark to-primary flex items-center justify-center">
                     <ImageIcon className="w-12 h-12 text-white/30" />

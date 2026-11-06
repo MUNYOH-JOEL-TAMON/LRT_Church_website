@@ -3,6 +3,7 @@ import { Image as ImageIcon, Loader2, X, ZoomIn } from 'lucide-react';
 import galleryService from '../services/galleryService';
 import type { GalleryImage } from '../types';
 import PageBanner from '../components/ui/PageBanner';
+import getMediaUrl from '../utils/imageUrl';
 
 const GalleryPage = () => {
   const [images, setImages] = useState<GalleryImage[]>([]);
@@ -92,7 +93,7 @@ const GalleryPage = () => {
               >
                 {img.imageUrl ? (
                   <img
-                    src={img.imageUrl}
+                    src={getMediaUrl(img.imageUrl)}
                     alt={img.title}
                     className="w-full object-cover group-hover:scale-105 transition-transform duration-700"
                     loading="lazy"
@@ -141,7 +142,7 @@ const GalleryPage = () => {
             onClick={(e) => e.stopPropagation()}
           >
             <img
-              src={lightboxImage.imageUrl}
+              src={getMediaUrl(lightboxImage.imageUrl)}
               alt={lightboxImage.title}
               className="max-h-[75vh] max-w-full object-contain rounded-3xl shadow-2xl border border-white/10"
             />
