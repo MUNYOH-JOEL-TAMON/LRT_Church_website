@@ -5,6 +5,7 @@ import PageBanner from '../components/ui/PageBanner';
 import eventService from '../services/eventService';
 import type { Event } from '../types';
 import useAuthStore from '../store/useAuthStore';
+import getMediaUrl from '../utils/imageUrl';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -113,7 +114,7 @@ const EventsPage = () => {
                   {event.flierUrl ? (
                     <div className="relative w-full h-64 sm:h-80 overflow-hidden">
                       <img
-                        src={event.flierUrl}
+                        src={getMediaUrl(event.flierUrl)}
                         alt={`${event.title} flier`}
                         className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
                       />
