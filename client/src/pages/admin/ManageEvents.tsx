@@ -6,6 +6,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import eventService from '../../services/eventService';
 import galleryService from '../../services/galleryService';
+import getMediaUrl from '../../utils/imageUrl';
 import type { Event } from '../../types';
 
 type FlierMode = 'file' | 'url' | 'none';
@@ -71,7 +72,7 @@ const ManageEvents = () => {
     if (event.flierUrl) {
       setFlierMode('url');
       setFlierUrl(event.flierUrl);
-      setFlierPreview(event.flierUrl);
+      setFlierPreview(getMediaUrl(event.flierUrl));
     }
     setError('');
     setIsModalOpen(true);
@@ -148,7 +149,7 @@ const ManageEvents = () => {
       render: (item: Event) => (
         <div className="flex items-center gap-3">
           {item.flierUrl ? (
-            <img src={item.flierUrl} alt={item.title}
+            <img src={getMediaUrl(item.flierUrl)} alt={item.title}
               className="w-10 h-10 rounded-lg object-cover flex-shrink-0 border border-slate-100" />
           ) : (
             <div className="w-10 h-10 rounded-lg bg-primary/10 flex items-center justify-center flex-shrink-0">
@@ -310,7 +311,7 @@ const ManageEvents = () => {
                   value={flierUrl} onChange={(e) => { setFlierUrl(e.target.value); setFlierPreview(e.target.value); }} />
                 {flierPreview && (
                   <div className="mt-2 rounded-xl overflow-hidden border border-slate-200 h-40">
-                    <img src={flierPreview} alt="Flier preview" className="w-full h-full object-cover"
+                    <img src={getMediaUrl(flierPreview)} alt="Flier preview" className="w-full h-full object-cover"
                       onError={(e) => { (e.target as HTMLImageElement).style.display = 'none'; }} />
                   </div>
                 )}
