@@ -93,7 +93,7 @@ export class BroadcastService {
         title: `🔴 LIVE NOW: ${broadcast.title}`,
         message: `${broadcast.preacher} is live ministering! Join the Virtual Sanctuary and worship with us now.`,
         type: 'event',
-        link: '/live',
+        link: '/portal/dashboard?tab=live',
         metadata: { broadcastId: broadcast._id },
       });
     } catch (err) {

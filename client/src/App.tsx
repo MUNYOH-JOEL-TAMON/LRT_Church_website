@@ -48,7 +48,6 @@ function App() {
           <Route path="announcements" element={<AnnouncementsPage />} />
           <Route path="gallery" element={<GalleryPage />} />
           <Route path="prayer-requests" element={<PrayerRequestPage />} />
-          <Route path="live" element={<LiveBroadcastPage />} />
         </Route>
 
         {/* ── In-Sanctuary Projector Screen (Clean 100% Fullscreen Output for HDMI / LED Wall) ── */}
@@ -61,7 +60,11 @@ function App() {
         {/* ── Protected Member Portal Routes ── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/portal/dashboard" element={<PortalDashboard />} />
+          <Route path="/portal/live" element={<LiveBroadcastPage />} />
         </Route>
+
+        {/* Redirect /live to Member Portal live route */}
+        <Route path="/live" element={<Navigate to="/portal/live" replace />} />
 
         {/* ── Admin Dashboard Routes (Role Protected) ── */}
         <Route element={<AdminRoute />}>
