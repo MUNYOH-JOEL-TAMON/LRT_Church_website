@@ -1,7 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import React, { useState, useEffect, useRef } from 'react';
+import { Link, useSearchParams } from 'react-router-dom';
 import {
   LayoutDashboard,
+  Radio,
+  Video,
+  VideoOff,
   BookOpen,
   CalendarDays,
   HeartHandshake,
@@ -33,16 +36,18 @@ import useAuthStore from '../../store/useAuthStore';
 import sermonService from '../../services/sermonService';
 import eventService from '../../services/eventService';
 import prayerService from '../../services/prayerService';
+import broadcastService from '../../services/broadcastService';
 import authService from '../../services/authService';
-import type { Sermon, Event, PrayerRequest } from '../../types';
+import type { Sermon, Event, PrayerRequest, BroadcastSession, VirtualParticipant } from '../../types';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 import getMediaUrl from '../../utils/imageUrl';
+import getEmbedStreamUrl from '../../utils/streamUrl';
 import isEventRegistrationClosed from '../../utils/eventUtils';
 import NotificationBell from '../../components/ui/NotificationBell';
 
-type TabType = 'overview' | 'sermons' | 'events' | 'prayer' | 'profile';
+type TabType = 'overview' | 'live' | 'sermons' | 'events' | 'prayer' | 'profile';
 
 const PortalDashboard = () => {
   const { user, logout, updateUser } = useAuthStore();

@@ -213,12 +213,12 @@ const Home = () => {
           </div>
 
           <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-            {/* Card 1: Join Us Live */}
+            {/* Card 1: Worship Gatherings */}
             <div className="group rounded-3xl bg-white shadow-xl shadow-slate-200/60 hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 relative overflow-hidden flex flex-col">
               <div className="relative h-48 overflow-hidden">
                 <img
                   src="https://images.unsplash.com/photo-1511632765486-a01980e01a18?auto=format&fit=crop&w=900&q=80"
-                  alt="Join Us Live"
+                  alt="Worship Gatherings"
                   className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-slate-950/85 via-slate-900/35 to-transparent" />
@@ -228,10 +228,10 @@ const Home = () => {
               </div>
               <div className="p-8 flex flex-col flex-1">
                 <h3 className="text-2xl font-heading font-bold mb-3 text-slate-900 group-hover:text-primary transition-colors">
-                  Join Us Live
+                  Worship Gatherings
                 </h3>
                 <p className="text-slate-500 mb-8 leading-relaxed flex-1">
-                  Experience the power of God in our Sunday Services and Mid-week meetings.
+                  Experience the power of God in our Sunday Services and Mid-week fellowship meetings.
                 </p>
                 <Link
                   to="/events"
