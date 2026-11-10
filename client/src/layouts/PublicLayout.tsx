@@ -11,6 +11,7 @@ const NAV_LINKS = [
   { to: '/blog',            label: 'Blog' },
   { to: '/announcements',   label: 'Announcements' },
   { to: '/gallery',         label: 'Gallery' },
+  { to: '/live',            label: 'Live Broadcast' },
 ];
 
 const PublicLayout = () => {
