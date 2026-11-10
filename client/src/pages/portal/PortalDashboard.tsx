@@ -605,23 +605,6 @@ const PortalDashboard = () => {
 
             {/* In-App Live Notifications */}
             <NotificationBell />
-
-            <button
-              onClick={() => setPrayerModalOpen(true)}
-              className="hidden sm:inline-flex items-center gap-2 bg-gradient-to-r from-secondary to-secondary-light hover:from-amber-400 hover:to-secondary text-slate-950 text-xs font-extrabold px-3.5 sm:px-4 py-2 rounded-xl transition-all shadow-md shadow-secondary/20 cursor-pointer"
-            >
-              <Plus className="w-4 h-4 text-slate-950" />
-              Submit Prayer
-            </button>
-
-            <button
-              onClick={() => setActiveTab('profile')}
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary font-bold text-xs hover:bg-primary hover:text-white transition-all cursor-pointer"
-              title="My Profile"
-            >
-              {user?.firstName?.[0]}
-              {user?.lastName?.[0]}
-            </button>
           </div>
         </header>
 
