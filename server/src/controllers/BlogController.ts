@@ -39,7 +39,7 @@ export class BlogController {
       try {
         await NotificationService.notifyAllMembers({
           title: `New Devotional: ${post.title}`,
-          message: post.excerpt || (post.content ? post.content.slice(0, 110) + '...' : 'A new article has been published on the LRT Blog.'),
+          message: post.content ? post.content.slice(0, 110) + '...' : 'A new article has been published on the LRT Blog.',
           type: 'blog',
           link: '/blog',
           metadata: { postId: post._id },
