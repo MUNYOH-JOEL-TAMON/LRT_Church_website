@@ -17,3 +17,4 @@ router.delete('/', NotificationController.clearAll);
 router.post('/broadcast', authorize('Admin'), NotificationController.broadcast);
 
 export default router;
+

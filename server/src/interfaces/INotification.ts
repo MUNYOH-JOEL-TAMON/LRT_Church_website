@@ -14,3 +14,4 @@ export interface INotification extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
+

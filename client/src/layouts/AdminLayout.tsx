@@ -16,6 +16,7 @@ import {
 } from 'lucide-react';
 import useAuthStore from '../store/useAuthStore';
 import lrtLogo from '../assets/LRT_LOGO.jpeg';
+import NotificationBell from '../components/ui/NotificationBell';
 
 interface NavItem {
   icon: typeof LayoutDashboard;

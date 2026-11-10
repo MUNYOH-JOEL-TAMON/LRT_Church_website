@@ -82,3 +82,20 @@ export interface GalleryImage {
   uploadedBy?: Partial<User>;
   createdAt: string;
 }
+
+export interface AppNotification {
+  _id: string;
+  recipient: string;
+  title: string;
+  message: string;
+  type: 'event' | 'blog' | 'announcement' | 'system';
+  link?: string;
+  isRead: boolean;
+  metadata?: Record<string, any>;
+  createdAt: string;
+}
+
+export interface NotificationResponseData {
+  notifications: AppNotification[];
+  unreadCount: number;
+}

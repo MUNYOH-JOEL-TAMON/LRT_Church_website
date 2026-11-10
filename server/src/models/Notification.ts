@@ -22,3 +22,4 @@ const NotificationSchema: Schema = new Schema(
 NotificationSchema.index({ recipient: 1, createdAt: -1 });
 
 export const Notification = mongoose.model<INotification>('Notification', NotificationSchema);
+
