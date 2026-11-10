@@ -23,3 +23,4 @@ router.post('/members/:memberId/audio', protect, authorize('Admin', 'Pastor', 'E
 router.post('/:broadcastId/spotlight', protect, authorize('Admin', 'Pastor', 'Editor'), BroadcastController.spotlightMember);
 
 export default router;
+

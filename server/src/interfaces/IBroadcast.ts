@@ -34,3 +34,4 @@ export interface IVirtualParticipant {
   streamPeerId?: string;
   lastPing: Date;
 }
+

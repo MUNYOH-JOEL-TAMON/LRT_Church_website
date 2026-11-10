@@ -30,3 +30,4 @@ const BroadcastSchema: Schema = new Schema(
 );
 
 export const Broadcast = mongoose.model<IBroadcast>('Broadcast', BroadcastSchema);
+
