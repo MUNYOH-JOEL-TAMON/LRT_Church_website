@@ -39,7 +39,7 @@ import eventService from '../../services/eventService';
 import prayerService from '../../services/prayerService';
 import broadcastService from '../../services/broadcastService';
 import authService from '../../services/authService';
-import type { Sermon, Event, PrayerRequest, BroadcastSession, VirtualParticipant } from '../../types';
+import type { Sermon, Event, PrayerRequest, BroadcastSession, VirtualParticipant, BroadcastRestriction } from '../../types';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
@@ -65,6 +65,7 @@ const PortalDashboard = () => {
 
   // Live Broadcast & Virtual Sanctuary states
   const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
+  const [broadcastRestriction, setBroadcastRestriction] = useState<BroadcastRestriction | null>(null);
   const [broadcastParticipants, setBroadcastParticipants] = useState<VirtualParticipant[]>([]);
   const [cameraActive, setCameraActive] = useState(false);
   const [locationInput, setLocationInput] = useState('');
@@ -147,6 +148,7 @@ const PortalDashboard = () => {
       if (res.data) {
         setBroadcast(res.data.broadcast);
         setBroadcastParticipants(res.data.participants || []);
+        setBroadcastRestriction(res.data.restriction || null);
         if (user && res.data.participants) {
           const mine = res.data.participants.find((p) => p.userId === user._id);
           if (mine) setMyParticipant(mine);
@@ -296,6 +298,7 @@ const PortalDashboard = () => {
             : e
         )
       );
+      fetchBroadcastData();
     } catch (err: any) {
       alert(err.response?.data?.message || 'Failed to register for this event');
     } finally {

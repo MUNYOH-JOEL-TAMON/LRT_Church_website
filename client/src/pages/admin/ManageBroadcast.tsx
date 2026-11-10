@@ -94,16 +94,25 @@ const ManageBroadcast: React.FC = () => {
       setError('Please provide a valid YouTube or Facebook streaming link.');
       return;
     }
+    if (formData.accessLevel === 'registered_only' && !formData.eventId) {
+      setError('Please select an event from the dropdown for the restricted broadcast.');
+      return;
+    }
     setError('');
     setIsSubmitting(true);
     try {
       const res = await broadcastService.startBroadcast({
         ...formData,
+        eventId: formData.accessLevel === 'registered_only' ? formData.eventId : null,
         _id: broadcast?._id,
       });
       if (res.data) {
         setBroadcast(res.data);
-        setSuccessMsg('Broadcast is LIVE! In-app notification sent to all members.');
+        setSuccessMsg(
+          formData.accessLevel === 'registered_only'
+            ? 'Restricted Event Broadcast is LIVE! In-app notifications sent to registered attendees.'
+            : 'Broadcast is LIVE! In-app notification sent to all church members.'
+        );
         setTimeout(() => setSuccessMsg(''), 5000);
       }
     } catch (err: any) {
@@ -330,6 +339,112 @@ const ManageBroadcast: React.FC = () => {
               onChange={(e) => setFormData({ ...formData, streamUrl: e.target.value })}
             />
 
+            {/* Audience Access Restrictions */}
+            <div className="p-5 bg-slate-50/80 rounded-2xl border border-slate-200/80 space-y-4">
+              <div>
+                <label className="text-sm font-semibold text-slate-800 block mb-1">
+                  Audience Access Restriction
+                </label>
+                <p className="text-xs text-slate-500">
+                  Choose whether this live broadcast is open to all church members or restricted to registered attendees of a specific program (e.g. Youths, Couples, Workers).
+                </p>
+              </div>
+
+              <div className="grid sm:grid-cols-2 gap-3">
+                <button
+                  type="button"
+                  onClick={() => setFormData({ ...formData, accessLevel: 'all', eventId: '' })}
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                    formData.accessLevel === 'all'
+                      ? 'border-primary bg-primary/5 text-primary-dark shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  <Globe className={`w-5 h-5 flex-shrink-0 mt-0.5 ${formData.accessLevel === 'all' ? 'text-primary' : 'text-slate-400'}`} />
+                  <div>
+                    <span className="text-xs font-bold block">All Church Members</span>
+                    <span className="text-[11px] text-slate-500 block mt-0.5">
+                      Open to all members in the Member Portal
+                    </span>
+                  </div>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => {
+                    const defaultEvId = events[0]?._id || '';
+                    setFormData({ ...formData, accessLevel: 'registered_only', eventId: defaultEvId });
+                  }}
+                  className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
+                    formData.accessLevel === 'registered_only'
+                      ? 'border-secondary-dark bg-secondary/10 text-slate-900 shadow-xs'
+                      : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
+                  }`}
+                >
+                  <Lock className={`w-5 h-5 flex-shrink-0 mt-0.5 ${formData.accessLevel === 'registered_only' ? 'text-amber-600' : 'text-slate-400'}`} />
+                  <div>
+                    <span className="text-xs font-bold block">Registered Attendees Only</span>
+                    <span className="text-[11px] text-slate-500 block mt-0.5">
+                      Restricted to members registered for an event
+                    </span>
+                  </div>
+                </button>
+              </div>
+
+              {/* Event Selector when restricted */}
+              {formData.accessLevel === 'registered_only' && (
+                <div className="pt-3 border-t border-slate-200 space-y-3">
+                  <div>
+                    <label htmlFor="event-select" className="text-xs font-bold text-slate-700 block mb-1.5 flex items-center gap-1.5">
+                      <Calendar className="w-3.5 h-3.5 text-secondary-dark" />
+                      Select Church Event:
+                    </label>
+                    {events.length === 0 ? (
+                      <div className="p-3 bg-amber-50 rounded-xl border border-amber-200 text-xs text-amber-800">
+                        No events found in the database. Please create an event first in Event Management.
+                      </div>
+                    ) : (
+                      <select
+                        id="event-select"
+                        value={formData.eventId}
+                        onChange={(e) => setFormData({ ...formData, eventId: e.target.value })}
+                        className="w-full bg-white border border-slate-200 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 font-medium focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary cursor-pointer"
+                        required
+                      >
+                        <option value="" disabled>-- Select an Event --</option>
+                        {events.map((ev) => (
+                          <option key={ev._id} value={ev._id}>
+                            {ev.title} ({ev.registeredAttendees?.length || 0} Registered Attendees)
+                          </option>
+                        ))}
+                      </select>
+                    )}
+                  </div>
+
+                  {formData.eventId && (() => {
+                    const selectedEv = events.find((e) => e._id === formData.eventId);
+                    if (!selectedEv) return null;
+                    return (
+                      <div className="p-3 bg-white rounded-xl border border-slate-200 text-xs text-slate-600 space-y-1">
+                        <div className="flex items-center justify-between font-bold text-slate-800">
+                          <span>{selectedEv.title}</span>
+                          <span className="text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded-md border border-emerald-200">
+                            {selectedEv.registeredAttendees?.length || 0} Registered Members
+                          </span>
+                        </div>
+                        <p className="text-[11px] text-slate-500">
+                          📅 {new Date(selectedEv.date).toLocaleDateString()} • 📍 {selectedEv.location}
+                        </p>
+                        <p className="text-[10px] text-amber-800 font-medium pt-1">
+                          🔒 Only these {selectedEv.registeredAttendees?.length || 0} registered members will have access to watch and appear on the video wall. Non-registered members will see a prompt to register.
+                        </p>
+                      </div>
+                    );
+                  })()}
+                </div>
+              )}
+            </div>
+
             <div className="flex items-center gap-3 p-4 bg-slate-50 rounded-2xl border border-slate-100">
               <input
                 type="checkbox"
@@ -361,7 +476,20 @@ const ManageBroadcast: React.FC = () => {
         <div className="lg:col-span-5 space-y-6">
           <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm flex flex-col">
             <h3 className="font-heading font-extrabold text-slate-900 text-base mb-3 flex items-center justify-between">
-              <span>Stream Monitor</span>
+              <div className="flex items-center gap-2">
+                <span>Stream Monitor</span>
+                {broadcast?.accessLevel === 'registered_only' ? (
+                  <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Lock className="w-2.5 h-2.5" />
+                    Registered Only
+                  </span>
+                ) : (
+                  <span className="text-[10px] font-bold text-slate-600 bg-slate-100 px-2 py-0.5 rounded-full flex items-center gap-1">
+                    <Globe className="w-2.5 h-2.5 text-slate-400" />
+                    All Members
+                  </span>
+                )}
+              </div>
               {isLive && (
                 <span className="text-xs font-bold text-red-600 bg-red-50 border border-red-200 px-2.5 py-0.5 rounded-full flex items-center gap-1">
                   <span className="w-2 h-2 rounded-full bg-red-500 animate-pulse" />
