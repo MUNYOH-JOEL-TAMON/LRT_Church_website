@@ -1,5 +1,6 @@
 import { Request, Response } from 'express';
 import { BlogService } from '../services/BlogService';
+import { NotificationService } from '../services/NotificationService';
 import { AuthRequest } from '../middleware/authMiddleware';
 
 export class BlogController {
@@ -33,6 +34,20 @@ export class BlogController {
   public static async create(req: AuthRequest, res: Response): Promise<void> {
     try {
       const post = await BlogService.create(req.body, req.user.id);
+
+      // In-app Notification: Notify all members of the newly published blog post
+      try {
+        await NotificationService.notifyAllMembers({
+          title: `New Devotional: ${post.title}`,
+          message: post.excerpt || (post.content ? post.content.slice(0, 110) + '...' : 'A new article has been published on the LRT Blog.'),
+          type: 'blog',
+          link: '/blog',
+          metadata: { postId: post._id },
+        });
+      } catch (notifErr) {
+        console.error('Failed to dispatch blog post notifications:', notifErr);
+      }
+
       res.status(201).json({ success: true, data: post });
     } catch (error: any) {
       res.status(400).json({ success: false, message: error.message });
