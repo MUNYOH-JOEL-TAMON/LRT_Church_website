@@ -11,13 +11,10 @@ import {
   VideoOff,
   Star,
   ExternalLink,
-  RefreshCw,
-  Sparkles,
   Volume2,
   VolumeX,
   AlertCircle,
   CheckCircle2,
-  Share2,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
@@ -29,7 +26,6 @@ const ManageBroadcast: React.FC = () => {
   const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
   const [participants, setParticipants] = useState<VirtualParticipant[]>([]);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -63,8 +59,6 @@ const ManageBroadcast: React.FC = () => {
       }
     } catch {
       setError('Failed to load current broadcast state.');
-    } finally {
-      setIsLoading(false);
     }
   };
 

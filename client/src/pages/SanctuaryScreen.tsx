@@ -9,13 +9,11 @@ import {
   Video,
   VideoOff,
   Star,
-  Sparkles,
-  Heart,
   Volume2,
 } from 'lucide-react';
-import broadcastService from '../../services/broadcastService';
-import lrtLogo from '../../assets/LRT_LOGO.jpeg';
-import type { BroadcastSession, VirtualParticipant, LiveReaction } from '../../types';
+import broadcastService from '../services/broadcastService';
+import lrtLogo from '../assets/LRT_LOGO.jpeg';
+import type { BroadcastSession, VirtualParticipant, LiveReaction } from '../types';
 
 const SanctuaryScreen: React.FC = () => {
   const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
