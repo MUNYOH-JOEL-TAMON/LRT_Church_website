@@ -19,6 +19,16 @@ const BroadcastSchema: Schema = new Schema(
     },
     streamUrl: { type: String, required: true, trim: true },
     allowWebcams: { type: Boolean, default: true },
+    accessLevel: {
+      type: String,
+      enum: ['all', 'registered_only'],
+      default: 'all',
+    },
+    eventId: {
+      type: Schema.Types.ObjectId,
+      ref: 'Event',
+      default: null,
+    },
     spotlightedMemberId: { type: String, default: null },
     scheduledDate: { type: Date },
     startedAt: { type: Date },

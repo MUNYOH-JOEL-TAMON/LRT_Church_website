@@ -38,6 +38,31 @@ export const protect = (req: AuthRequest, res: Response, next: NextFunction): vo
 };
 
 /**
+ * Middleware for optional authentication: Decodes JWT if provided, otherwise continues anonymously
+ */
+export const optionalAuth = (req: AuthRequest, _res: Response, next: NextFunction): void => {
+  let token;
+
+  if (req.headers.authorization && req.headers.authorization.startsWith('Bearer')) {
+    token = req.headers.authorization.split(' ')[1];
+  }
+
+  if (!token) {
+    return next();
+  }
+
+  try {
+    const secret = process.env.JWT_SECRET || 'fallback_secret';
+    const decoded = jwt.verify(token, secret);
+    req.user = decoded;
+  } catch {
+    // Ignore invalid token for optional routes
+  }
+
+  next();
+};
+
+/**
  * Middleware to restrict access based on User roles
  * @param roles Array of allowed roles (e.g., ['Admin', 'Pastor'])
  */

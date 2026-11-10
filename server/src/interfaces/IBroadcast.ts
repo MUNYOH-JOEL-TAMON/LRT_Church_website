@@ -2,6 +2,7 @@ import { Document, Types } from 'mongoose';
 
 export type BroadcastStatus = 'offline' | 'scheduled' | 'live';
 export type BroadcastSourceType = 'youtube' | 'facebook' | 'direct';
+export type BroadcastAccessLevel = 'all' | 'registered_only';
 
 export interface IBroadcast extends Document {
   _id: Types.ObjectId;
@@ -12,6 +13,8 @@ export interface IBroadcast extends Document {
   sourceType: BroadcastSourceType;
   streamUrl: string; // YouTube Video ID/URL or Facebook embed or direct HLS URL
   allowWebcams: boolean;
+  accessLevel: BroadcastAccessLevel;
+  eventId?: Types.ObjectId | null;
   spotlightedMemberId?: string | null;
   scheduledDate?: Date;
   startedAt?: Date;
