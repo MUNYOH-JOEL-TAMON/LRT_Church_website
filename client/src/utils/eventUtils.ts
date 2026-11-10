@@ -10,3 +10,4 @@ export const isEventRegistrationClosed = (eventDateInput?: string | Date | null)
 };
 
 export default isEventRegistrationClosed;
+
