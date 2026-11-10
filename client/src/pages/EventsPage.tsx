@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon, LogIn, X } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon, LogIn, X, Lock } from 'lucide-react';
 import Button from '../components/ui/Button';
 import PageBanner from '../components/ui/PageBanner';
 import eventService from '../services/eventService';
 import type { Event } from '../types';
 import getMediaUrl from '../utils/imageUrl';
+import isEventRegistrationClosed from '../utils/eventUtils';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);

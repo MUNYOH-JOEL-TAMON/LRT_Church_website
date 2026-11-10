@@ -32,6 +32,11 @@ export class EventService {
     const event = await Event.findById(eventId);
     if (!event) throw new Error('Event not found');
 
+    // Business Rule: Check if event due date has reached/passed
+    if (event.date && new Date().getTime() >= new Date(event.date).getTime()) {
+      throw new Error('Registration is closed for this event as the due date has been reached.');
+    }
+
     // Business Rule: Check capacity
     if (event.maxCapacity && event.registeredAttendees.length >= event.maxCapacity) {
       throw new Error('Event is at full capacity');
