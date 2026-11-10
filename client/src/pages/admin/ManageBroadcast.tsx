@@ -15,17 +15,22 @@ import {
   VolumeX,
   AlertCircle,
   CheckCircle2,
+  Lock,
+  Globe,
+  Calendar,
 } from 'lucide-react';
 import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import broadcastService from '../../services/broadcastService';
+import eventService from '../../services/eventService';
 import getEmbedStreamUrl from '../../utils/streamUrl';
-import type { BroadcastSession, VirtualParticipant, LiveReaction } from '../../types';
+import type { BroadcastSession, VirtualParticipant, LiveReaction, Event } from '../../types';
 
 const ManageBroadcast: React.FC = () => {
   const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
   const [participants, setParticipants] = useState<VirtualParticipant[]>([]);
   const [reactions, setReactions] = useState<LiveReaction[]>([]);
+  const [events, setEvents] = useState<Event[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
@@ -37,24 +42,38 @@ const ManageBroadcast: React.FC = () => {
     sourceType: 'youtube' as 'youtube' | 'facebook' | 'direct',
     streamUrl: '',
     allowWebcams: true,
+    accessLevel: 'all' as 'all' | 'registered_only',
+    eventId: '',
   });
 
   const fetchBroadcastData = async () => {
     try {
-      const res = await broadcastService.getCurrent();
-      if (res.data) {
-        setBroadcast(res.data.broadcast);
-        setParticipants(res.data.participants || []);
-        setReactions(res.data.reactions || []);
+      const [res, eventsRes] = await Promise.allSettled([
+        broadcastService.getCurrent(),
+        eventService.getAll(),
+      ]);
 
-        if (res.data.broadcast) {
-          setFormData({
-            title: res.data.broadcast.title || 'Sunday Worship Service',
-            preacher: res.data.broadcast.preacher || 'Pastor',
-            sourceType: res.data.broadcast.sourceType || 'youtube',
-            streamUrl: res.data.broadcast.streamUrl || '',
-            allowWebcams: res.data.broadcast.allowWebcams !== false,
-          });
+      if (eventsRes.status === 'fulfilled' && eventsRes.value.data) {
+        setEvents(eventsRes.value.data);
+      }
+
+      if (res.status === 'fulfilled' && res.value.data) {
+        setBroadcast(res.value.data.broadcast);
+        setParticipants(res.value.data.participants || []);
+        setReactions(res.value.data.reactions || []);
+
+        if (res.value.data.broadcast) {
+          const b = res.value.data.broadcast;
+          setFormData((prev) => ({
+            ...prev,
+            title: b.title || 'Sunday Worship Service',
+            preacher: b.preacher || 'Pastor',
+            sourceType: b.sourceType || 'youtube',
+            streamUrl: b.streamUrl || '',
+            allowWebcams: b.allowWebcams !== false,
+            accessLevel: b.accessLevel || 'all',
+            eventId: typeof b.eventId === 'object' && b.eventId ? (b.eventId as any)._id : b.eventId || '',
+          }));
         }
       }
     } catch {

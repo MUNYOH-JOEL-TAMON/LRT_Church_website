@@ -102,6 +102,7 @@ export interface NotificationResponseData {
 
 export type BroadcastStatus = 'offline' | 'scheduled' | 'live';
 export type BroadcastSourceType = 'youtube' | 'facebook' | 'direct';
+export type BroadcastAccessLevel = 'all' | 'registered_only';
 
 export interface BroadcastSession {
   _id: string;
@@ -112,6 +113,8 @@ export interface BroadcastSession {
   sourceType: BroadcastSourceType;
   streamUrl: string;
   allowWebcams: boolean;
+  accessLevel?: BroadcastAccessLevel;
+  eventId?: string | null;
   spotlightedMemberId?: string | null;
   scheduledDate?: string;
   startedAt?: string;
@@ -119,6 +122,20 @@ export interface BroadcastSession {
   activeViewersCount: number;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BroadcastRestriction {
+  isRestricted: boolean;
+  accessLevel: BroadcastAccessLevel;
+  isUserRegistered?: boolean;
+  event?: {
+    _id: string;
+    title: string;
+    date: string;
+    location?: string;
+    isRegistrationClosed: boolean;
+  } | null;
+  message?: string;
 }
 
 export interface VirtualParticipant {
@@ -146,4 +163,5 @@ export interface BroadcastCurrentData {
   participants: VirtualParticipant[];
   reactions: LiveReaction[];
   activeViewersCount: number;
+  restriction?: BroadcastRestriction;
 }
