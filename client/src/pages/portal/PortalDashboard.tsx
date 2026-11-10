@@ -634,23 +634,33 @@ const PortalDashboard = () => {
             <div className="space-y-8 animate-fade-in">
               {/* Live Service Broadcast Alert Banner */}
               {isBroadcastLive && (
-                <div className="p-6 rounded-3xl bg-gradient-to-r from-red-600 via-rose-600 to-primary text-white shadow-xl shadow-red-600/20 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-red-400/40">
+                <div className={`p-6 rounded-3xl text-white shadow-xl flex flex-col sm:flex-row sm:items-center justify-between gap-5 border ${
+                  broadcastRestriction?.isRestricted
+                    ? 'bg-gradient-to-r from-amber-600 via-orange-600 to-amber-700 shadow-amber-600/20 border-amber-400/40'
+                    : 'bg-gradient-to-r from-red-600 via-rose-600 to-primary shadow-red-600/20 border-red-400/40'
+                }`}>
                   <div className="flex items-center gap-4">
                     <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white flex-shrink-0">
-                      <Radio className="w-6 h-6 animate-pulse" />
+                      {broadcastRestriction?.isRestricted ? (
+                        <Lock className="w-6 h-6 text-amber-200" />
+                      ) : (
+                        <Radio className="w-6 h-6 animate-pulse" />
+                      )}
                     </div>
                     <div>
                       <div className="flex items-center gap-2 mb-1">
                         <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
                         <span className="text-xs font-black uppercase tracking-wider text-secondary">
-                          Service Live Now
+                          {broadcastRestriction?.isRestricted ? 'Restricted Event Live Now' : 'Service Live Now'}
                         </span>
                       </div>
                       <h3 className="text-lg sm:text-xl font-heading font-extrabold text-white">
                         {broadcast?.title || 'Sunday Worship Service'}
                       </h3>
-                      <p className="text-xs text-red-100">
-                        Ministration by {broadcast?.preacher || 'Pastor Joel'} • Appear on the church projector wall!
+                      <p className="text-xs text-slate-100">
+                        {broadcastRestriction?.isRestricted
+                          ? `Restricted to registered attendees of ${broadcastRestriction.event?.title || 'this event'}. Tap to unlock access.`
+                          : `Ministration by ${broadcast?.preacher || 'Pastor Joel'} • Appear on the church projector wall!`}
                       </p>
                     </div>
                   </div>
@@ -658,10 +668,10 @@ const PortalDashboard = () => {
                     variant="secondary"
                     size="sm"
                     onClick={() => setActiveTab('live')}
-                    leftIcon={<Play className="w-4 h-4 text-slate-950" />}
+                    leftIcon={broadcastRestriction?.isRestricted ? <Lock className="w-4 h-4 text-slate-950" /> : <Play className="w-4 h-4 text-slate-950" />}
                     className="shadow-lg shadow-black/20 flex-shrink-0"
                   >
-                    Join Live Sanctuary
+                    {broadcastRestriction?.isRestricted ? 'View Access & Register' : 'Join Live Sanctuary'}
                   </Button>
                 </div>
               )}
@@ -1105,28 +1115,119 @@ const PortalDashboard = () => {
              ══════════════════════════════════════════════════════════ */}
           {activeTab === 'live' && (
             <div className="space-y-6 animate-fade-in">
-              {/* Pastor Dialogue Live Alert (When Pastor talks to member) */}
-              {isDialogueActive && (
-                <div className="p-6 rounded-3xl bg-amber-400 text-slate-950 font-heading shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-amber-300 animate-slide-up">
-                  <div className="flex items-center gap-4">
-                    <div className="w-12 h-12 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center flex-shrink-0 text-xl font-extrabold animate-bounce">
-                      🎤
-                    </div>
-                    <div>
-                      <h3 className="text-xl font-extrabold leading-tight">
-                        Pastor Is Speaking With You Live!
-                      </h3>
-                      <p className="text-xs sm:text-sm font-semibold text-slate-900 mt-0.5">
-                        Your video is spotlighted on the church screen and your microphone is live. Speak clearly into your device.
-                      </p>
-                    </div>
+              {/* Restricted Event Gate (When user is not registered for this event) */}
+              {isBroadcastLive && broadcastRestriction?.isRestricted ? (
+                <div className="bg-white rounded-3xl p-6 sm:p-12 border border-slate-200/80 shadow-xl text-center max-w-2xl mx-auto space-y-6 my-4">
+                  <div className="w-20 h-20 rounded-3xl bg-amber-50 text-amber-600 border border-amber-200/80 flex items-center justify-center mx-auto shadow-md">
+                    <Lock className="w-10 h-10 text-amber-600" />
                   </div>
-                  <span className="px-4 py-2 rounded-xl bg-slate-950 text-white text-xs font-extrabold flex items-center gap-1.5 w-fit">
-                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
-                    Microphone Live
-                  </span>
+                  <div>
+                    <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-amber-100 text-amber-800 text-[11px] font-bold uppercase tracking-wider mb-3">
+                      <span>Restricted Fellowship Broadcast</span>
+                    </div>
+                    <h2 className="text-2xl sm:text-3xl font-heading font-extrabold text-slate-900 mb-2">
+                      Registered Attendees Only
+                    </h2>
+                    <p className="text-sm text-slate-600 leading-relaxed max-w-lg mx-auto">
+                      This live service is reserved for church members registered for{' '}
+                      <strong className="text-slate-900">{broadcastRestriction.event?.title || 'this fellowship program'}</strong>.
+                    </p>
+                  </div>
+
+                  {broadcastRestriction.event && (
+                    <div className="p-5 rounded-2xl bg-slate-50 border border-slate-200 text-left text-xs space-y-2.5 max-w-md mx-auto">
+                      <div className="flex items-center justify-between font-bold text-slate-800">
+                        <span className="text-sm text-primary">{broadcastRestriction.event.title}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-slate-600">
+                        <Calendar className="w-4 h-4 text-secondary-dark flex-shrink-0" />
+                        <span>
+                          {new Date(broadcastRestriction.event.date).toLocaleDateString('en-US', {
+                            weekday: 'long',
+                            year: 'numeric',
+                            month: 'long',
+                            day: 'numeric',
+                          })}
+                        </span>
+                      </div>
+                      {broadcastRestriction.event.location && (
+                        <div className="flex items-center gap-2 text-slate-600">
+                          <MapPin className="w-4 h-4 text-primary flex-shrink-0" />
+                          <span>{broadcastRestriction.event.location}</span>
+                        </div>
+                      )}
+                    </div>
+                  )}
+
+                  {/* Action / Unlock Button */}
+                  <div>
+                    {broadcastRestriction.event?.isRegistrationClosed ? (
+                      <div className="p-4 rounded-2xl bg-red-50 border border-red-200 text-xs text-red-700 font-semibold max-w-md mx-auto space-y-1">
+                        <p className="font-bold">Registration Portal Closed</p>
+                        <p className="text-[11px] text-red-600">
+                          The due date for registration has passed. If you should have access to this event, please contact the church office or media team.
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="space-y-3">
+                        <Button
+                          variant="primary"
+                          size="lg"
+                          onClick={async () => {
+                            if (broadcastRestriction.event?._id) {
+                              await handleEventRegister(broadcastRestriction.event._id);
+                            }
+                          }}
+                          isLoading={registeringEventId === broadcastRestriction.event?._id}
+                          leftIcon={<CheckCircle2 className="w-5 h-5 text-secondary" />}
+                          className="shadow-xl shadow-primary/25 cursor-pointer"
+                        >
+                          Register Now to Unlock Live Stream
+                        </Button>
+                        <p className="text-[11px] text-slate-400">
+                          Registration is instant. Once registered, your broadcast stream and video wall tile will unlock immediately.
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              )}
+              ) : (
+                <>
+                  {/* Verified Attendee Exclusive Ribbon */}
+                  {isBroadcastLive && broadcast?.accessLevel === 'registered_only' && (
+                    <div className="p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-emerald-800 text-xs font-bold flex flex-col sm:flex-row sm:items-center justify-between gap-2 shadow-xs">
+                      <span className="flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4 text-emerald-600 flex-shrink-0" />
+                        Verified Attendee Access • You are registered for this exclusive program
+                      </span>
+                      <span className="text-[10px] uppercase tracking-wider text-emerald-700 bg-emerald-100/80 px-2.5 py-1 rounded-full font-extrabold w-fit">
+                        {broadcastRestriction?.event?.title || 'Exclusive Session'}
+                      </span>
+                    </div>
+                  )}
+
+                  {/* Pastor Dialogue Live Alert (When Pastor talks to member) */}
+                  {isDialogueActive && (
+                    <div className="p-6 rounded-3xl bg-amber-400 text-slate-950 font-heading shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-amber-300 animate-slide-up">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center flex-shrink-0 text-xl font-extrabold animate-bounce">
+                          🎤
+                        </div>
+                        <div>
+                          <h3 className="text-xl font-extrabold leading-tight">
+                            Pastor Is Speaking With You Live!
+                          </h3>
+                          <p className="text-xs sm:text-sm font-semibold text-slate-900 mt-0.5">
+                            Your video is spotlighted on the church screen and your microphone is live. Speak clearly into your device.
+                          </p>
+                        </div>
+                      </div>
+                      <span className="px-4 py-2 rounded-xl bg-slate-950 text-white text-xs font-extrabold flex items-center gap-1.5 w-fit">
+                        <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                        Microphone Live
+                      </span>
+                    </div>
+                  )}
 
               {/* Main Live Player + Information Grid */}
               <div className="grid lg:grid-cols-12 gap-6">
@@ -1322,8 +1423,10 @@ const PortalDashboard = () => {
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
+        </div>
+      )}
 
           {/* ══════════════════════════════════════════════════════════
               TAB 2: SERMONS IN-DASHBOARD
