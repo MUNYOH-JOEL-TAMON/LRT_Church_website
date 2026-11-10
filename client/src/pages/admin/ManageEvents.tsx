@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Plus, Edit, Trash2, Search, MapPin, Users as UsersIcon, Loader2, Upload, Link as LinkIcon, Image as ImageIcon } from 'lucide-react';
+import { Plus, Edit, Trash2, Search, MapPin, Users as UsersIcon, Loader2, Upload, Link as LinkIcon, Image as ImageIcon, Lock, Clock } from 'lucide-react';
 import DataTable from '../../components/admin/DataTable';
 import Modal from '../../components/admin/Modal';
 import Button from '../../components/ui/Button';
@@ -7,11 +7,12 @@ import Input from '../../components/ui/Input';
 import eventService from '../../services/eventService';
 import galleryService from '../../services/galleryService';
 import getMediaUrl from '../../utils/imageUrl';
+import isEventRegistrationClosed from '../../utils/eventUtils';
 import type { Event } from '../../types';
 
 type FlierMode = 'file' | 'url' | 'none';
 
-const EMPTY_FORM = { title: '', description: '', date: '', location: '', maxCapacity: '' };
+const EMPTY_FORM = { title: '', description: '', date: '', time: '', location: '', maxCapacity: '' };
 
 const ManageEvents = () => {
   const [events, setEvents] = useState<Event[]>([]);
@@ -61,10 +62,20 @@ const ManageEvents = () => {
 
   const openEditModal = (event: Event) => {
     setEditingEvent(event);
+    let datePart = '';
+    let timePart = '';
+    if (event.date) {
+      datePart = event.date.slice(0, 10);
+      if (event.date.includes('T')) {
+        const t = event.date.slice(11, 16);
+        if (t && t !== '00:00') timePart = t;
+      }
+    }
     setFormData({
       title: event.title,
       description: event.description,
-      date: event.date ? event.date.slice(0, 10) : '',
+      date: datePart,
+      time: timePart,
       location: event.location,
       maxCapacity: event.maxCapacity ? String(event.maxCapacity) : '',
     });
@@ -108,8 +119,16 @@ const ManageEvents = () => {
         finalFlierUrl = editingEvent.flierUrl;
       }
 
+      let combinedDate = formData.date;
+      if (formData.time) {
+        combinedDate = `${formData.date}T${formData.time}:00`;
+      }
+
       const payload: any = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        date: combinedDate,
+        location: formData.location,
         maxCapacity: formData.maxCapacity ? Number(formData.maxCapacity) : undefined,
         flierUrl: finalFlierUrl,
       };
@@ -167,12 +186,26 @@ const ManageEvents = () => {
     },
     {
       key: 'date',
-      header: 'Date',
-      render: (item: Event) => (
-        <span className="text-slate-500">
-          {item.date ? new Date(item.date).toLocaleDateString() : '—'}
-        </span>
-      ),
+      header: 'Date & Status',
+      render: (item: Event) => {
+        const isClosed = isEventRegistrationClosed(item.date);
+        return (
+          <div className="flex flex-col gap-1">
+            <span className="text-slate-700 text-sm font-medium">
+              {item.date ? new Date(item.date).toLocaleDateString() : '—'}
+            </span>
+            {isClosed ? (
+              <span className="inline-flex items-center gap-1 w-fit text-[10px] font-bold px-2 py-0.5 rounded-full bg-red-50 text-red-700 border border-red-200">
+                <Lock className="w-2.5 h-2.5 text-red-500" /> Closed
+              </span>
+            ) : (
+              <span className="inline-flex items-center gap-1 w-fit text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                Open
+              </span>
+            )}
+          </div>
+        );
+      },
     },
     {
       key: 'capacity',
@@ -240,9 +273,11 @@ const ManageEvents = () => {
           <Input id="event-title" label="Event Title" placeholder="e.g. Sunday Worship Service"
             required value={formData.title} onChange={(e) => setFormData({ ...formData, title: e.target.value })} />
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <Input id="event-date" label="Date" type="date" required
               value={formData.date} onChange={(e) => setFormData({ ...formData, date: e.target.value })} />
+            <Input id="event-time" label="Due Time (Optional)" type="time"
+              value={formData.time} onChange={(e) => setFormData({ ...formData, time: e.target.value })} />
             <Input id="event-capacity" label="Max Capacity (Optional)" type="number" placeholder="e.g. 200"
               value={formData.maxCapacity} onChange={(e) => setFormData({ ...formData, maxCapacity: e.target.value })} />
           </div>
