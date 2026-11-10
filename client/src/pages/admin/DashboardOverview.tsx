@@ -198,9 +198,8 @@ const DashboardOverview = () => {
   return (
     <div className="space-y-8">
       {/* Welcome Banner */}
-      <div className="rounded-3xl bg-gradient-to-br from-primary-dark via-primary to-primary-light text-white p-6 md:p-8 relative overflow-hidden shadow-xl shadow-primary/20">
-        <div className="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full -translate-y-1/2 translate-x-1/3"></div>
-        <div className="absolute bottom-0 left-1/3 w-48 h-48 bg-white/5 rounded-full translate-y-1/2"></div>
+      <div className="bg-slate-900 rounded-3xl p-6 md:p-8 text-white relative overflow-hidden shadow-2xl border border-white/10">
+        <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
         <div className="relative z-10 flex items-center justify-between">
           <div>
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-white/10 border border-white/15 text-secondary font-bold text-xs uppercase tracking-widest mb-3">
@@ -210,7 +209,7 @@ const DashboardOverview = () => {
             <h2 className="text-2xl sm:text-3xl font-heading font-extrabold mb-2 text-white">
               Welcome back, {user?.firstName}!
             </h2>
-            <p className="text-blue-100 max-w-lg text-xs sm:text-sm">
+            <p className="text-slate-300 max-w-lg text-xs sm:text-sm leading-relaxed">
               Here is an overview of your church platform. Manage members, content, and events all from one place.
             </p>
           </div>
