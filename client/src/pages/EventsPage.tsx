@@ -1,73 +1,41 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon, CheckCircle2, UserCheck, LogIn, X } from 'lucide-react';
+import { CalendarDays, MapPin, Clock, Users, Loader2, Image as ImageIcon, LogIn, X } from 'lucide-react';
 import Button from '../components/ui/Button';
 import PageBanner from '../components/ui/PageBanner';
 import eventService from '../services/eventService';
 import type { Event } from '../types';
-import useAuthStore from '../store/useAuthStore';
 import getMediaUrl from '../utils/imageUrl';
 
 const EventsPage = () => {
   const [events, setEvents] = useState<Event[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState('');
-  const [registeringId, setRegisteringId] = useState<string | null>(null);
-  const [registeredIds, setRegisteredIds] = useState<Set<string>>(new Set());
   const [authPromptEvent, setAuthPromptEvent] = useState<Event | null>(null);
-  const [confirmEvent, setConfirmEvent] = useState<Event | null>(null);
-  const { isAuthenticated, user } = useAuthStore();
 
   useEffect(() => {
-    const fetch = async () => {
+    const fetchEvents = async () => {
       try {
         setIsLoading(true);
         const res = await eventService.getAll();
-        const eventsData = res.data || [];
-        setEvents(eventsData);
-        if (user) {
-          const already = new Set(
-            eventsData.filter((e) => e.registeredAttendees?.includes(user._id)).map((e) => e._id)
-          );
-          setRegisteredIds(already);
-        }
+        setEvents(res.data || []);
       } catch {
         setError('Failed to load events. Please try again later.');
       } finally {
         setIsLoading(false);
       }
     };
-    fetch();
-  }, [user]);
+    fetchEvents();
+  }, []);
 
   const handleRegisterClick = (event: Event) => {
-    if (!isAuthenticated || !user) {
-      setAuthPromptEvent(event);
-      return;
-    }
-    setConfirmEvent(event);
-  };
-
-  const handleConfirmRegister = async (eventId: string) => {
-    try {
-      setRegisteringId(eventId);
-      await eventService.register(eventId);
-      setRegisteredIds((prev) => new Set(prev).add(eventId));
-      setEvents((prev) =>
-        prev.map((e) =>
-          e._id === eventId ? { ...e, registeredAttendees: [...e.registeredAttendees, user!._id] } : e
-        )
-      );
-      setConfirmEvent(null);
-    } catch (err: any) {
-      alert(err.response?.data?.message || 'Failed to register for event');
-    } finally {
-      setRegisteringId(null);
-    }
+    // The public website is completely decoupled from any user session.
+    // Visitors are directed to the Member Portal to register.
+    setAuthPromptEvent(event);
   };
 
   const isAtCapacity = (event: Event) =>
-    !!event.maxCapacity && event.registeredAttendees?.length >= event.maxCapacity;
+    !!event.maxCapacity && (event.registeredAttendees?.length ?? 0) >= event.maxCapacity;
 
   return (
     <div className="pb-24 bg-background min-h-screen">
@@ -113,8 +81,6 @@ const EventsPage = () => {
           <div className="flex flex-col gap-8 max-w-4xl mx-auto">
             {events.map((event) => {
               const atCapacity = isAtCapacity(event);
-              const isRegistered = registeredIds.has(event._id);
-              const isRegistering = registeringId === event._id;
 
               return (
                 <div
@@ -136,7 +102,9 @@ const EventsPage = () => {
                           <CalendarDays className="w-4 h-4 text-secondary" />
                           <span className="text-sm font-semibold">
                             {new Date(event.date).toLocaleDateString('en-US', {
-                              month: 'short', day: 'numeric', year: 'numeric',
+                              month: 'short',
+                              day: 'numeric',
+                              year: 'numeric',
                             })}
                           </span>
                         </div>
@@ -181,7 +149,10 @@ const EventsPage = () => {
                         <span className="flex items-center gap-2">
                           <Clock className="w-4 h-4 text-primary flex-shrink-0" />
                           {new Date(event.date).toLocaleDateString('en-US', {
-                            weekday: 'long', month: 'long', day: 'numeric', year: 'numeric',
+                            weekday: 'long',
+                            month: 'long',
+                            day: 'numeric',
+                            year: 'numeric',
                           })}
                         </span>
                       )}
@@ -207,7 +178,9 @@ const EventsPage = () => {
                           </div>
                           <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
                             <div
-                              className={`h-full rounded-full transition-all ${atCapacity ? 'bg-red-400' : 'bg-gradient-to-r from-primary to-secondary'}`}
+                              className={`h-full rounded-full transition-all ${
+                                atCapacity ? 'bg-red-400' : 'bg-gradient-to-r from-primary to-secondary'
+                              }`}
                               style={{
                                 width: `${Math.min(
                                   100,
@@ -221,21 +194,14 @@ const EventsPage = () => {
                         <div />
                       )}
 
-                      {isRegistered ? (
-                        <span className="text-sm font-semibold text-emerald-600 bg-emerald-50 px-5 py-2.5 rounded-xl border border-emerald-200">
-                          ✓ Registered
-                        </span>
-                      ) : (
-                        <Button
-                          variant={atCapacity ? 'ghost' : 'secondary'}
-                          size="sm"
-                          onClick={() => handleRegisterClick(event)}
-                          isLoading={isRegistering}
-                          disabled={atCapacity}
-                        >
-                          {atCapacity ? 'Fully Booked' : 'Register Now'}
-                        </Button>
-                      )}
+                      <Button
+                        variant={atCapacity ? 'ghost' : 'secondary'}
+                        size="sm"
+                        onClick={() => handleRegisterClick(event)}
+                        disabled={atCapacity}
+                      >
+                        {atCapacity ? 'Fully Booked' : 'Register Now'}
+                      </Button>
                     </div>
                   </div>
                 </div>
@@ -245,7 +211,7 @@ const EventsPage = () => {
         )}
       </div>
 
-      {/* ── Public Visitor Auth Prompt Modal ── */}
+      {/* ── Public Visitor Member Registration Prompt Modal ── */}
       {authPromptEvent && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
           <div
@@ -268,6 +234,7 @@ const EventsPage = () => {
               <button
                 onClick={() => setAuthPromptEvent(null)}
                 className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
+                aria-label="Close modal"
               >
                 <X className="w-5 h-5" />
               </button>
@@ -293,69 +260,10 @@ const EventsPage = () => {
               </Link>
               <button
                 onClick={() => setAuthPromptEvent(null)}
-                className="w-full py-2 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors"
+                className="w-full py-2 text-xs font-semibold text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
               >
                 Cancel
               </button>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* ── Member Confirm Registration Modal ── */}
-      {confirmEvent && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-          <div
-            className="absolute inset-0 bg-slate-950/70 backdrop-blur-xs"
-            onClick={() => setConfirmEvent(null)}
-          />
-          <div className="relative bg-white rounded-3xl shadow-2xl w-full max-w-md p-6 sm:p-8 overflow-hidden animate-slide-up">
-            <div className="flex items-start justify-between pb-4 border-b border-slate-100 mb-4">
-              <div className="flex items-center gap-3">
-                <div className="w-10 h-10 rounded-2xl bg-secondary/20 text-secondary-dark flex items-center justify-center flex-shrink-0">
-                  <UserCheck className="w-5 h-5" />
-                </div>
-                <div>
-                  <h3 className="font-heading font-extrabold text-slate-900 text-lg leading-tight">
-                    Confirm Event Registration
-                  </h3>
-                  <p className="text-xs text-slate-400 mt-0.5">{confirmEvent.title}</p>
-                </div>
-              </div>
-              <button
-                onClick={() => setConfirmEvent(null)}
-                className="p-1.5 rounded-xl hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors cursor-pointer"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-
-            <div className="bg-slate-50 p-4 rounded-2xl border border-slate-100 mb-5">
-              <p className="text-xs text-slate-500 mb-1">Registering attendee:</p>
-              <p className="text-sm font-bold text-slate-800">
-                {user?.firstName} {user?.lastName}
-              </p>
-              <p className="text-xs text-slate-400">{user?.email}</p>
-            </div>
-
-            <div className="flex items-center justify-end gap-3">
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setConfirmEvent(null)}
-                disabled={registeringId === confirmEvent._id}
-              >
-                Cancel
-              </Button>
-              <Button
-                variant="secondary"
-                size="sm"
-                onClick={() => handleConfirmRegister(confirmEvent._id)}
-                isLoading={registeringId === confirmEvent._id}
-                leftIcon={<CheckCircle2 className="w-4 h-4" />}
-              >
-                Confirm Registration
-              </Button>
             </div>
           </div>
         </div>
