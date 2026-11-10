@@ -39,6 +39,7 @@ import Button from '../../components/ui/Button';
 import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 import getMediaUrl from '../../utils/imageUrl';
+import isEventRegistrationClosed from '../../utils/eventUtils';
 
 type TabType = 'overview' | 'sermons' | 'events' | 'prayer' | 'profile';
 

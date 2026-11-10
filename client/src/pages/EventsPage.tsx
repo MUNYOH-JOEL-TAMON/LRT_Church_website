@@ -30,6 +30,9 @@ const EventsPage = () => {
   }, []);
 
   const handleRegisterClick = (event: Event) => {
+    // When the event due date has been reached, registration is closed
+    if (isEventRegistrationClosed(event.date)) return;
+
     // The public website is completely decoupled from any user session.
     // Visitors are directed to the Member Portal to register.
     setAuthPromptEvent(event);
@@ -82,6 +85,7 @@ const EventsPage = () => {
           <div className="flex flex-col gap-8 max-w-4xl mx-auto">
             {events.map((event) => {
               const atCapacity = isAtCapacity(event);
+              const isClosed = isEventRegistrationClosed(event.date);
 
               return (
                 <div
@@ -110,6 +114,13 @@ const EventsPage = () => {
                           </span>
                         </div>
                       )}
+                      {/* registration closed overlay */}
+                      {isClosed && (
+                        <div className="absolute top-4 right-4 bg-red-950/85 backdrop-blur-md text-red-200 border border-red-500/40 rounded-2xl px-3.5 py-1.5 flex items-center gap-1.5 shadow-lg text-xs font-bold">
+                          <Lock className="w-3.5 h-3.5 text-red-400" />
+                          Registration Closed
+                        </div>
+                      )}
                     </div>
                   ) : (
                     /* No flier — coloured banner with date block */
@@ -128,9 +139,15 @@ const EventsPage = () => {
                           <ImageIcon className="w-6 h-6 text-white/40" />
                         )}
                       </div>
-                      <h3 className="text-2xl font-heading font-bold text-white">
+                      <h3 className="text-2xl font-heading font-bold text-white flex-1">
                         {event.title}
                       </h3>
+                      {isClosed && (
+                        <span className="bg-red-500/20 border border-red-400/40 text-red-200 text-xs font-bold px-3 py-1.5 rounded-xl flex items-center gap-1.5 flex-shrink-0">
+                          <Lock className="w-3.5 h-3.5 text-red-300" />
+                          Registration Closed
+                        </span>
+                      )}
                     </div>
                   )}
 
@@ -195,14 +212,24 @@ const EventsPage = () => {
                         <div />
                       )}
 
-                      <Button
-                        variant={atCapacity ? 'ghost' : 'secondary'}
-                        size="sm"
-                        onClick={() => handleRegisterClick(event)}
-                        disabled={atCapacity}
-                      >
-                        {atCapacity ? 'Fully Booked' : 'Register Now'}
-                      </Button>
+                      {isClosed ? (
+                        <span className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl text-xs font-bold bg-slate-100 text-slate-500 border border-slate-200">
+                          <Lock className="w-3.5 h-3.5 text-slate-400" />
+                          Registration Closed
+                        </span>
+                      ) : atCapacity ? (
+                        <Button variant="ghost" size="sm" disabled>
+                          Fully Booked
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleRegisterClick(event)}
+                        >
+                          Register Now
+                        </Button>
+                      )}
                     </div>
                   </div>
                 </div>
