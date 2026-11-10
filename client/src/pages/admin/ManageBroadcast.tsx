@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Radio,
   Tv,
@@ -34,6 +34,7 @@ const ManageBroadcast: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState('');
   const [successMsg, setSuccessMsg] = useState('');
+  const isFormInitialized = useRef(false);
 
   // Form State
   const [formData, setFormData] = useState({
@@ -62,10 +63,11 @@ const ManageBroadcast: React.FC = () => {
         setParticipants(res.value.data.participants || []);
         setReactions(res.value.data.reactions || []);
 
-        if (res.value.data.broadcast) {
+        // Only initialize form data once on initial load so polling does not overwrite admin inputs
+        if (res.value.data.broadcast && !isFormInitialized.current) {
+          isFormInitialized.current = true;
           const b = res.value.data.broadcast;
-          setFormData((prev) => ({
-            ...prev,
+          setFormData({
             title: b.title || 'Sunday Worship Service',
             preacher: b.preacher || 'Pastor',
             sourceType: b.sourceType || 'youtube',
@@ -73,7 +75,7 @@ const ManageBroadcast: React.FC = () => {
             allowWebcams: b.allowWebcams !== false,
             accessLevel: b.accessLevel || 'all',
             eventId: typeof b.eventId === 'object' && b.eventId ? (b.eventId as any)._id : b.eventId || '',
-          }));
+          });
         }
       }
     } catch {
@@ -353,10 +355,10 @@ const ManageBroadcast: React.FC = () => {
               <div className="grid sm:grid-cols-2 gap-3">
                 <button
                   type="button"
-                  onClick={() => setFormData({ ...formData, accessLevel: 'all', eventId: '' })}
+                  onClick={() => setFormData((prev) => ({ ...prev, accessLevel: 'all', eventId: '' }))}
                   className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
                     formData.accessLevel === 'all'
-                      ? 'border-primary bg-primary/5 text-primary-dark shadow-xs'
+                      ? 'border-primary bg-primary/5 text-primary-dark shadow-xs ring-2 ring-primary/20'
                       : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                   }`}
                 >
@@ -372,12 +374,15 @@ const ManageBroadcast: React.FC = () => {
                 <button
                   type="button"
                   onClick={() => {
-                    const defaultEvId = events[0]?._id || '';
-                    setFormData({ ...formData, accessLevel: 'registered_only', eventId: defaultEvId });
+                    setFormData((prev) => ({
+                      ...prev,
+                      accessLevel: 'registered_only',
+                      eventId: prev.eventId || events[0]?._id || '',
+                    }));
                   }}
                   className={`p-3.5 rounded-xl border text-left transition-all cursor-pointer flex items-start gap-3 ${
                     formData.accessLevel === 'registered_only'
-                      ? 'border-secondary-dark bg-secondary/10 text-slate-900 shadow-xs'
+                      ? 'border-secondary-dark bg-secondary/10 text-slate-900 shadow-xs ring-2 ring-secondary/40'
                       : 'border-slate-200 bg-white text-slate-600 hover:border-slate-300'
                   }`}
                 >
