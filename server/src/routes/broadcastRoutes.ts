@@ -1,11 +1,11 @@
 import { Router } from 'express';
 import { BroadcastController } from '../controllers/BroadcastController';
-import { protect, authorize } from '../middleware/authMiddleware';
+import { protect, authorize, optionalAuth } from '../middleware/authMiddleware';
 
 const router = Router();
 
-// Public routes (anyone viewing the broadcast or projector screen)
-router.get('/current', BroadcastController.getCurrent);
+// Current broadcast info (optionalAuth determines if member has access to restricted events)
+router.get('/current', optionalAuth, BroadcastController.getCurrent);
 router.get('/participants', BroadcastController.getParticipants);
 router.get('/reactions', BroadcastController.getReactions);
 

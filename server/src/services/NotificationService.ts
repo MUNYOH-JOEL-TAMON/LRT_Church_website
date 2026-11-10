@@ -111,5 +111,25 @@ export class NotificationService {
       isRead: false,
     });
   }
+
+  /**
+   * Send notifications to a specific list of user IDs (e.g. registered event attendees).
+   */
+  public static async notifyUsers(userIds: any[], input: CreateNotificationInput) {
+    if (!userIds || userIds.length === 0) return [];
+
+    const uniqueIds = Array.from(new Set(userIds.map((id) => id.toString())));
+    const notificationsToInsert = uniqueIds.map((uid) => ({
+      recipient: uid,
+      title: input.title,
+      message: input.message,
+      type: input.type || 'event',
+      link: input.link,
+      metadata: input.metadata,
+      isRead: false,
+    }));
+
+    return await Notification.insertMany(notificationsToInsert);
+  }
 }
 

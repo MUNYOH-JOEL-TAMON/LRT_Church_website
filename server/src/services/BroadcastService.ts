@@ -1,4 +1,5 @@
 import { Broadcast } from '../models/Broadcast';
+import { Event } from '../models/Event';
 import { IVirtualParticipant } from '../interfaces/IBroadcast';
 import { NotificationService } from './NotificationService';
 
