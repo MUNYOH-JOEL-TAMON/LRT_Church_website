@@ -99,3 +99,51 @@ export interface NotificationResponseData {
   notifications: AppNotification[];
   unreadCount: number;
 }
+
+export type BroadcastStatus = 'offline' | 'scheduled' | 'live';
+export type BroadcastSourceType = 'youtube' | 'facebook' | 'direct';
+
+export interface BroadcastSession {
+  _id: string;
+  title: string;
+  preacher: string;
+  description?: string;
+  status: BroadcastStatus;
+  sourceType: BroadcastSourceType;
+  streamUrl: string;
+  allowWebcams: boolean;
+  spotlightedMemberId?: string | null;
+  scheduledDate?: string;
+  startedAt?: string;
+  endedAt?: string;
+  activeViewersCount: number;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface VirtualParticipant {
+  userId: string;
+  name: string;
+  email?: string;
+  location: string;
+  hasCamera: boolean;
+  hasAudio: boolean;
+  isMutedByAdmin: boolean;
+  isSpotlighted: boolean;
+  streamPeerId?: string;
+  lastPing: string;
+}
+
+export interface LiveReaction {
+  id: string;
+  type: string;
+  userName: string;
+  createdAt: number;
+}
+
+export interface BroadcastCurrentData {
+  broadcast: BroadcastSession;
+  participants: VirtualParticipant[];
+  reactions: LiveReaction[];
+  activeViewersCount: number;
+}
