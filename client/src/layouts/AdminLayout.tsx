@@ -9,6 +9,7 @@ import {
   Megaphone,
   PenLine,
   Image,
+  Radio,
   LogOut,
   ChevronRight,
   Menu,
@@ -34,6 +35,7 @@ const allNavItems: NavItem[] = [
   { icon: Megaphone, label: 'Announcements', to: '/admin/announcements', roles: ['Admin', 'Editor'] },
   { icon: PenLine, label: 'Blog Posts', to: '/admin/blog', roles: ['Admin', 'Editor'] },
   { icon: Image, label: 'Gallery', to: '/admin/gallery', roles: ['Admin', 'Editor'] },
+  { icon: Radio, label: 'Live Broadcast', to: '/admin/broadcast', roles: ['Admin', 'Pastor', 'Editor'] },
 ];
 
 const AdminLayout = () => {

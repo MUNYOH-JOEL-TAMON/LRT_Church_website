@@ -13,6 +13,8 @@ import BlogPage from './pages/BlogPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import GalleryPage from './pages/GalleryPage';
 import PrayerRequestPage from './pages/PrayerRequestPage';
+import LiveBroadcastPage from './pages/LiveBroadcastPage';
+import SanctuaryScreen from './pages/SanctuaryScreen';
 
 // Pages - Auth
 import LoginPage from './pages/portal/LoginPage';
@@ -30,6 +32,7 @@ import ManagePrayerRequests from './pages/admin/ManagePrayerRequests';
 import ManageAnnouncements from './pages/admin/ManageAnnouncements';
 import ManageBlog from './pages/admin/ManageBlog';
 import ManageGallery from './pages/admin/ManageGallery';
+import ManageBroadcast from './pages/admin/ManageBroadcast';
 
 function App() {
   return (
@@ -45,7 +48,11 @@ function App() {
           <Route path="announcements" element={<AnnouncementsPage />} />
           <Route path="gallery" element={<GalleryPage />} />
           <Route path="prayer-requests" element={<PrayerRequestPage />} />
+          <Route path="live" element={<LiveBroadcastPage />} />
         </Route>
+
+        {/* ── In-Sanctuary Projector Screen (Clean 100% Fullscreen Output for HDMI / LED Wall) ── */}
+        <Route path="/live/screen" element={<SanctuaryScreen />} />
 
         {/* ── Auth Routes (no layout wrapper) ── */}
         <Route path="/portal/login" element={<LoginPage />} />
@@ -67,6 +74,7 @@ function App() {
             <Route path="/admin/announcements" element={<ManageAnnouncements />} />
             <Route path="/admin/blog" element={<ManageBlog />} />
             <Route path="/admin/gallery" element={<ManageGallery />} />
+            <Route path="/admin/broadcast" element={<ManageBroadcast />} />
           </Route>
         </Route>
 
