@@ -12,6 +12,7 @@ import blogRoutes from './routes/blogRoutes';
 import galleryRoutes from './routes/galleryRoutes';
 import uploadRoutes from './routes/uploadRoutes';
 import notificationRoutes from './routes/notificationRoutes';
+import broadcastRoutes from './routes/broadcastRoutes';
 
 // Initialize env variables
 dotenv.config();
@@ -59,6 +60,7 @@ app.use('/api/v1/blog', blogRoutes);
 app.use('/api/v1/gallery', galleryRoutes);
 app.use('/api/v1/upload', uploadRoutes);
 app.use('/api/v1/notifications', notificationRoutes);
+app.use('/api/v1/broadcast', broadcastRoutes);
 
 // Generic Error handling middleware
 app.use((err: any, req: Request, res: Response, next: NextFunction) => {
