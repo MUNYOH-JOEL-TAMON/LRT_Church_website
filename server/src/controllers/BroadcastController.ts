@@ -3,9 +3,9 @@ import { AuthRequest } from '../middleware/authMiddleware';
 import { BroadcastService } from '../services/BroadcastService';
 
 export class BroadcastController {
-  public static async getCurrent(req: Request, res: Response): Promise<void> {
+  public static async getCurrent(req: AuthRequest, res: Response): Promise<void> {
     try {
-      const broadcast = await BroadcastService.getCurrentBroadcast();
+      const { broadcast, restriction } = await BroadcastService.getCurrentBroadcast(req.user);
       const participants = BroadcastService.getParticipants();
       const reactions = BroadcastService.getRecentReactions();
 
@@ -13,6 +13,7 @@ export class BroadcastController {
         success: true,
         data: {
           broadcast,
+          restriction,
           participants,
           reactions,
           activeViewersCount: participants.length,
@@ -56,6 +57,14 @@ export class BroadcastController {
         res.status(401).json({ success: false, message: 'Not authenticated' });
         return;
       }
+
+      // Check audience registration permission
+      const check = await BroadcastService.canUserJoinPresence(req.user.id, req.user.role);
+      if (!check.allowed) {
+        res.status(403).json({ success: false, message: check.reason });
+        return;
+      }
+
       const participant = BroadcastService.joinOrUpdatePresence({
         userId: req.user.id,
         name: `${req.user.firstName || ''} ${req.user.lastName || ''}`.trim() || 'Online Worshipper',

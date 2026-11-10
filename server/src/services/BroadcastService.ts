@@ -32,16 +32,23 @@ setInterval(() => {
 
 export class BroadcastService {
   /**
-   * Get the current broadcast session (or latest one)
+   * Get the current broadcast session (or latest one) with access evaluation
    */
-  public static async getCurrentBroadcast() {
+  public static async getCurrentBroadcast(user?: any) {
     // Priority: Live session first, then Scheduled, then most recent
-    let broadcast = await Broadcast.findOne({ status: 'live' }).sort({ updatedAt: -1 });
+    let broadcast: any = await Broadcast.findOne({ status: 'live' })
+      .populate('eventId', 'title date location registeredAttendees')
+      .sort({ updatedAt: -1 });
+
     if (!broadcast) {
-      broadcast = await Broadcast.findOne({ status: 'scheduled' }).sort({ scheduledDate: 1 });
+      broadcast = await Broadcast.findOne({ status: 'scheduled' })
+        .populate('eventId', 'title date location registeredAttendees')
+        .sort({ scheduledDate: 1 });
     }
     if (!broadcast) {
-      broadcast = await Broadcast.findOne().sort({ updatedAt: -1 });
+      broadcast = await Broadcast.findOne()
+        .populate('eventId', 'title date location registeredAttendees')
+        .sort({ updatedAt: -1 });
     }
 
     // Default fallback if no broadcast exists yet
@@ -53,10 +60,58 @@ export class BroadcastService {
         sourceType: 'youtube',
         streamUrl: 'https://www.youtube.com/watch?v=live_stream',
         allowWebcams: true,
+        accessLevel: 'all',
       });
     }
 
-    return broadcast;
+    // Evaluate audience access restriction
+    const event = broadcast.eventId as any;
+    let isRestricted = false;
+    let isUserRegistered = false;
+
+    if (broadcast.accessLevel === 'registered_only' && event) {
+      const userRole = user?.role?.toLowerCase();
+      const isAdminOrPastor = ['admin', 'pastor', 'editor'].includes(userRole);
+
+      if (!isAdminOrPastor) {
+        const attendeeIds = (event.registeredAttendees || []).map((id: any) => id.toString());
+        isUserRegistered = !!(user?.id && attendeeIds.includes(user.id.toString()));
+        if (!isUserRegistered) {
+          isRestricted = true;
+        }
+      } else {
+        isUserRegistered = true;
+      }
+    }
+
+    // Convert to plain object and mask streamUrl if restricted so non-registered viewers cannot stream
+    const broadcastObj = broadcast.toObject ? broadcast.toObject() : { ...broadcast };
+    if (isRestricted) {
+      broadcastObj.streamUrl = '';
+    }
+
+    const restriction = {
+      isRestricted,
+      accessLevel: broadcast.accessLevel || 'all',
+      isUserRegistered,
+      event: event
+        ? {
+            _id: event._id,
+            title: event.title,
+            date: event.date,
+            location: event.location,
+            isRegistrationClosed: new Date(event.date).getTime() < Date.now(),
+          }
+        : null,
+      message: isRestricted
+        ? `This live broadcast is reserved exclusively for registered attendees of ${event?.title || 'this program'}.`
+        : undefined,
+    };
+
+    return {
+      broadcast: broadcastObj,
+      restriction,
+    };
   }
 
   /**
@@ -88,20 +143,59 @@ export class BroadcastService {
       });
     }
 
-    // Dispatch In-App Notification to all members
+    // Dispatch In-App Notification (targeted if registered_only, or to all members if open)
     try {
-      await NotificationService.notifyAllMembers({
-        title: `🔴 LIVE NOW: ${broadcast.title}`,
-        message: `${broadcast.preacher} is live ministering! Join the Virtual Sanctuary and worship with us now.`,
-        type: 'event',
-        link: '/portal/dashboard?tab=live',
-        metadata: { broadcastId: broadcast._id },
-      });
+      if (broadcast.accessLevel === 'registered_only' && broadcast.eventId) {
+        const event = await Event.findById(broadcast.eventId).select('title registeredAttendees');
+        if (event && event.registeredAttendees && event.registeredAttendees.length > 0) {
+          await NotificationService.notifyUsers(event.registeredAttendees, {
+            title: `🔴 LIVE NOW: ${broadcast.title} (Exclusive)`,
+            message: `The live program for ${event.title} is now streaming! Tap to worship with other registered attendees.`,
+            type: 'event',
+            link: '/portal/dashboard?tab=live',
+            metadata: { broadcastId: broadcast._id, eventId: event._id },
+          });
+        }
+      } else {
+        await NotificationService.notifyAllMembers({
+          title: `🔴 LIVE NOW: ${broadcast.title}`,
+          message: `${broadcast.preacher} is live ministering! Join the Virtual Sanctuary and worship with us now.`,
+          type: 'event',
+          link: '/portal/dashboard?tab=live',
+          metadata: { broadcastId: broadcast._id },
+        });
+      }
     } catch (err) {
       console.error('Failed to dispatch broadcast live notification:', err);
     }
 
     return broadcast;
+  }
+
+  /**
+   * Check if a member is allowed to join the Virtual Congregation wall
+   */
+  public static async canUserJoinPresence(userId: string, userRole?: string): Promise<{ allowed: boolean; reason?: string }> {
+    const liveBroadcast = await Broadcast.findOne({ status: 'live' });
+    if (!liveBroadcast) return { allowed: true };
+
+    if (liveBroadcast.accessLevel === 'registered_only' && liveBroadcast.eventId) {
+      const isAdminOrPastor = ['admin', 'pastor', 'editor'].includes(userRole?.toLowerCase() || '');
+      if (isAdminOrPastor) return { allowed: true };
+
+      const event = await Event.findById(liveBroadcast.eventId).select('title registeredAttendees');
+      if (event) {
+        const attendeeIds = (event.registeredAttendees || []).map((id: any) => id.toString());
+        const isRegistered = attendeeIds.includes(userId);
+        if (!isRegistered) {
+          return {
+            allowed: false,
+            reason: `Only registered attendees of "${event.title}" can appear on the sanctuary video wall.`,
+          };
+        }
+      }
+    }
+    return { allowed: true };
   }
 
   /**
