@@ -10,6 +10,7 @@ import {
   HeartHandshake,
   LogOut,
   User,
+  Users,
   Menu,
   X,
   ChevronRight,
@@ -51,6 +52,7 @@ type TabType = 'overview' | 'live' | 'sermons' | 'events' | 'prayer' | 'profile'
 
 const PortalDashboard = () => {
   const { user, logout, updateUser } = useAuthStore();
+  const [searchParams] = useSearchParams();
   const [activeTab, setActiveTab] = useState<TabType>('overview');
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
@@ -60,6 +62,17 @@ const PortalDashboard = () => {
   const [myPrayers, setMyPrayers] = useState<PrayerRequest[]>([]);
   const [publicPrayers, setPublicPrayers] = useState<PrayerRequest[]>([]);
   const [isLoadingData, setIsLoadingData] = useState(true);
+
+  // Live Broadcast & Virtual Sanctuary states
+  const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
+  const [broadcastParticipants, setBroadcastParticipants] = useState<VirtualParticipant[]>([]);
+  const [cameraActive, setCameraActive] = useState(false);
+  const [locationInput, setLocationInput] = useState('');
+  const [userLocation, setUserLocation] = useState('Online Worshipper');
+  const [myParticipant, setMyParticipant] = useState<VirtualParticipant | null>(null);
+  const [recentReactionSent, setRecentReactionSent] = useState('');
+  const videoPreviewRef = useRef<HTMLVideoElement>(null);
+  const localStreamRef = useRef<MediaStream | null>(null);
 
   // Action states
   const [registeringEventId, setRegisteringEventId] = useState<string | null>(null);
@@ -118,6 +131,117 @@ const PortalDashboard = () => {
   useEffect(() => {
     fetchPortalData();
   }, []);
+
+  // Listen to tab in query parameter (e.g. ?tab=live)
+  useEffect(() => {
+    const tabParam = searchParams.get('tab');
+    if (tabParam && ['overview', 'live', 'sermons', 'events', 'prayer', 'profile'].includes(tabParam)) {
+      setActiveTab(tabParam as TabType);
+    }
+  }, [searchParams]);
+
+  // Fetch live broadcast status periodically
+  const fetchBroadcastData = async () => {
+    try {
+      const res = await broadcastService.getCurrent();
+      if (res.data) {
+        setBroadcast(res.data.broadcast);
+        setBroadcastParticipants(res.data.participants || []);
+        if (user && res.data.participants) {
+          const mine = res.data.participants.find((p) => p.userId === user._id);
+          if (mine) setMyParticipant(mine);
+        }
+      }
+    } catch {
+      // Quiet fail
+    }
+  };
+
+  useEffect(() => {
+    fetchBroadcastData();
+    const intervalTime = activeTab === 'live' ? 4000 : 20000;
+    const interval = setInterval(fetchBroadcastData, intervalTime);
+    return () => clearInterval(interval);
+  }, [activeTab, user]);
+
+  // Presence heartbeat when camera is active
+  useEffect(() => {
+    if (!cameraActive) return;
+    const pingInterval = setInterval(async () => {
+      try {
+        await broadcastService.pingPresence();
+      } catch {
+        // Quiet fail
+      }
+    }, 15000);
+    return () => clearInterval(pingInterval);
+  }, [cameraActive]);
+
+  // Restore camera video stream preview when live tab is displayed
+  useEffect(() => {
+    if (activeTab === 'live' && cameraActive && localStreamRef.current && videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = localStreamRef.current;
+    }
+  }, [activeTab, cameraActive]);
+
+  // Cleanup media tracks on unmount
+  useEffect(() => {
+    return () => {
+      if (localStreamRef.current) {
+        localStreamRef.current.getTracks().forEach((t) => t.stop());
+      }
+    };
+  }, []);
+
+  // Camera controls for Virtual Sanctuary
+  const startCamera = async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        video: { width: { ideal: 640 }, height: { ideal: 360 } },
+        audio: true,
+      });
+      localStreamRef.current = stream;
+      if (videoPreviewRef.current) {
+        videoPreviewRef.current.srcObject = stream;
+      }
+      setCameraActive(true);
+
+      const loc = locationInput.trim() || 'Online Worshipper';
+      setUserLocation(loc);
+
+      const res = await broadcastService.joinPresence({
+        location: loc,
+        hasCamera: true,
+        hasAudio: true,
+      });
+      if (res.data) setMyParticipant(res.data);
+    } catch {
+      alert('Could not access camera/microphone. Please ensure permissions are granted in your browser.');
+    }
+  };
+
+  const stopCamera = async () => {
+    if (localStreamRef.current) {
+      localStreamRef.current.getTracks().forEach((t) => t.stop());
+      localStreamRef.current = null;
+    }
+    if (videoPreviewRef.current) {
+      videoPreviewRef.current.srcObject = null;
+    }
+    setCameraActive(false);
+    await broadcastService.leavePresence();
+    setMyParticipant(null);
+  };
+
+  const handleSendReaction = async (type: string) => {
+    try {
+      setRecentReactionSent(type);
+      await broadcastService.sendReaction(type);
+      setTimeout(() => setRecentReactionSent(''), 1500);
+    } catch {
+      // Quiet fail
+    }
+  };
 
   // Prevent body scroll when mobile drawer or modal is open
   useEffect(() => {
@@ -244,6 +368,12 @@ const PortalDashboard = () => {
   };
 
   // Derived calculations
+  const isBroadcastLive = broadcast?.status === 'live';
+  const isDialogueActive = myParticipant && (!myParticipant.isMutedByAdmin || myParticipant.isSpotlighted);
+  const embedData = broadcast
+    ? getEmbedStreamUrl(broadcast.streamUrl, broadcast.sourceType)
+    : { embedUrl: '', isEmbeddable: false };
+
   const registeredEvents = events.filter((e) => e.registeredAttendees?.includes(user?._id || ''));
   const answeredPrayersCount = myPrayers.filter((p) => p.status === 'Answered').length;
   const latestSermon = sermons[0];
@@ -262,11 +392,18 @@ const PortalDashboard = () => {
 
   // Navigation items config
   const navItems = [
-    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, count: undefined },
-    { id: 'sermons', label: 'Sermons', icon: BookOpen, count: sermons.length || undefined },
-    { id: 'events', label: 'Events', icon: CalendarDays, count: registeredEvents.length || undefined },
-    { id: 'prayer', label: 'Prayer Requests', icon: HeartHandshake, count: myPrayers.length || undefined },
-    { id: 'profile', label: 'My Profile', icon: User, count: undefined },
+    { id: 'overview', label: 'Dashboard', icon: LayoutDashboard, count: undefined, badge: undefined },
+    {
+      id: 'live',
+      label: 'Live Sanctuary',
+      icon: Radio,
+      count: undefined,
+      badge: isBroadcastLive ? 'LIVE' : undefined,
+    },
+    { id: 'sermons', label: 'Sermons', icon: BookOpen, count: sermons.length || undefined, badge: undefined },
+    { id: 'events', label: 'Events', icon: CalendarDays, count: registeredEvents.length || undefined, badge: undefined },
+    { id: 'prayer', label: 'Prayer Requests', icon: HeartHandshake, count: myPrayers.length || undefined, badge: undefined },
+    { id: 'profile', label: 'My Profile', icon: User, count: undefined, badge: undefined },
   ];
 
   return (
@@ -318,7 +455,7 @@ const PortalDashboard = () => {
           <div className="px-3 pb-2 text-[11px] font-bold uppercase tracking-widest text-slate-400">
             Menu
           </div>
-          {navItems.map(({ id, label, icon: Icon, count }) => {
+          {navItems.map(({ id, label, icon: Icon, count, badge }) => {
             const isActive = activeTab === id;
             return (
               <button
@@ -336,22 +473,33 @@ const PortalDashboard = () => {
                 <div className="flex items-center gap-3">
                   <Icon
                     className={`w-5 h-5 transition-colors ${
-                      isActive ? 'text-secondary-light' : 'text-slate-400'
+                      isActive
+                        ? 'text-secondary-light'
+                        : id === 'live' && isBroadcastLive
+                        ? 'text-red-400 animate-pulse'
+                        : 'text-slate-400'
                     }`}
                   />
                   <span>{label}</span>
                 </div>
-                {count !== undefined && (
-                  <span
-                    className={`text-xs px-2 py-0.5 rounded-full font-bold ${
-                      isActive
-                        ? 'bg-white/20 text-white'
-                        : 'bg-white/10 text-secondary'
-                    }`}
-                  >
-                    {count}
-                  </span>
-                )}
+                <div className="flex items-center gap-2">
+                  {badge && (
+                    <span className="text-[10px] px-2 py-0.5 rounded-full font-extrabold uppercase tracking-wider bg-red-600 text-white animate-pulse shadow-sm shadow-red-500/50">
+                      {badge}
+                    </span>
+                  )}
+                  {count !== undefined && (
+                    <span
+                      className={`text-xs px-2 py-0.5 rounded-full font-bold ${
+                        isActive
+                          ? 'bg-white/20 text-white'
+                          : 'bg-white/10 text-secondary'
+                      }`}
+                    >
+                      {count}
+                    </span>
+                  )}
+                </div>
               </button>
             );
           })}
@@ -431,7 +579,11 @@ const PortalDashboard = () => {
             </button>
             <div className="min-w-0">
               <h1 className="text-base sm:text-xl font-heading font-extrabold text-slate-900 capitalize truncate">
-                {activeTab === 'overview' ? 'Dashboard Overview' : activeTab.replace('-', ' ')}
+                {activeTab === 'overview'
+                  ? 'Dashboard Overview'
+                  : activeTab === 'live'
+                  ? 'Live Sanctuary'
+                  : activeTab.replace('-', ' ')}
               </h1>
               <p className="text-xs text-slate-400 hidden sm:block truncate">
                 Latter Rain Tabernacle • Member Sanctuary
@@ -477,6 +629,40 @@ const PortalDashboard = () => {
              ══════════════════════════════════════════════════════════ */}
           {activeTab === 'overview' && (
             <div className="space-y-8 animate-fade-in">
+              {/* Live Service Broadcast Alert Banner */}
+              {isBroadcastLive && (
+                <div className="p-6 rounded-3xl bg-gradient-to-r from-red-600 via-rose-600 to-primary text-white shadow-xl shadow-red-600/20 flex flex-col sm:flex-row sm:items-center justify-between gap-5 border border-red-400/40">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-white/20 backdrop-blur-md flex items-center justify-center text-white flex-shrink-0">
+                      <Radio className="w-6 h-6 animate-pulse" />
+                    </div>
+                    <div>
+                      <div className="flex items-center gap-2 mb-1">
+                        <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping" />
+                        <span className="text-xs font-black uppercase tracking-wider text-secondary">
+                          Service Live Now
+                        </span>
+                      </div>
+                      <h3 className="text-lg sm:text-xl font-heading font-extrabold text-white">
+                        {broadcast?.title || 'Sunday Worship Service'}
+                      </h3>
+                      <p className="text-xs text-red-100">
+                        Ministration by {broadcast?.preacher || 'Pastor Joel'} • Appear on the church projector wall!
+                      </p>
+                    </div>
+                  </div>
+                  <Button
+                    variant="secondary"
+                    size="sm"
+                    onClick={() => setActiveTab('live')}
+                    leftIcon={<Play className="w-4 h-4 text-slate-950" />}
+                    className="shadow-lg shadow-black/20 flex-shrink-0"
+                  >
+                    Join Live Sanctuary
+                  </Button>
+                </div>
+              )}
+
               {/* Hero Banner with Royal Blue & Gold theme */}
               <div className="relative rounded-3xl bg-gradient-to-br from-slate-950 via-primary-dark to-primary text-white p-6 sm:p-10 overflow-hidden shadow-2xl shadow-primary/20 border border-white/10">
                 <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
@@ -905,6 +1091,231 @@ const PortalDashboard = () => {
                       <User className="w-3.5 h-3.5 text-primary" />
                       Manage Profile Information
                     </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* ══════════════════════════════════════════════════════════
+              TAB: LIVE SANCTUARY & VIRTUAL CONGREGATION
+             ══════════════════════════════════════════════════════════ */}
+          {activeTab === 'live' && (
+            <div className="space-y-6 animate-fade-in">
+              {/* Pastor Dialogue Live Alert (When Pastor talks to member) */}
+              {isDialogueActive && (
+                <div className="p-6 rounded-3xl bg-amber-400 text-slate-950 font-heading shadow-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4 border-2 border-amber-300 animate-slide-up">
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 rounded-2xl bg-slate-950 text-amber-400 flex items-center justify-center flex-shrink-0 text-xl font-extrabold animate-bounce">
+                      🎤
+                    </div>
+                    <div>
+                      <h3 className="text-xl font-extrabold leading-tight">
+                        Pastor Is Speaking With You Live!
+                      </h3>
+                      <p className="text-xs sm:text-sm font-semibold text-slate-900 mt-0.5">
+                        Your video is spotlighted on the church screen and your microphone is live. Speak clearly into your device.
+                      </p>
+                    </div>
+                  </div>
+                  <span className="px-4 py-2 rounded-xl bg-slate-950 text-white text-xs font-extrabold flex items-center gap-1.5 w-fit">
+                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    Microphone Live
+                  </span>
+                </div>
+              )}
+
+              {/* Main Live Player + Information Grid */}
+              <div className="grid lg:grid-cols-12 gap-6">
+                {/* Left 8 Columns: Live Video Stream Player */}
+                <div className="lg:col-span-8 space-y-5">
+                  <div className="bg-slate-950 rounded-3xl overflow-hidden shadow-2xl border border-slate-800">
+                    {/* Aspect Ratio 16:9 Video Container */}
+                    <div className="aspect-video w-full relative bg-slate-900">
+                      {embedData.isEmbeddable ? (
+                        <iframe
+                          src={embedData.embedUrl}
+                          title="LRT Live Broadcast"
+                          className="w-full h-full border-0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                        />
+                      ) : (
+                        <div className="w-full h-full flex flex-col items-center justify-center p-8 text-center text-white">
+                          <Radio className="w-12 h-12 text-secondary mb-3 animate-pulse" />
+                          <h3 className="text-xl font-heading font-bold mb-1">
+                            {isBroadcastLive ? 'Connecting to Stream...' : 'Broadcast Standby'}
+                          </h3>
+                          <p className="text-xs text-slate-400 max-w-sm">
+                            {isBroadcastLive
+                              ? 'The stream is loading. If it does not begin automatically, please refresh.'
+                              : 'No service is currently on air. Join us during our Sunday services and midweek fellowships.'}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Player Bottom Bar */}
+                    <div className="p-5 bg-slate-900/90 border-t border-slate-800 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                      <div>
+                        <div className="flex items-center gap-2 mb-1">
+                          <span
+                            className={`w-2.5 h-2.5 rounded-full ${
+                              isBroadcastLive ? 'bg-red-500 animate-pulse' : 'bg-slate-500'
+                            }`}
+                          />
+                          <span className="text-xs font-bold uppercase tracking-wider text-secondary">
+                            {isBroadcastLive ? 'Live On Air' : 'Standby'}
+                          </span>
+                        </div>
+                        <h2 className="text-lg font-heading font-extrabold text-white">
+                          {broadcast?.title || 'Sunday Worship Service'}
+                        </h2>
+                        <p className="text-xs text-slate-400">
+                          Ministration by {broadcast?.preacher || 'Pastor Joel'}
+                        </p>
+                      </div>
+
+                      {/* Viewers presence count */}
+                      <div className="flex items-center gap-2 px-3.5 py-2 rounded-xl bg-white/10 text-white text-xs font-bold border border-white/10 w-fit">
+                        <Users className="w-4 h-4 text-secondary" />
+                        <span>{broadcastParticipants.length} Worshipping Online</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Live Floating Reaction Buttons */}
+                  <div className="bg-white rounded-3xl p-5 border border-slate-200/80 shadow-sm flex items-center justify-between gap-2 overflow-x-auto">
+                    <span className="text-xs font-bold text-slate-500 uppercase tracking-widest pl-2 hidden sm:inline">
+                      Live Reactions:
+                    </span>
+                    <div className="flex items-center gap-2 flex-1 justify-around sm:justify-end">
+                      {[
+                        { type: 'amen', label: 'Amen', icon: '🙏' },
+                        { type: 'hallelujah', label: 'Hallelujah', icon: '🙌' },
+                        { type: 'praise', label: 'Praise', icon: '🔥' },
+                        { type: 'clap', label: 'Clap', icon: '👏' },
+                        { type: 'love', label: 'Love', icon: '❤️' },
+                      ].map(({ type, label, icon }) => (
+                        <button
+                          key={type}
+                          onClick={() => handleSendReaction(type)}
+                          className={`flex items-center gap-1.5 px-3.5 py-2 rounded-2xl text-xs font-bold transition-all transform active:scale-90 cursor-pointer ${
+                            recentReactionSent === type
+                              ? 'bg-secondary text-slate-950 scale-110 shadow-lg shadow-secondary/30'
+                              : 'bg-slate-100 hover:bg-slate-200 text-slate-700'
+                          }`}
+                        >
+                          <span className="text-base">{icon}</span>
+                          <span className="hidden md:inline">{label}</span>
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Right 4 Columns: Virtual Congregation Webcam Panel */}
+                <div className="lg:col-span-4 space-y-6">
+                  <div className="bg-white rounded-3xl p-6 sm:p-7 border border-slate-200/80 shadow-sm space-y-5">
+                    <div className="flex items-center justify-between pb-3 border-b border-slate-100">
+                      <div className="flex items-center gap-2">
+                        <Video className="w-5 h-5 text-secondary-dark" />
+                        <h3 className="font-heading font-extrabold text-slate-900 text-base">
+                          Virtual Sanctuary Wall
+                        </h3>
+                      </div>
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-600 bg-emerald-50 px-2 py-0.5 rounded-full border border-emerald-200">
+                        Church LED Feed
+                      </span>
+                    </div>
+
+                    <p className="text-xs text-slate-500 leading-relaxed">
+                      Appear on the church projector and LED screen inside the physical sanctuary during worship and prayer!
+                    </p>
+
+                    {/* Camera Preview / Video Tile */}
+                    <div className="relative rounded-2xl overflow-hidden aspect-video bg-slate-950 border border-slate-200 flex items-center justify-center">
+                      <video
+                        ref={videoPreviewRef}
+                        autoPlay
+                        playsInline
+                        muted
+                        className={`w-full h-full object-cover transform -scale-x-100 ${
+                          cameraActive ? 'block' : 'hidden'
+                        }`}
+                      />
+                      {!cameraActive && (
+                        <div className="flex flex-col items-center justify-center text-center p-4">
+                          <div className="w-12 h-12 rounded-2xl bg-white/10 text-white flex items-center justify-center mb-2">
+                            <VideoOff className="w-6 h-6 text-slate-400" />
+                          </div>
+                          <p className="text-xs text-slate-300 font-semibold">Camera is Turned Off</p>
+                          <p className="text-[10px] text-slate-500 mt-0.5">
+                            Click below to appear on the church video wall
+                          </p>
+                        </div>
+                      )}
+
+                      {/* Overlay Name Tag */}
+                      {cameraActive && (
+                        <div className="absolute bottom-2 left-2 px-2.5 py-1 rounded-lg bg-slate-950/80 backdrop-blur-md text-[11px] font-bold text-white border border-white/10 flex items-center gap-1.5">
+                          <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+                          <span>{user ? `${user.firstName} ${user.lastName}` : 'You'} • {userLocation}</span>
+                        </div>
+                      )}
+                    </div>
+
+                    {/* Location Input (if not active) */}
+                    {!cameraActive && (
+                      <div>
+                        <label className="text-xs font-semibold text-slate-700 mb-1.5 block">
+                          Your City & Country
+                        </label>
+                        <input
+                          type="text"
+                          placeholder="e.g. Buea, Cameroon"
+                          value={locationInput}
+                          onChange={(e) => setLocationInput(e.target.value)}
+                          className="w-full bg-slate-50 border border-slate-200 rounded-xl px-3.5 py-2 text-xs text-slate-800 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-primary/40 focus:border-primary"
+                        />
+                      </div>
+                    )}
+
+                    {/* Camera Toggle Button */}
+                    <div>
+                      {cameraActive ? (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={stopCamera}
+                          leftIcon={<VideoOff className="w-4 h-4 text-red-500" />}
+                          className="w-full text-red-600 border-red-200 hover:bg-red-50"
+                        >
+                          Leave Sanctuary Wall
+                        </Button>
+                      ) : (
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={startCamera}
+                          leftIcon={<Video className="w-4 h-4 text-slate-950" />}
+                          className="w-full"
+                        >
+                          Join with Camera
+                        </Button>
+                      )}
+                    </div>
+
+                    {/* Info note */}
+                    <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-100 text-[11px] text-slate-500 leading-relaxed space-y-1">
+                      <p className="font-bold text-slate-700 flex items-center gap-1.5">
+                        <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+                        Sanctuary Audio Safety
+                      </p>
+                      <p>
+                        Your microphone is muted by default to prevent auditorium echo. The media team or pastor will enable your mic when speaking with you.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>

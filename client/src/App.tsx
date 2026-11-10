@@ -13,7 +13,6 @@ import BlogPage from './pages/BlogPage';
 import AnnouncementsPage from './pages/AnnouncementsPage';
 import GalleryPage from './pages/GalleryPage';
 import PrayerRequestPage from './pages/PrayerRequestPage';
-import LiveBroadcastPage from './pages/LiveBroadcastPage';
 import SanctuaryScreen from './pages/SanctuaryScreen';
 
 // Pages - Auth
@@ -60,11 +59,11 @@ function App() {
         {/* ── Protected Member Portal Routes ── */}
         <Route element={<ProtectedRoute />}>
           <Route path="/portal/dashboard" element={<PortalDashboard />} />
-          <Route path="/portal/live" element={<LiveBroadcastPage />} />
+          <Route path="/portal/live" element={<Navigate to="/portal/dashboard?tab=live" replace />} />
         </Route>
 
-        {/* Redirect /live to Member Portal live route */}
-        <Route path="/live" element={<Navigate to="/portal/live" replace />} />
+        {/* Redirect /live to Member Portal live tab */}
+        <Route path="/live" element={<Navigate to="/portal/dashboard?tab=live" replace />} />
 
         {/* ── Admin Dashboard Routes (Role Protected) ── */}
         <Route element={<AdminRoute />}>
