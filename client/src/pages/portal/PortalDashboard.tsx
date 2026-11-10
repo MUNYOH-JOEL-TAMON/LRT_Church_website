@@ -659,10 +659,9 @@ const PortalDashboard = () => {
                 </div>
               )}
 
-              {/* Hero Banner with Royal Blue & Gold theme */}
-              <div className="relative rounded-3xl bg-gradient-to-br from-slate-950 via-primary-dark to-primary text-white p-6 sm:p-10 overflow-hidden shadow-2xl shadow-primary/20 border border-white/10">
-                <div className="absolute top-0 right-0 w-96 h-96 bg-secondary/15 rounded-full blur-3xl pointer-events-none" />
-                <div className="absolute bottom-0 left-1/4 w-80 h-80 bg-primary-light/20 rounded-full blur-2xl pointer-events-none" />
+              {/* Hero Banner */}
+              <div className="bg-slate-900 rounded-3xl p-6 sm:p-10 text-white relative overflow-hidden shadow-2xl border border-white/10">
+                <div className="absolute top-0 right-0 w-96 h-96 bg-primary/20 rounded-full blur-3xl pointer-events-none" />
 
                 <div className="relative z-10 max-w-3xl">
                   <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/10 border border-white/15 backdrop-blur-md mb-4">
@@ -675,7 +674,7 @@ const PortalDashboard = () => {
                   <h2 className="text-2xl sm:text-4xl font-heading font-extrabold text-white tracking-tight mb-3">
                     Welcome back, {user?.firstName} {user?.lastName}
                   </h2>
-                  <p className="text-slate-200 text-sm sm:text-base leading-relaxed mb-6">
+                  <p className="text-slate-300 text-sm sm:text-base leading-relaxed mb-6">
                     Stay equipped and spiritually nourished. Access recent sermons, track prayer requests,
                     and reserve your attendance for upcoming church fellowships.
                   </p>
