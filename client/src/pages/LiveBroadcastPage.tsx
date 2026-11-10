@@ -3,17 +3,8 @@ import {
   Radio,
   Video,
   VideoOff,
-  Mic,
-  MicOff,
   Users,
-  Sparkles,
-  Heart,
-  MessageCircle,
-  HelpCircle,
   CheckCircle2,
-  Tv,
-  AlertCircle,
-  ExternalLink,
 } from 'lucide-react';
 import Button from '../components/ui/Button';
 import PageBanner from '../components/ui/PageBanner';
@@ -26,11 +17,9 @@ const LiveBroadcastPage: React.FC = () => {
   const { user, isAuthenticated } = useAuthStore();
   const [broadcast, setBroadcast] = useState<BroadcastSession | null>(null);
   const [participants, setParticipants] = useState<VirtualParticipant[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
 
   // User Local Media & Presence State
   const [cameraActive, setCameraActive] = useState(false);
-  const [micActive, setMicActive] = useState(false);
   const [locationInput, setLocationInput] = useState('');
   const [userLocation, setUserLocation] = useState('Online Worshipper');
   const [myParticipant, setMyParticipant] = useState<VirtualParticipant | null>(null);
@@ -54,8 +43,6 @@ const LiveBroadcastPage: React.FC = () => {
       }
     } catch {
       // Quiet fail
-    } finally {
-      setIsLoading(false);
     }
   };
 
@@ -94,7 +81,6 @@ const LiveBroadcastPage: React.FC = () => {
       }
 
       setCameraActive(true);
-      setMicActive(true);
 
       const loc = locationInput.trim() || 'Online Worshipper';
       setUserLocation(loc);
@@ -122,7 +108,6 @@ const LiveBroadcastPage: React.FC = () => {
       videoPreviewRef.current.srcObject = null;
     }
     setCameraActive(false);
-    setMicActive(false);
 
     if (isAuthenticated) {
       await broadcastService.leavePresence();
