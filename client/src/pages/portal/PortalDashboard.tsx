@@ -40,6 +40,7 @@ import Input from '../../components/ui/Input';
 import lrtLogo from '../../assets/LRT_LOGO.jpeg';
 import getMediaUrl from '../../utils/imageUrl';
 import isEventRegistrationClosed from '../../utils/eventUtils';
+import NotificationBell from '../../components/ui/NotificationBell';
 
 type TabType = 'overview' | 'sermons' | 'events' | 'prayer' | 'profile';
 
@@ -441,6 +442,9 @@ const PortalDashboard = () => {
             >
               <RefreshCw className={`w-4 h-4 ${isLoadingData ? 'animate-spin text-primary' : ''}`} />
             </button>
+
+            {/* In-App Live Notifications */}
+            <NotificationBell />
 
             <button
               onClick={() => setPrayerModalOpen(true)}

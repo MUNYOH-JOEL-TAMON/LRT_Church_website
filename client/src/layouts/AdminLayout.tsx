@@ -185,6 +185,7 @@ const AdminLayout = () => {
             </div>
           </div>
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+            <NotificationBell />
             <Link
               to="/"
               className="text-xs sm:text-sm text-slate-500 hover:text-primary px-2.5 py-1.5 sm:py-2 rounded-lg hover:bg-slate-50 transition-colors"
